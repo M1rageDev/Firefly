@@ -6,14 +6,15 @@ namespace AtmosphericFx
 	/// <summary>
 	/// Helper class used to generate hexagon grid planes, used for the grid projection
 	/// </summary>
-	internal class Hexgrid
+	public class HexGrid
 	{
+		public Mesh HexMesh { get; private set; }
+
 		public Vector2Int gridDimensions;
 		public float hexRadius;
 
 		Vector3[] hexagon;
 
-		Mesh mesh;
 		List<Vector3> vertices;
 		List<int> triangles;
 		List<Vector2> uvs;
@@ -107,12 +108,12 @@ namespace AtmosphericFx
 			}
 
 			// Create the mesh object
-			mesh = new Mesh();
-			mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+			HexMesh = new Mesh();
+			HexMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
 
-			mesh.vertices = vertices.ToArray();
-			mesh.triangles = triangles.ToArray();
-			mesh.uv = uvs.ToArray();
+			HexMesh.vertices = vertices.ToArray();
+			HexMesh.triangles = triangles.ToArray();
+			HexMesh.uv = uvs.ToArray();
 
 			Logging.Log($"Hexgrid: Created {vertices.Count} verts");
 		}
@@ -120,7 +121,7 @@ namespace AtmosphericFx
 		/// <summary>
 		/// Initializes the object and generates the hexgrid
 		/// </summary>
-		public Hexgrid(Vector2Int gridDimensions, float hexRadius)
+		public HexGrid(Vector2Int gridDimensions, float hexRadius)
 		{
 			this.gridDimensions = gridDimensions;
 			this.hexRadius = hexRadius;

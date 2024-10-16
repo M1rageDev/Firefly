@@ -24,8 +24,9 @@ namespace AtmosphericFx
 	/// </summary>
 	public class AtmoFxVessel
 	{
-		public List<Renderer> fxEnvelope = new List<Renderer>();
-		public List<Renderer> particleFxEnvelope = new List<Renderer>();
+		public HexGrid hexGrid;
+		public MeshRenderer hexGridRenderer;
+		public MeshFilter hexGridFilter;
 
 		public bool hasParticles = false;
 
@@ -35,8 +36,6 @@ namespace AtmosphericFx
 		public ParticleSystem chunkParticles;
 		public ParticleSystem alternateChunkParticles;
 		public ParticleSystem smokeParticles;
-
-		public Mesh totalEnvelope;
 
 		public Camera airstreamCamera;
 		public RenderTexture airstreamTexture;
@@ -62,14 +61,13 @@ namespace AtmosphericFx
 	{
 		public AtmoFxVessel fxVessel = new AtmoFxVessel();
 		public bool isLoaded = false;
-
 		bool debugMode = false;
-
 		float lastFixedTime;
-		public bool bodyHasAtmo;
+
 		float desiredRate;
 		float lastSpeed;
 
+		public bool bodyHasAtmo;
 		public BodyConfig currentBody;
 
 		// Snippet taken from Reentry Particle Effects by pizzaoverhead
@@ -88,8 +86,6 @@ namespace AtmosphericFx
 			}
 		}
 
-		private bool markForReload;
-
 		public override Activation GetActivation()
 		{
 			return Activation.LoadedVessels | Activation.FlightScene;
@@ -98,7 +94,7 @@ namespace AtmosphericFx
 		/// <summary>
 		/// Loads a vessel, instantiates stuff like the camera and rendertexture, also creates the entry velopes and particle system
 		/// </summary>
-		void OnVesselLoaded(bool onModify = false)
+		void OnVesselLoaded()
 		{
 			// check if the vessel is actually loaded, and if it has any parts
 			if (vessel == null || (!vessel.loaded) || vessel.parts.Count < 1 )
@@ -120,226 +116,65 @@ namespace AtmosphericFx
 			}
 
 			Logging.Log("Loading vessel " + vessel.name);
-			Logging.Log(onModify ? "Using light method" : "Using heavy method");
 
-			Material material = fxVessel.material;
-			if (!onModify)
-			{
-				fxVessel = new AtmoFxVessel();
+			fxVessel = new AtmoFxVessel();
 
-				// create material
-				material = Instantiate(AssetLoader.Instance.globalMaterial);
-				fxVessel.material = material;
+			// create material
+			Material material = Instantiate(AssetLoader.Instance.globalMaterial);
+			fxVessel.material = material;
 
-				// create camera
-				GameObject cameraGO = new GameObject("AtmoFxCamera - " + vessel.name);
-				fxVessel.airstreamCamera = cameraGO.AddComponent<Camera>();
+			// create camera
+			GameObject cameraGO = new GameObject("AtmoFxCamera - " + vessel.name);
+			fxVessel.airstreamCamera = cameraGO.AddComponent<Camera>();
 
-				fxVessel.airstreamCamera.orthographic = true;
-				fxVessel.airstreamCamera.clearFlags = CameraClearFlags.SolidColor;
-				fxVessel.airstreamCamera.cullingMask = (1 << 0);  // Only render layer 0, which is for the spacecraft
+			fxVessel.airstreamCamera.orthographic = true;
+			fxVessel.airstreamCamera.clearFlags = CameraClearFlags.SolidColor;
+			fxVessel.airstreamCamera.cullingMask = (1 << 0);  // Only render layer 0, which is for the spacecraft
 
-				// create rendertexture
-				fxVessel.airstreamTexture = new RenderTexture(512, 512, 1, RenderTextureFormat.Depth);
-				fxVessel.airstreamTexture.Create();
-				fxVessel.airstreamCamera.targetTexture = fxVessel.airstreamTexture;
-			}
-
-			// Check if the fxVessel or material is null
-			if (fxVessel == null || material == null)
-			{
-				Logging.Log("fxVessel/material is null");
-
-				VesselUnload(false);
-				EventManager.UnregisterInstance(vessel.id);
-				return;
-			}
-
-			// reset part cache
-			ResetPartModelCache();
-
-			// create the fx envelopes
-			UpdateFxEnvelopes(material);
+			// create rendertexture and assign it to the material
+			fxVessel.airstreamTexture = new RenderTexture(ModSettings.Instance.renderTextureResolution, ModSettings.Instance.renderTextureResolution, 1, RenderTextureFormat.Depth);
+			fxVessel.airstreamTexture.Create();
+			fxVessel.airstreamCamera.targetTexture = fxVessel.airstreamTexture;
 			fxVessel.material.SetTexture("_AirstreamTex", fxVessel.airstreamTexture);  // Set the airstream depth texture parameter
-
-			// create the particles
-			if (!ConfigManager.Instance.modSettings.disableParticles) CreateParticleSystems();  // run the function only if they're enabled in settings
 
 			// calculate the vessel bounds
 			CalculateVesselBounds(fxVessel, vessel);
 			fxVessel.airstreamCamera.orthographicSize = Mathf.Clamp(fxVessel.vesselBoundExtents.magnitude, 0.3f, 2000f);  // clamp the ortho camera size
 			fxVessel.airstreamCamera.farClipPlane = Mathf.Clamp(fxVessel.vesselBoundExtents.magnitude * 2f, 1f, 1000f);  // set the far clip plane so the segment occlusion works
 
-			if (!onModify)
-			{
-				// set the current body
-				UpdateCurrentBody(ConfigManager.Instance.GetVesselBody(vessel), vessel.mainBody);
-			}
+			// TODO: Load the hexgrid here
+			CreateHexGrid();
+
+			// create the particles
+			if (!ModSettings.Instance.disableParticles) CreateParticleSystems();  // run the function only if they're enabled in settings
+
+			// set the current body
+			UpdateCurrentBody(ConfigManager.Instance.GetVesselBody(vessel), vessel.mainBody);
 
 			Logging.Log("Finished loading vessel");
 			isLoaded = true;
 		}
 
-		/// <summary>
-		/// Resets the model renderer cache for each part
-		/// </summary>
-		void ResetPartModelCache()
+		void CreateHexGrid()
 		{
-			for (int i = 0; i < vessel.parts.Count; i++)
-			{
-				vessel.parts[i].ResetModelRenderersCache();
-			}
-		}
+			// TODO: Calculate the dimensions and radius
+			Vector2Int dimensions = new Vector2Int();
+			float radius = 0f;
+			fxVessel.hexGrid = new HexGrid(dimensions, radius);
 
-		/// <summary>
-		/// Creates one envelope mesh, with a given parent, mesh and material
-		/// </summary>
-		MeshRenderer InstantiateEnvelopeMesh(Transform parent, Mesh mesh, Material material, bool premade)
-		{
-			// create envelope object
-			Transform envelope = new GameObject("atmofx_envelope_generated").transform;
-			envelope.gameObject.layer = AtmoFxLayers.Fx;
-			envelope.parent = parent;
+			// Create the mesh holder
+			GameObject gridGO = new GameObject("HexGrid");
+			gridGO.transform.parent = fxVessel.airstreamCamera.transform;
+			gridGO.transform.localPosition = Vector3.zero;
+			gridGO.transform.localRotation = Quaternion.identity;
 
-			envelope.localPosition = Vector3.zero;
-			envelope.localRotation = Quaternion.identity;
-			envelope.localScale = new Vector3(premade ? 1f : 1.05f, premade ? 1f : 1.07f, premade ? 1f : 1.05f);
+			// Add the filter and renderer components
+			fxVessel.hexGridFilter = gridGO.AddComponent<MeshFilter>();
+			fxVessel.hexGridRenderer = gridGO.AddComponent<MeshRenderer>();
 
-			// add mesh filter and renderer to the envelope
-			MeshFilter filter = envelope.gameObject.AddComponent<MeshFilter>();
-			MeshRenderer renderer = envelope.gameObject.AddComponent<MeshRenderer>();
-
-			// initialize renderer
-			filter.mesh = mesh;
-			renderer.sharedMaterial = material;
-			renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-
-			// set model-specific properties
-			MaterialPropertyBlock properties = new MaterialPropertyBlock();
-			properties.SetVector("_ModelScale", parent.lossyScale);
-			renderer.SetPropertyBlock(properties);
-
-			return renderer;
-		}
-
-		/// <summary>
-		/// Processes one part and creates the envelope mesh for it
-		/// </summary>
-		void CreatePartEnvelope(Part part, Material material)
-		{
-			Transform[] fxEnvelopes = part.FindModelTransforms("atmofx_envelope");
-			if (fxEnvelopes.Length > 0)
-			{
-				Logging.Log($"Part {part.name} has a defined effect envelope. Skipping collider search.");
-
-				for (int j = 0; j < fxEnvelopes.Length; j++)
-				{
-					if (!fxEnvelopes[j].TryGetComponent(out MeshFilter parentFilter)) continue;
-
-					// disable the mesh
-					if (fxEnvelopes[j].TryGetComponent(out MeshRenderer parentRenderer)) parentRenderer.enabled = false;
-
-					// needs to be a separate transform, otherwise it breaks for some reason
-					MeshRenderer r = InstantiateEnvelopeMesh(fxEnvelopes[j], parentFilter.mesh, material, true);
-					fxVessel.fxEnvelope.Add(r);
-
-					if (IsPartBoundCompatible(part)) fxVessel.particleFxEnvelope.Add(r);
-				}
-
-				// skip model search
-				return;
-			}
-
-			if (ConfigManager.Instance.modSettings.useColliders)
-			{
-				Collider[] colliders = part.GetPartColliders();
-				for (int j = 0; j < colliders.Length; j++)
-				{
-					MeshCollider collider = colliders[j] as MeshCollider;
-					if (collider == null)
-					{
-						Logging.Log($"Collider {colliders[j].gameObject.name} isn't a mesh, ignoring");
-						continue;
-					}
-
-					MeshRenderer renderer = InstantiateEnvelopeMesh(collider.transform, collider.sharedMesh, material, false);
-					fxVessel.fxEnvelope.Add(renderer);
-
-					if (IsPartBoundCompatible(part)) fxVessel.particleFxEnvelope.Add(renderer);
-				}
-			}
-			else
-			{
-				List<Renderer> models = part.FindModelRenderersCached();
-				for (int j = 0; j < models.Count; j++)
-				{
-					Renderer model = models[j];
-
-					// check for wheel flare
-					if (CheckWheelFlareModel(part, model.gameObject.name)) continue;
-
-					// check for layers
-					if (CheckLayerModel(model.transform)) continue;
-
-					// try getting the mesh filter
-					bool hasMeshFilter = model.TryGetComponent(out MeshFilter filter);
-					if (!hasMeshFilter) continue;
-
-					// try getting the mesh
-					Mesh mesh = filter.sharedMesh;
-					if (mesh == null) continue;
-
-					MeshRenderer renderer = InstantiateEnvelopeMesh(model.transform, mesh, material, false);
-					fxVessel.fxEnvelope.Add(renderer);
-
-					if (IsPartBoundCompatible(part)) fxVessel.particleFxEnvelope.Add(renderer);
-				}
-			}
-		}
-
-		/// <summary>
-		/// Creates the effect envelopes
-		/// </summary>
-		void UpdateFxEnvelopes(Material material)
-		{
-			Logging.Log($"Updating fx envelopes for vessel {vessel.name}");
-			Logging.Log($"Found {vessel.parts.Count} parts on the vessel");
-
-			fxVessel.fxEnvelope.Clear();
-			fxVessel.particleFxEnvelope.Clear();
-
-			for (int i = 0; i < vessel.parts.Count; i++)
-			{
-				Part part = vessel.parts[i];
-				if (!IsPartCompatible(part)) continue;
-
-				CreatePartEnvelope(part, material);
-			}
-
-			// set the vessel position to zero, to make combining possible
-			Vector3 orgPosition = vessel.transform.position;
-			vessel.transform.position = Vector3.zero;
-
-			// combine the envelope meshes
-			CombineInstance[] combine = new CombineInstance[fxVessel.particleFxEnvelope.Count];
-			for (int i = 0; i < combine.Length; i++)
-			{
-				MeshFilter filter = fxVessel.particleFxEnvelope[i].GetComponent<MeshFilter>();
-
-				// set the part position to match the vessel
-				filter.transform.position -= orgPosition;
-
-				combine[i].mesh = filter.sharedMesh;
-				combine[i].transform = filter.transform.localToWorldMatrix;
-
-				// reset the part position
-				filter.transform.position += orgPosition;
-			}
-			fxVessel.totalEnvelope = new Mesh();
-			fxVessel.totalEnvelope.CombineMeshes(combine);
-
-			// reset the vessel position back to original
-			vessel.transform.position = orgPosition;
+			// Initialize the renderer and filter
+			fxVessel.hexGridFilter.sharedMesh = fxVessel.hexGrid.HexMesh;
+			fxVessel.hexGridRenderer.sharedMaterial = fxVessel.material;
 		}
 
 		/// <summary>
@@ -384,6 +219,7 @@ namespace AtmosphericFx
 			{
 				ParticleSystem ps = fxVessel.allParticles[i];
 
+				// TODO: Figure out particle envelopes
 				ParticleSystem.ShapeModule shapeModule = ps.shape;
 				shapeModule.mesh = fxVessel.totalEnvelope;
 
@@ -503,31 +339,22 @@ namespace AtmosphericFx
 		/// <summary>
 		/// Unloads the vessel, removing instances and other things like that
 		/// </summary>
-		public void VesselUnload(bool onlyEnvelopes = false)
+		public void VesselUnload()
 		{
 			if (!isLoaded) return;
 
 			isLoaded = false;
 
-			// destroy the fx envelope
-			for (int i = 0; i < fxVessel.fxEnvelope.Count; i++)
-			{
-				if (fxVessel.fxEnvelope[i] != null) Destroy(fxVessel.fxEnvelope[i].gameObject);
-			}
+			// destroy the misc stuff
+			if (fxVessel.material != null) Destroy(fxVessel.material);
+			if (fxVessel.airstreamCamera != null) Destroy(fxVessel.airstreamCamera.gameObject);
+			if (fxVessel.airstreamTexture != null) Destroy(fxVessel.airstreamTexture);
 
-			if (!onlyEnvelopes)
-			{
-				// destroy the misc stuff
-				if (fxVessel.material != null) Destroy(fxVessel.material);
-				if (fxVessel.airstreamCamera != null) Destroy(fxVessel.airstreamCamera.gameObject);
-				if (fxVessel.airstreamTexture != null) Destroy(fxVessel.airstreamTexture);
-
-				// destroy the particles
-				if (fxVessel.sparkParticles != null) Destroy(fxVessel.sparkParticles.gameObject);
-				if (fxVessel.chunkParticles != null) Destroy(fxVessel.chunkParticles.gameObject);
-				if (fxVessel.alternateChunkParticles != null) Destroy(fxVessel.alternateChunkParticles.gameObject);
-				if (fxVessel.smokeParticles != null) Destroy(fxVessel.smokeParticles.gameObject);
-			}
+			// destroy the particles
+			if (fxVessel.sparkParticles != null) Destroy(fxVessel.sparkParticles.gameObject);
+			if (fxVessel.chunkParticles != null) Destroy(fxVessel.chunkParticles.gameObject);
+			if (fxVessel.alternateChunkParticles != null) Destroy(fxVessel.alternateChunkParticles.gameObject);
+			if (fxVessel.smokeParticles != null) Destroy(fxVessel.smokeParticles.gameObject);
 
 			Logging.Log("Unloaded vessel " + vessel.vesselName);
 		}
@@ -535,11 +362,11 @@ namespace AtmosphericFx
 		/// <summary>
 		/// Reloads the vessel (simulates unloading and loading again)
 		/// </summary>
-		public void ReloadVessel()
+		public void DoFullReload()
 		{
 			if (!bodyHasAtmo) return;
 
-			VesselUnload(false);
+			VesselUnload();
 			OnVesselLoaded();
 		}
 
@@ -550,9 +377,7 @@ namespace AtmosphericFx
 		{
 			if (!bodyHasAtmo) return;
 
-			// Mark the vessel for reloading
-			VesselUnload(true);
-			markForReload = true;
+			// TODO: Reload function
 		}
 
 		/// <summary>
@@ -589,22 +414,12 @@ namespace AtmosphericFx
 
 			StopAllCoroutines();
 
-			VesselUnload(false);
+			VesselUnload();
 		}
 
 		public void OnDestroy()
 		{
-			VesselUnload(false);
-		}
-
-		void Debug_ToggleEnvelopes()
-		{
-			bool state = fxVessel.fxEnvelope[0].gameObject.activeSelf;
-
-			for (int i = 0; i < fxVessel.fxEnvelope.Count; i++)
-			{
-				fxVessel.fxEnvelope[i].gameObject.SetActive(!state);
-			}
+			VesselUnload();
 		}
 
 		public void Update()
@@ -613,15 +428,7 @@ namespace AtmosphericFx
 
 			// debug mode
 			if (Input.GetKey(KeyCode.LeftAlt) && Input.GetKeyDown(KeyCode.Alpha0) && vessel == FlightGlobals.ActiveVessel) debugMode = !debugMode;
-			if (Input.GetKey(KeyCode.LeftAlt) && Input.GetKeyDown(KeyCode.Alpha8) && vessel == FlightGlobals.ActiveVessel) Debug_ToggleEnvelopes();
-			if (Input.GetKey(KeyCode.LeftAlt) && Input.GetKeyDown(KeyCode.Alpha9) && vessel == FlightGlobals.ActiveVessel) ReloadVessel();
-
-			// Reload if the vessel is marked for reloading
-			if (markForReload)
-			{
-				markForReload = false;
-				OnVesselLoaded(true);
-			}
+			if (Input.GetKey(KeyCode.LeftAlt) && Input.GetKeyDown(KeyCode.Alpha9) && vessel == FlightGlobals.ActiveVessel) DoFullReload();
 
 			// Certain things only need to happen if we had a fixed update
 			if (Time.fixedTime != lastFixedTime && isLoaded)
@@ -685,7 +492,7 @@ namespace AtmosphericFx
 			if (!body.atmosphere)
 			{
 				bodyHasAtmo = false;
-				if (isLoaded) VesselUnload(false);
+				if (isLoaded) VesselUnload();
 				return;
 			}
 

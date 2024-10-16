@@ -115,7 +115,7 @@ namespace AtmosphericFx
 			bool canReload = (Time.realtimeSinceStartup - reloadBtnTime) > 1f;
 			if (GUILayout.Button("Reload Vessel") && canReload)
 			{
-				fxModule.ReloadVessel();
+				fxModule.DoFullReload();
 				reloadBtnTime = Time.realtimeSinceStartup;
 			}
 			if (DrawConfigField("HDR Override", ref tgl_Hdr)) CameraManager.Instance.OverrideHDR(tgl_Hdr);

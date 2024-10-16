@@ -78,8 +78,8 @@ namespace AtmosphericFx
 		{
 			Logging.Log($"Docked vessels {action.from.vessel.name}, {action.to.vessel.name}");
 
-			if (fxInstances.TryGetValue(action.from.vessel.id, out AtmoFxModule module)) module.ReloadVessel();
-			if (fxInstances.TryGetValue(action.to.vessel.id, out module)) module.ReloadVessel();
+			if (fxInstances.TryGetValue(action.from.vessel.id, out AtmoFxModule module)) module.DoFullReload();
+			if (fxInstances.TryGetValue(action.to.vessel.id, out module)) module.DoFullReload();
 		}
 
 		/// <summary>

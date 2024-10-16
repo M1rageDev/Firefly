@@ -5,22 +5,18 @@ using UnityEngine;
 
 namespace AtmosphericFx
 {
-	public struct ModSettings
+	public class ModSettings
 	{
-		public bool hdrOverride;
-		public bool useColliders;
-		public bool disableParticles;
+		public static ModSettings Instance { get; private set; }
 
-		public ModSettings(bool hdrOverride, bool useColliders, bool disableParticles)
-		{
-			this.hdrOverride = hdrOverride;
-			this.useColliders = useColliders;
-			this.disableParticles = disableParticles;
-		}
+		public bool hdrOverride = true;
+		public bool disableParticles = false;
 
-		public static ModSettings CreateDefault()
+		public int renderTextureResolution = 512;
+
+		public ModSettings()
 		{
-			return new ModSettings(true, false, false);
+			Instance = this;
 		}
 	}
 
@@ -109,7 +105,7 @@ namespace AtmosphericFx
 		public static ConfigManager Instance { get; private set; }
 		public const string SettingsPath = "GameData/AtmosphericFx/Configs/ModSettings.cfg";
 
-		public ModSettings modSettings = ModSettings.CreateDefault();
+		public ModSettings modSettings = new ModSettings();
 
 		public Dictionary<string, BodyConfig> bodyConfigs = new Dictionary<string, BodyConfig>();
 		public List<PlanetPackConfig> planetPackConfigs = new List<PlanetPackConfig>();
@@ -153,8 +149,8 @@ namespace AtmosphericFx
 			ConfigNode node = new ConfigNode("ATMOFX_SETTINGS");
 
 			node.AddValue("hdr_override", modSettings.hdrOverride);
-			node.AddValue("use_colliders", modSettings.useColliders);
 			node.AddValue("disable_particles", modSettings.disableParticles);
+			node.AddValue("render_texture_resolution", modSettings.renderTextureResolution);
 
 			// add to parent and save
 			parent.AddNode(node);
@@ -168,7 +164,7 @@ namespace AtmosphericFx
 		{
 			// load settings
 			ConfigNode[] settingsNodes = GameDatabase.Instance.GetConfigNodes("ATMOFX_SETTINGS");
-			modSettings = ModSettings.CreateDefault();
+			modSettings = new ModSettings();
 
 			if (settingsNodes.Length < 1)
 			{
@@ -181,16 +177,14 @@ namespace AtmosphericFx
 
 			bool isFormatted = true;
 			modSettings.hdrOverride = ReadConfigBoolean(settingsNode, "hdr_override", ref isFormatted);
-			modSettings.useColliders = ReadConfigBoolean(settingsNode, "use_colliders", ref isFormatted);
 			modSettings.disableParticles = ReadConfigBoolean(settingsNode, "disable_particles", ref isFormatted);
+			modSettings.renderTextureResolution = (int)ReadConfigValue(settingsNode, "render_texture_resolution", ref isFormatted);
 
 			if (!isFormatted)
 			{
 				Logging.Log("Settings cfg formatted incorrectly");
-				modSettings = ModSettings.CreateDefault();
+				modSettings = new ModSettings();
 			}
-
-			Logging.Log($"UseColliders:{modSettings.useColliders} DisableParticles:{modSettings.disableParticles}");
 		}
 
 		/// <summary>
