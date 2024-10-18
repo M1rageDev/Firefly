@@ -139,10 +139,9 @@ namespace AtmosphericFx
 
 			// calculate the vessel bounds
 			CalculateVesselBounds(fxVessel, vessel);
-			fxVessel.airstreamCamera.orthographicSize = Mathf.Clamp(fxVessel.vesselBoundExtents.magnitude, 0.3f, 2000f);  // clamp the ortho camera size
-			fxVessel.airstreamCamera.farClipPlane = Mathf.Clamp(fxVessel.vesselBoundExtents.magnitude * 2f, 1f, 1000f);  // set the far clip plane so the segment occlusion works
+			InitializeAirstreamCamera(fxVessel.vesselBoundExtents.magnitude);
 
-			// TODO: Load the hexgrid here
+			// Load the hexgrid
 			CreateHexGrid();
 
 			// create the particles
@@ -157,9 +156,8 @@ namespace AtmosphericFx
 
 		void CreateHexGrid()
 		{
-			// TODO: Calculate the dimensions and radius
-			Vector2Int dimensions = new Vector2Int();
-			float radius = 0f;
+			float radius = ModSettings.Instance.hexgridRadius;
+			Vector2Int dimensions = HexGrid.CalculateDimensions(radius, fxVessel.airstreamCamera.orthographicSize * 2f * Vector3.one);
 			fxVessel.hexGrid = new HexGrid(dimensions, radius);
 
 			// Create the mesh holder
@@ -360,7 +358,7 @@ namespace AtmosphericFx
 		}
 
 		/// <summary>
-		/// Reloads the vessel (simulates unloading and loading again)
+		/// Does a full reload of the vessel (simulates unloading and loading again)
 		/// </summary>
 		public void DoFullReload()
 		{
@@ -371,13 +369,18 @@ namespace AtmosphericFx
 		}
 
 		/// <summary>
-		/// Similar to ReloadVessel(), but it's much lighter since it does not re-instantiate the camera and particles
+		/// Reload the vessel data, most importantly the bounds
 		/// </summary>
 		public void OnVesselModified()
 		{
 			if (!bodyHasAtmo) return;
 
-			// TODO: Reload function
+			// Recalculate the vessel bounds and the airstream camera parameters
+			CalculateVesselBounds(fxVessel, vessel);
+			InitializeAirstreamCamera(fxVessel.vesselBoundExtents.magnitude);
+
+			// Reload the hexgrid
+			CreateHexGrid();
 		}
 
 		/// <summary>
@@ -617,6 +620,12 @@ namespace AtmosphericFx
 			fxVessel.vesselBoundCenter = bounds.center;
 			fxVessel.vesselBoundExtents = vesselSize / 2f;
 			fxVessel.vesselBoundRadius = fxVessel.vesselBoundExtents.magnitude;
+		}
+
+		void InitializeAirstreamCamera(float boundExtents)
+		{
+			fxVessel.airstreamCamera.orthographicSize = Mathf.Clamp(boundExtents, 0.3f, 2000f);  // clamp the ortho camera size
+			fxVessel.airstreamCamera.farClipPlane = Mathf.Clamp(boundExtents * 2f, 1f, 1000f);  // set the far clip plane so the segment occlusion works
 		}
 
 		/// <summary>

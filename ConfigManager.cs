@@ -13,6 +13,7 @@ namespace AtmosphericFx
 		public bool disableParticles = false;
 
 		public int renderTextureResolution = 512;
+		public float hexgridRadius = 0.05f;
 
 		public ModSettings()
 		{
@@ -151,6 +152,7 @@ namespace AtmosphericFx
 			node.AddValue("hdr_override", modSettings.hdrOverride);
 			node.AddValue("disable_particles", modSettings.disableParticles);
 			node.AddValue("render_texture_resolution", modSettings.renderTextureResolution);
+			node.AddValue("hexgrid_radius", modSettings.hexgridRadius);
 
 			// add to parent and save
 			parent.AddNode(node);
@@ -179,6 +181,7 @@ namespace AtmosphericFx
 			modSettings.hdrOverride = ReadConfigBoolean(settingsNode, "hdr_override", ref isFormatted);
 			modSettings.disableParticles = ReadConfigBoolean(settingsNode, "disable_particles", ref isFormatted);
 			modSettings.renderTextureResolution = (int)ReadConfigValue(settingsNode, "render_texture_resolution", ref isFormatted);
+			modSettings.hexgridRadius = ReadConfigValue(settingsNode, "hexgrid_radius", ref isFormatted);
 
 			if (!isFormatted)
 			{

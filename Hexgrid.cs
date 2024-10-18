@@ -20,6 +20,22 @@ namespace AtmosphericFx
 		List<Vector2> uvs;
 
 		/// <summary>
+		/// Returns the hexgrid dimensions for a given radius and desired grid size
+		/// Rounds the results upward
+		/// </summary>
+		public static Vector2Int CalculateDimensions(float radius, Vector2 desiredSize)
+		{
+			float sqrt3 = Mathf.Sqrt(3f);
+			float hexWidth = sqrt3 * radius;
+			float xSpacing = hexWidth * (sqrt3 / 2f);
+
+			int gridWidth = Mathf.FloorToInt(desiredSize.x / xSpacing);
+			int gridHeight = Mathf.FloorToInt(desiredSize.y / hexWidth);
+
+			return new Vector2Int(gridWidth, gridHeight);
+		}
+
+		/// <summary>
 		/// Pregenerates the hexagon shape, with a predefined radius
 		/// </summary>
 		void PregenerateHexagon(float radius)
@@ -85,8 +101,7 @@ namespace AtmosphericFx
 			// Grid values
 			float sqrt3 = Mathf.Sqrt(3f);
 			float hexWidth = sqrt3 * hexRadius;
-			float hexHeight = 2f * hexRadius;
-			float xOffset = hexWidth * (sqrt3 / 2);
+			float xOffset = hexWidth * (sqrt3 / 2f);
 
 			for (int y = 0; y < gridDimensions.y; y++)
 			{
@@ -94,12 +109,12 @@ namespace AtmosphericFx
 				{
 					// Calculate the position for each hexagon in a grid
 					float xPos = x * xOffset;
-					float yPos = y * hexHeight * (sqrt3 / 2f);
+					float yPos = y * hexWidth;
 
 					// Offset every second column (odd columns)
 					if (x % 2 == 1)
 					{
-						yPos += hexHeight * (sqrt3 / 4f);
+						yPos += hexWidth / 2f;
 					}
 
 					// Create the hexagon
