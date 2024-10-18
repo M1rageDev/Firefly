@@ -156,14 +156,21 @@ namespace AtmosphericFx
 
 		void CreateHexGrid()
 		{
+			// Calculate the dimensions of the hexgrid and initialize it
 			float radius = ModSettings.Instance.hexgridRadius;
-			Vector2Int dimensions = HexGrid.CalculateDimensions(radius, fxVessel.airstreamCamera.orthographicSize * 2f * Vector3.one);
+			Vector2Int dimensions = HexGrid.CalculateDimensions(radius, fxVessel.airstreamCamera.orthographicSize * 2f * Vector2.one);
 			fxVessel.hexGrid = new HexGrid(dimensions, radius);
+
+			// Create the upper mesh holder - used for the grid rotation
+			GameObject holderGO = new GameObject("HexGridHolder");
+			holderGO.transform.parent = fxVessel.airstreamCamera.transform;
+			holderGO.transform.localPosition = Vector3.zero;
+			holderGO.transform.localRotation = Quaternion.identity;
 
 			// Create the mesh holder
 			GameObject gridGO = new GameObject("HexGrid");
-			gridGO.transform.parent = fxVessel.airstreamCamera.transform;
-			gridGO.transform.localPosition = Vector3.zero;
+			gridGO.transform.parent = holderGO.transform;
+			gridGO.transform.localPosition = new Vector3(-fxVessel.airstreamCamera.orthographicSize, -fxVessel.airstreamCamera.orthographicSize, 0.1f);
 			gridGO.transform.localRotation = Quaternion.identity;
 
 			// Add the filter and renderer components
@@ -497,6 +504,7 @@ namespace AtmosphericFx
 		/// </summary>
 		public void UpdateCurrentBody(BodyConfig cfg, CelestialBody body)
 		{
+			// Unload the vessel if the main body doesn't have an atmo
 			if (!body.atmosphere)
 			{
 				bodyHasAtmo = false;
@@ -504,6 +512,7 @@ namespace AtmosphericFx
 				return;
 			}
 
+			// Load the vessel if it does have an atmosphere, but didn't before
 			if (!bodyHasAtmo)
 			{
 				bodyHasAtmo = true;
@@ -634,6 +643,7 @@ namespace AtmosphericFx
 			fxVessel.airstreamCamera.orthographicSize = Mathf.Clamp(boundExtents, 0.3f, 2000f);  // clamp the ortho camera size
 			fxVessel.airstreamCamera.farClipPlane = farClipPlane;
 
+			// Update the far clip plane in the shader
 			fxVessel.material.SetFloat("_CameraFarClip", farClipPlane);
 		}
 
