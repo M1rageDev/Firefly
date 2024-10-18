@@ -189,6 +189,7 @@ namespace AtmosphericFx
 				Transform t = vessel.transform.GetChild(i);
 
 				// this is stupid, I don't know why this is neccessary but it is
+				// TODO: figure this out?
 				if (t.TryGetComponent(out ParticleSystem _)) Destroy(t.gameObject);
 			}
 
@@ -208,18 +209,22 @@ namespace AtmosphericFx
 			StoreParticleSystem(fxVessel.smokeParticles);
 
 			// initialize particle systems
-			fxVessel.sparkParticles.transform.rotation = Quaternion.identity;
-			fxVessel.chunkParticles.transform.rotation = Quaternion.identity;
-			fxVessel.alternateChunkParticles.transform.rotation = Quaternion.identity;
-			fxVessel.smokeParticles.transform.rotation = Quaternion.identity;
+			fxVessel.sparkParticles.transform.localRotation = Quaternion.identity;
+			fxVessel.chunkParticles.transform.localRotation = Quaternion.identity;
+			fxVessel.alternateChunkParticles.transform.localRotation = Quaternion.identity;
+			fxVessel.smokeParticles.transform.localRotation = Quaternion.identity;
+
+			fxVessel.sparkParticles.transform.localPosition = fxVessel.vesselBoundCenter;
+			fxVessel.chunkParticles.transform.localPosition = fxVessel.vesselBoundCenter;
+			fxVessel.alternateChunkParticles.transform.localPosition = fxVessel.vesselBoundCenter;
+			fxVessel.smokeParticles.transform.localPosition = fxVessel.vesselBoundCenter;
 
 			for (int i = 0; i < fxVessel.allParticles.Count; i++)
 			{
 				ParticleSystem ps = fxVessel.allParticles[i];
 
-				// TODO: Figure out particle envelopes
 				ParticleSystem.ShapeModule shapeModule = ps.shape;
-				shapeModule.mesh = fxVessel.totalEnvelope;
+				shapeModule.scale = fxVessel.vesselBoundExtents * 2f;
 
 				ParticleSystem.VelocityOverLifetimeModule velocityModule = ps.velocityOverLifetime;
 				velocityModule.radialMultiplier = 1f;
