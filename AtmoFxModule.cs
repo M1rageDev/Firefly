@@ -629,8 +629,12 @@ namespace AtmosphericFx
 
 		void InitializeAirstreamCamera(float boundExtents)
 		{
+			float farClipPlane = Mathf.Clamp(boundExtents * 2f, 1f, 1000f);  // set the far clip plane so the segment occlusion works
+
 			fxVessel.airstreamCamera.orthographicSize = Mathf.Clamp(boundExtents, 0.3f, 2000f);  // clamp the ortho camera size
-			fxVessel.airstreamCamera.farClipPlane = Mathf.Clamp(boundExtents * 2f, 1f, 1000f);  // set the far clip plane so the segment occlusion works
+			fxVessel.airstreamCamera.farClipPlane = farClipPlane;
+
+			fxVessel.material.SetFloat("_CameraFarClip", farClipPlane);
 		}
 
 		/// <summary>
