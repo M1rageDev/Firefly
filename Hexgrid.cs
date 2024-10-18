@@ -29,8 +29,8 @@ namespace AtmosphericFx
 			float hexWidth = sqrt3 * radius;
 			float xSpacing = hexWidth * (sqrt3 / 2f);
 
-			int gridWidth = Mathf.FloorToInt(desiredSize.x / xSpacing);
-			int gridHeight = Mathf.FloorToInt(desiredSize.y / hexWidth);
+			int gridWidth = Mathf.CeilToInt(desiredSize.x / xSpacing);
+			int gridHeight = Mathf.CeilToInt(desiredSize.y / hexWidth);
 
 			return new Vector2Int(gridWidth, gridHeight);
 		}
