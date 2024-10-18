@@ -53,7 +53,6 @@ namespace AtmosphericFx
 		public void InitializeDefaultValues()
 		{
 			tgl_Hdr = ConfigManager.Instance.modSettings.hdrOverride;
-			tgl_UseColliders = ConfigManager.Instance.modSettings.useColliders;
 			tgl_DisableParticles = ConfigManager.Instance.modSettings.disableParticles;
 		}
 
@@ -119,7 +118,6 @@ namespace AtmosphericFx
 				reloadBtnTime = Time.realtimeSinceStartup;
 			}
 			if (DrawConfigField("HDR Override", ref tgl_Hdr)) CameraManager.Instance.OverrideHDR(tgl_Hdr);
-			if (DrawConfigField("Use colliders", ref tgl_UseColliders)) ConfigManager.Instance.modSettings.useColliders = tgl_UseColliders;
 			if (DrawConfigField("Disable particles", ref tgl_DisableParticles)) ConfigManager.Instance.modSettings.disableParticles = tgl_DisableParticles;
 			DrawConfigField("Speed method", ref tgl_SpeedMethod);
 			if (GUILayout.Button("Save overrides")) ConfigManager.Instance.SaveModSettings();
