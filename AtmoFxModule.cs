@@ -142,7 +142,7 @@ namespace AtmosphericFx
 			InitializeAirstreamCamera(fxVessel.vesselBoundExtents.magnitude);
 
 			// Load the hexgrid
-			CreateHexGrid();
+			CreateHexGrid(false);
 
 			// create the particles
 			if (!ModSettings.Instance.disableParticles) CreateParticleSystems();  // run the function only if they're enabled in settings
@@ -154,32 +154,36 @@ namespace AtmosphericFx
 			isLoaded = true;
 		}
 
-		void CreateHexGrid()
+		void CreateHexGrid(bool onReload)
 		{
 			// Calculate the dimensions of the hexgrid and initialize it
 			float radius = ModSettings.Instance.hexgridRadius;
 			Vector2Int dimensions = HexGrid.CalculateDimensions(radius, fxVessel.airstreamCamera.orthographicSize * 2f * Vector2.one);
 			fxVessel.hexGrid = new HexGrid(dimensions, radius);
 
-			// Create the upper mesh holder - used for the grid rotation
-			GameObject holderGO = new GameObject("HexGridHolder");
-			holderGO.transform.parent = fxVessel.airstreamCamera.transform;
-			holderGO.transform.localPosition = Vector3.zero;
-			holderGO.transform.localRotation = Quaternion.identity;
+			if (!onReload)
+			{
+				// Create the upper mesh holder - used for the grid rotation
+				GameObject holderGO = new GameObject("HexGridHolder");
+				holderGO.transform.parent = fxVessel.airstreamCamera.transform;
+				holderGO.transform.localPosition = Vector3.zero;
+				holderGO.transform.localRotation = Quaternion.identity;
 
-			// Create the mesh holder
-			GameObject gridGO = new GameObject("HexGrid");
-			gridGO.transform.parent = holderGO.transform;
-			gridGO.transform.localPosition = new Vector3(-fxVessel.airstreamCamera.orthographicSize, -fxVessel.airstreamCamera.orthographicSize, 0.1f);
-			gridGO.transform.localRotation = Quaternion.identity;
+				// Create the mesh holder
+				GameObject gridGO = new GameObject("HexGrid");
+				gridGO.transform.parent = holderGO.transform;
+				gridGO.transform.localPosition = new Vector3(-fxVessel.airstreamCamera.orthographicSize, -fxVessel.airstreamCamera.orthographicSize, 0.1f);
+				gridGO.transform.localRotation = Quaternion.identity;
 
-			// Add the filter and renderer components
-			fxVessel.hexGridFilter = gridGO.AddComponent<MeshFilter>();
-			fxVessel.hexGridRenderer = gridGO.AddComponent<MeshRenderer>();
+				// Add the filter and renderer components
+				fxVessel.hexGridFilter = gridGO.AddComponent<MeshFilter>();
+				fxVessel.hexGridRenderer = gridGO.AddComponent<MeshRenderer>();
 
-			// Initialize the renderer and filter
+				// Initialize the renderer and filter
+				fxVessel.hexGridRenderer.sharedMaterial = fxVessel.material;
+			}
+
 			fxVessel.hexGridFilter.sharedMesh = fxVessel.hexGrid.HexMesh;
-			fxVessel.hexGridRenderer.sharedMaterial = fxVessel.material;
 		}
 
 		/// <summary>
@@ -392,7 +396,10 @@ namespace AtmosphericFx
 			InitializeAirstreamCamera(fxVessel.vesselBoundExtents.magnitude);
 
 			// Reload the hexgrid
-			CreateHexGrid();
+			CreateHexGrid(true);
+
+			// create the particles
+			if (!ModSettings.Instance.disableParticles) CreateParticleSystems();  // run the function only if they're enabled in settings
 		}
 
 		/// <summary>

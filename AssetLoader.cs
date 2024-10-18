@@ -64,7 +64,7 @@ namespace AtmosphericFx
 			Logging.Log(Versioning.Version);
 
 			// load shader
-			bool hasShader = TryGetShader("MirageDev/AtmosphericEntry", out Shader sh);
+			bool hasShader = TryGetShader("MirageDev/GridProjectionFX", out Shader sh);
 			if (!hasShader)
 			{
 				Logging.Log("Failed to load shader, halting startup");
@@ -73,7 +73,7 @@ namespace AtmosphericFx
 			globalShader = sh;
 
 			// load material
-			bool hasMaterial = TryGetMaterial("Reentry", out Material mt);
+			bool hasMaterial = TryGetMaterial("GridProjectionMat", out Material mt);
 			if (!hasMaterial)
 			{
 				Logging.Log("Failed to load reentry material, halting startup");
