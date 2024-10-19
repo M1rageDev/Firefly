@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using static KSP.UI.Screens.RDArchivesController;
 
 namespace AtmosphericFx
 {
@@ -129,6 +130,8 @@ namespace AtmosphericFx
 			HexMesh.vertices = vertices.ToArray();
 			HexMesh.triangles = triangles.ToArray();
 			HexMesh.uv = uvs.ToArray();
+
+			HexMesh.bounds = new Bounds(Vector3.zero, HexMesh.bounds.size * 500f);  // set the bounds to be absurdly big, to not get culled by the frustum culling
 
 			Logging.Log($"Hexgrid: Created {vertices.Count} verts");
 		}

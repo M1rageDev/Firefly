@@ -161,6 +161,8 @@ namespace AtmosphericFx
 			Vector2Int dimensions = HexGrid.CalculateDimensions(radius, fxVessel.airstreamCamera.orthographicSize * 2f * Vector2.one);
 			fxVessel.hexGrid = new HexGrid(dimensions, radius);
 
+			Logging.Log($"Created hex grid {radius} {dimensions.x} {dimensions.y}");
+
 			if (!onReload)
 			{
 				// Create the upper mesh holder - used for the grid rotation
@@ -173,7 +175,7 @@ namespace AtmosphericFx
 				GameObject gridGO = new GameObject("HexGrid");
 				gridGO.transform.parent = holderGO.transform;
 				gridGO.transform.localPosition = new Vector3(-fxVessel.airstreamCamera.orthographicSize, -fxVessel.airstreamCamera.orthographicSize, 0.1f);
-				gridGO.transform.localRotation = Quaternion.identity;
+				gridGO.transform.localRotation = Quaternion.Euler(270f, 0f, 0f);
 
 				// Add the filter and renderer components
 				fxVessel.hexGridFilter = gridGO.AddComponent<MeshFilter>();
