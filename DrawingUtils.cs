@@ -128,6 +128,24 @@ namespace AtmosphericFx
 			GLEnd();
 		}
 
+		public static void DrawPlane(Vector3 center, Vector2 dimensions, Vector3 rt, Vector3 up, Color color)
+		{
+			var a = center + dimensions.x * -rt + dimensions.y * up;
+			var b = center + dimensions.x * rt + dimensions.y * up;
+			var c = center + dimensions.x * rt + dimensions.y * -up;
+			var d = center + dimensions.x * -rt + dimensions.y * -up;
+
+			GLStart();
+			GL.Color(color);
+
+			DrawLine(a, b, color);
+			DrawLine(b, c, color);
+			DrawLine(c, d, color);
+			DrawLine(d, a, color);
+
+			GLEnd();
+		}
+
 		public static void DrawBox(Vector3[] corners, Color color)
 		{
 			GLStart();

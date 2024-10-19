@@ -18,10 +18,10 @@ namespace AtmosphericFx
 
 		// override toggle values
 		public bool tgl_Hdr = false;
-		public bool tgl_UseColliders = false;
 		public bool tgl_DisableParticles = false;
 
-		public bool tgl_SpeedMethod = true;
+		public bool tgl_SpeedMethod = false;
+		public bool tgl_CombinedShader = true;
 
 		// timer
 		float reloadBtnTime = 0f;
@@ -120,6 +120,7 @@ namespace AtmosphericFx
 			if (DrawConfigField("HDR Override", ref tgl_Hdr)) CameraManager.Instance.OverrideHDR(tgl_Hdr);
 			if (DrawConfigField("Disable particles", ref tgl_DisableParticles)) ConfigManager.Instance.modSettings.disableParticles = tgl_DisableParticles;
 			DrawConfigField("Speed method", ref tgl_SpeedMethod);
+			DrawConfigField("Combined shader", ref tgl_CombinedShader);
 			if (GUILayout.Button("Save overrides")) ConfigManager.Instance.SaveModSettings();
 
 			// end

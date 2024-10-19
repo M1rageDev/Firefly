@@ -120,7 +120,7 @@ namespace AtmosphericFx
 			fxVessel = new AtmoFxVessel();
 
 			// create material
-			Material material = Instantiate(AssetLoader.Instance.globalMaterial);
+			Material material = Instantiate(WindowManager.Instance.tgl_CombinedShader ? AssetLoader.Instance.globalMaterial : AssetLoader.Instance.loadedMaterials["GridProjectionAlt"]);
 			fxVessel.material = material;
 
 			// create camera
@@ -136,6 +136,7 @@ namespace AtmosphericFx
 			fxVessel.airstreamTexture.Create();
 			fxVessel.airstreamCamera.targetTexture = fxVessel.airstreamTexture;
 			fxVessel.material.SetTexture("_AirstreamTex", fxVessel.airstreamTexture);  // Set the airstream depth texture parameter
+			fxVessel.material.SetVector("_ModelScale", Vector3.one);
 
 			// calculate the vessel bounds
 			CalculateVesselBounds(fxVessel, vessel);
@@ -173,6 +174,7 @@ namespace AtmosphericFx
 
 				// Create the mesh holder
 				GameObject gridGO = new GameObject("HexGrid");
+				gridGO.layer = AtmoFxLayers.Fx;
 				gridGO.transform.parent = holderGO.transform;
 				gridGO.transform.localPosition = new Vector3(-fxVessel.airstreamCamera.orthographicSize, -fxVessel.airstreamCamera.orthographicSize, 0.1f);
 				gridGO.transform.localRotation = Quaternion.Euler(270f, 0f, 0f);
@@ -478,6 +480,7 @@ namespace AtmosphericFx
 
 				fxVessel.material.SetInt("_Hdr", CameraManager.Instance.ActualHdrState ? 1 : 0);
 				fxVessel.material.SetFloat("_FxState", AeroFX.state);
+				fxVessel.material.SetFloat("_FxScalar", AeroFX.FxScalar);
 				fxVessel.material.SetFloat("_AngleOfAttack", GetAngleOfAttack());
 				fxVessel.material.SetFloat("_ShadowPower", 0f);
 				fxVessel.material.SetFloat("_VelDotPower", 0f);
@@ -506,6 +509,7 @@ namespace AtmosphericFx
 			// camera
 			Transform camTransform = fxVessel.airstreamCamera.transform;
 			DrawingUtils.DrawArrow(camTransform.position, camTransform.forward, camTransform.right, camTransform.up, Color.magenta);
+			DrawingUtils.DrawPlane(camTransform.position, Vector2.one * fxVessel.airstreamCamera.orthographicSize, camTransform.right, camTransform.up, Color.magenta);
 		}
 
 		/// <summary>
