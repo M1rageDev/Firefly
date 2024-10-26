@@ -1,3 +1,4 @@
+using EdyCommonTools;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -27,6 +28,7 @@ namespace AtmosphericFx
 		public HexGrid hexGrid;
 		public MeshRenderer hexGridRenderer;
 		public MeshFilter hexGridFilter;
+		public Transform hexGridHolder;
 
 		public bool hasParticles = false;
 
@@ -138,6 +140,9 @@ namespace AtmosphericFx
 			fxVessel.material.SetTexture("_AirstreamTex", fxVessel.airstreamTexture);  // Set the airstream depth texture parameter
 			fxVessel.material.SetVector("_ModelScale", Vector3.one);
 
+			// reset part cache
+			ResetPartModelCache();
+
 			// calculate the vessel bounds
 			CalculateVesselBounds(fxVessel, vessel);
 			InitializeAirstreamCamera(fxVessel.vesselBoundExtents.magnitude);
@@ -155,8 +160,21 @@ namespace AtmosphericFx
 			isLoaded = true;
 		}
 
+		/// <summary>
+		/// Resets the model renderer cache for each part
+		/// </summary>
+		void ResetPartModelCache()
+		{
+			for (int i = 0; i < vessel.parts.Count; i++)
+			{
+				vessel.parts[i].ResetModelRenderersCache();
+			}
+		}
+
 		void CreateHexGrid(bool onReload)
 		{
+			if (fxVessel.hexGrid != null) Destroy(fxVessel.hexGrid.HexMesh);
+
 			// Calculate the dimensions of the hexgrid and initialize it
 			float radius = ModSettings.Instance.hexgridRadius;
 			Vector2Int dimensions = HexGrid.CalculateDimensions(radius, fxVessel.airstreamCamera.orthographicSize * 2f * Vector2.one);
@@ -171,6 +189,7 @@ namespace AtmosphericFx
 				holderGO.transform.parent = fxVessel.airstreamCamera.transform;
 				holderGO.transform.localPosition = Vector3.zero;
 				holderGO.transform.localRotation = Quaternion.identity;
+				fxVessel.hexGridHolder = holderGO.transform;
 
 				// Create the mesh holder
 				GameObject gridGO = new GameObject("HexGrid");
@@ -393,7 +412,10 @@ namespace AtmosphericFx
 		/// </summary>
 		public void OnVesselModified()
 		{
-			if (!bodyHasAtmo) return;
+			if (!bodyHasAtmo || !isLoaded || vessel == null || (!vessel.loaded) || vessel.parts.Count < 1) return;
+
+			// reset part cache
+			ResetPartModelCache();
 
 			// Recalculate the vessel bounds and the airstream camera parameters
 			CalculateVesselBounds(fxVessel, vessel);
@@ -411,8 +433,6 @@ namespace AtmosphericFx
 		/// </summary>
 		IEnumerator LoadVesselCoroutine()
 		{
-			yield return new WaitForSecondsRealtime(2f);
-
 			for (int i = 0; i < 10; i++)
 			{
 				yield return null;
@@ -464,7 +484,7 @@ namespace AtmosphericFx
 				// update particles
 				if (fxVessel.hasParticles) UpdateParticleSystems();
 
-				// position the cameras
+				// position the camera
 				fxVessel.airstreamCamera.transform.position = GetOrthoCameraPosition();
 				fxVessel.airstreamCamera.transform.LookAt(vessel.transform.TransformPoint(fxVessel.vesselBoundCenter));
 
@@ -485,6 +505,9 @@ namespace AtmosphericFx
 				fxVessel.material.SetFloat("_ShadowPower", 0f);
 				fxVessel.material.SetFloat("_VelDotPower", 0f);
 				fxVessel.material.SetFloat("_EntrySpeedMultiplier", 1f);
+
+				// Rotate the hexgrid
+				fxVessel.hexGridHolder.localRotation = Quaternion.AngleAxis(Time.time * 5f % 180f, Vector3.forward);
 			}
 		}
 

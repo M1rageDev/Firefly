@@ -93,6 +93,8 @@ namespace AtmosphericFx
 		/// </summary>
 		void Generate()
 		{
+			if (hexRadius <= 0 || gridDimensions.x < 1 || gridDimensions.y < 1) return;
+
 			vertices = new List<Vector3>();
 			triangles = new List<int>();
 			uvs = new List<Vector2>();
