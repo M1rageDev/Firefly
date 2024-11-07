@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace AtmosphericFx
+namespace Firefly
 {
 	// https://github.com/DefiantZombie/Collide-o-Scope/blob/master/Collide-o-Scope/DrawTools.cs
 	internal class DrawingUtils

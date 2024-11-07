@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace AtmosphericFx
+namespace Firefly
 {
 	public static class AtmoFxLayers
 	{
@@ -10,7 +10,7 @@ namespace AtmosphericFx
 
 	public class Logging
 	{
-		public const string Prefix = "[AtmosphericFx] ";
+		public const string Prefix = "[Firefly] ";
 
 		public static void Log(object message)
 		{

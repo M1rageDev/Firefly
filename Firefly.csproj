@@ -7,8 +7,8 @@
     <ProjectGuid>{0DD486F0-EF12-458B-B0E2-F74C7A90E36A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AtmosphericFx</RootNamespace>
-    <AssemblyName>AtmosphericFx</AssemblyName>
+    <RootNamespace>Firefly</RootNamespace>
+    <AssemblyName>Firefly</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -249,7 +249,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy /y "$(TargetDir)\AtmosphericFX.*" "$(ReferencePath)..\..\GameData\AtmosphericFx\Plugins\*"
-    </PostBuildEvent>
+    <PostBuildEvent>xcopy /y "$(TargetDir)\Firefly.*" "$(ReferencePath)..\..\GameData\Firefly\Plugins\*"
+</PostBuildEvent>
   </PropertyGroup>
 </Project>

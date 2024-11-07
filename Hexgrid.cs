@@ -2,7 +2,7 @@
 using UnityEngine;
 using static KSP.UI.Screens.RDArchivesController;
 
-namespace AtmosphericFx
+namespace Firefly
 {
 	/// <summary>
 	/// Helper class used to generate hexagon grid planes, used for the grid projection

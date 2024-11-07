@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace AtmosphericFx
+namespace Firefly
 {
 	[KSPAddon(KSPAddon.Startup.Flight, false)]
 	internal class CameraManager : MonoBehaviour

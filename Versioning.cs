@@ -1,4 +1,4 @@
-﻿namespace AtmosphericFx
+﻿namespace Firefly
 {
 	public class Versioning
 	{

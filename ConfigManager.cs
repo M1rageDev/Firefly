@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace AtmosphericFx
+namespace Firefly
 {
 	public class ModSettings
 	{
@@ -104,7 +104,7 @@ namespace AtmosphericFx
 	public class ConfigManager : MonoBehaviour
 	{
 		public static ConfigManager Instance { get; private set; }
-		public const string SettingsPath = "GameData/AtmosphericFx/Configs/ModSettings.cfg";
+		public const string SettingsPath = "GameData/Firefly/Configs/ModSettings.cfg";
 
 		public ModSettings modSettings = new ModSettings();
 
