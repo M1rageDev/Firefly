@@ -122,7 +122,7 @@ namespace Firefly
 			fxVessel = new AtmoFxVessel();
 
 			// create material
-			Material material = Instantiate(WindowManager.Instance.tgl_CombinedShader ? AssetLoader.Instance.globalMaterial : AssetLoader.Instance.loadedMaterials["GridProjectionAlt"]);
+			Material material = Instantiate(AssetLoader.Instance.globalMaterial);
 			fxVessel.material = material;
 
 			// create camera
