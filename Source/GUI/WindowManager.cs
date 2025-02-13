@@ -10,7 +10,7 @@ namespace Firefly
 	{
 		public static WindowManager Instance { get; private set; }
 
-		ApplicationLauncherButton appButton;
+		ApplicationLauncherButton appButton = null;
 		Rect windowPosition = new Rect(0, 100, 300, 100);
 
 		public bool uiHidden = false;
@@ -26,23 +26,30 @@ namespace Firefly
 		EffectEditor effectEditor;
 		Rect effectEditorPosition = new Rect(300, 100, 300, 100);
 		bool effectEditorActive = false;
+
+		// error list window
+		ErrorListWindow errorListWindow;
 		
 		public void Awake()
 		{
 			Instance = this;
 
 			effectEditor = new EffectEditor();
+			errorListWindow = new ErrorListWindow();
 		}
 
 		public void Start()
 		{
-			appButton = ApplicationLauncher.Instance.AddModApplication(
-				OnApplicationTrue, 
-				OnApplicationFalse, 
-				null, null, null, null, 
-				ApplicationLauncher.AppScenes.FLIGHT, 
-				AssetLoader.Instance.loadedTextures["Icon"]
-			);
+			if (ModLoadError.SeriousErrorCount > 0)
+			{
+				appButton = ApplicationLauncher.Instance.AddModApplication(
+					OnApplicationTrue,
+					OnApplicationFalse,
+					null, null, null, null,
+					ApplicationLauncher.AppScenes.FLIGHT,
+					AssetLoader.Instance.loadedTextures["Icon"]
+				);
+			}
 
 			GameEvents.onHideUI.Add(OnHideUi);
 			GameEvents.onShowUI.Add(OnShowUi);
@@ -52,7 +59,7 @@ namespace Firefly
 		{
 			// remove everything associated with the thing
 
-			ApplicationLauncher.Instance.RemoveModApplication(appButton);
+			if (appButton != null) ApplicationLauncher.Instance.RemoveModApplication(appButton);
 
 			GameEvents.onHideUI.Remove(OnHideUi);
 			GameEvents.onShowUI.Remove(OnShowUi);
@@ -85,7 +92,12 @@ namespace Firefly
 
 		public void OnGUI()
 		{
-			if (uiHidden || !appToggle || FlightGlobals.ActiveVessel == null) return;
+			// draw the error list window, even if the app is closed
+			if (uiHidden || FlightGlobals.ActiveVessel == null) return;
+			if (errorListWindow.windowActive) errorListWindow.windowPosition = GUILayout.Window(899, errorListWindow.windowPosition, errorListWindow.Gui, "Firefly error list");
+
+			// if the app is open, draw the rest of the windows
+			if (!appToggle) return;
 
 			windowPosition = GUILayout.Window(416, windowPosition, OnWindow, $"Firefly {Versioning.Version(this)}");
 

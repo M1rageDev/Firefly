@@ -184,16 +184,18 @@ namespace Firefly
 
 		public const string NewConfigPath = "GameData/Firefly/Configs/Saved/";
 
+		// loaded configs
+		public Dictionary<string, BodyColors> partConfigs = new Dictionary<string, BodyColors>();
 		public Dictionary<string, BodyConfig> bodyConfigs = new Dictionary<string, BodyConfig>();
 		public List<PlanetPackConfig> planetPackConfigs = new List<PlanetPackConfig>();
 		public string[] loadedBodyConfigs;
 
-		public Dictionary<string, BodyColors> partConfigs = new Dictionary<string, BodyColors>();
-
 		public BodyConfig defaultConfig;
 
-		public string homeWorld;
+		// error list
+		public List<ModLoadError> errorList = new List<ModLoadError>();
 
+		// internal SettingsManager handle, used to instantiate it
 		SettingsManager settingsManager;
 
 		public void Awake()
@@ -236,38 +238,53 @@ namespace Firefly
 			planetPackConfigs.Clear();
 
 			// get the planet packs
-			ConfigNode[] nodes = GameDatabase.Instance.GetConfigNodes("ATMOFX_PLANET_PACK");
+			// here we're using the UrlConfig stuff, to be able to get the path of the config
+			UrlDir.UrlConfig[] urlConfigs = GameDatabase.Instance.GetConfigs("ATMOFX_PLANET_PACK");
 
 			// check if there's actually anything to load
-			if (nodes.Length > 0)
+			if (urlConfigs.Length > 0)
 			{
-				for (int i = 0; i < nodes.Length; i++)
+				for (int i = 0; i < urlConfigs.Length; i++)
 				{
+					ConfigNode node = urlConfigs[i].config;
+
 					try
 					{
-						bool success = ProcessPlanetPackNode(nodes[i], out PlanetPackConfig cfg);
-						Logging.Log($"Processing planet pack cfg '{nodes[i].name}'");
+						bool success = ProcessPlanetPackNode(node, out PlanetPackConfig cfg);
+						Logging.Log($"Processing planet pack cfg '{node.name}'");
 
 						if (!success)
 						{
 							Logging.Log("Planet pack cfg can't be registered");
+							errorList.Add(new ModLoadError(
+								cause: ModLoadError.ProbableCause.BadConfig,
+								isSerious: false,
+								sourcePath: urlConfigs[i].url,
+								description: "This planet pack could not be registered. " + ModLoadError.BadConfigAdvice
+							));
 							continue;
 						}
 
-						Logging.Log($"Successfully registered planet pack cfg '{nodes[i].name}'");
+						Logging.Log($"Successfully registered planet pack cfg '{node.name}'");
 						planetPackConfigs.Add(cfg);
 					} 
 					catch (Exception e)  // catching plain exception, to then log it
 					{
-						Logging.Log($"Exception while loading planet pack {nodes[i].name}.");
+						Logging.Log($"Exception while loading planet pack {node.name}.");
 						Logging.Log(e.ToString());
+
+						errorList.Add(new ModLoadError(
+							cause: ModLoadError.ProbableCause.BadConfig,
+							isSerious: false,
+							sourcePath: urlConfigs[i].url,
+							description: "The config loader ran into an exception while loading this planet pack. " + ModLoadError.BadConfigAdvice
+						));
 					}
 				}
 			}
 
 			// get the nodes
-			// here we're using the UrlConfig stuff, to be able to get the path of the config
-			UrlDir.UrlConfig[] urlConfigs = GameDatabase.Instance.GetConfigs("ATMOFX_BODY");
+			urlConfigs = GameDatabase.Instance.GetConfigs("ATMOFX_BODY");
 
 			// check if there's actually anything to load
 			if (urlConfigs.Length > 0)
@@ -283,6 +300,12 @@ namespace Firefly
 						if (!success)
 						{
 							Logging.Log("Body couldn't be loaded");
+							errorList.Add(new ModLoadError(
+								cause: ModLoadError.ProbableCause.BadConfig,
+								isSerious: false,
+								sourcePath: urlConfigs[i].url,
+								description: "This config could not be registered. " + ModLoadError.BadConfigAdvice
+							));
 							continue;
 						}
 
@@ -292,6 +315,12 @@ namespace Firefly
 					{
 						Logging.Log($"Exception while loading config for {urlConfigs[i].config.GetValue("name")}.");
 						Logging.Log(e.ToString());
+						errorList.Add(new ModLoadError(
+							cause: ModLoadError.ProbableCause.BadConfig,
+							isSerious: false,
+							sourcePath: urlConfigs[i].url,
+							description: "The config loader ran into an exception while loading this planet pack. " + ModLoadError.BadConfigAdvice
+						));
 					}
 				}
 			}
@@ -305,6 +334,13 @@ namespace Firefly
 				Logging.Log("Default config not loaded, halting startup.");
 				Logging.Log("This likely means a corrupted install.");
 				Logging.Log("-------------------------------------------");
+
+				errorList.Add(new ModLoadError(
+					cause: ModLoadError.ProbableCause.IncorrectInstall,
+					isSerious: true,
+					sourcePath: "Default body config",
+					description: "The config loader did not load the default config. This probably means the mod is installed incorrectly."
+				));
 
 				return;
 			}
@@ -322,7 +358,7 @@ namespace Firefly
 			// clear the dict
 			partConfigs.Clear();
 
-			// get the planet packs
+			// get the nodes
 			ConfigNode[] nodes = GameDatabase.Instance.GetConfigNodes("ATMOFX_PART");
 
 			// check if there's actually anything to load
@@ -338,6 +374,12 @@ namespace Firefly
 					if (!success)
 					{
 						Logging.Log($"Couldn't process override config for part {partId}");
+						errorList.Add(new ModLoadError(
+							cause: ModLoadError.ProbableCause.BadConfig,
+							isSerious: false,
+							sourcePath: "Part override config for " + partId,
+							description: "This config could not be registered. " + ModLoadError.BadConfigAdvice
+						));
 						continue;
 					}
 

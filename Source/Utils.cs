@@ -4,6 +4,35 @@ using UnityEngine;
 
 namespace Firefly
 {
+	public class ModLoadError
+	{
+		public static string BadConfigAdvice = "Check if it has all the required values, and if it's formatted correctly.";
+
+		public static int SeriousErrorCount = 0;
+
+		public enum ProbableCause
+		{
+			IncorrectInstall,
+			BadConfig,
+			Other
+		}
+
+		public ProbableCause cause = ProbableCause.Other;
+		public bool isSerious = false;
+		public string sourcePath = "";
+		public string description = "";
+
+		public ModLoadError(ProbableCause cause, bool isSerious, string sourcePath, string description)
+		{
+			this.cause = cause;
+			this.isSerious = isSerious;
+			this.sourcePath = sourcePath;
+			this.description = description;
+
+			if (isSerious) SeriousErrorCount++;
+		}
+	}
+
 	/// <summary>
 	/// Stores a pair of floats
 	/// </summary>

@@ -56,6 +56,18 @@ namespace Firefly
 			LoadAssets();
 			InitAssets();
 
+			if (!allAssetsLoaded)
+			{
+				ConfigManager.Instance.errorList.Add(new ModLoadError(
+					cause: ModLoadError.ProbableCause.IncorrectInstall,
+					isSerious: true,
+					sourcePath: "Firefly asset loader",
+					description: "The asset loader did not load every asset."
+				));
+
+				return;
+			}
+
 			// disable the stock effects
 			Logging.Log("Disabling stock effects");
 			Logging.Log("Turning the quality down to minimal");
@@ -148,6 +160,12 @@ namespace Firefly
 			if (!bundle)
 			{
 				Logging.Log($"Bundle couldn't be loaded: {loadPath}");
+				ConfigManager.Instance.errorList.Add(new ModLoadError(
+					cause: ModLoadError.ProbableCause.IncorrectInstall,
+					isSerious: true,
+					sourcePath: "Firefly asset bundle",
+					description: "The asset bundle loader could not load the asset bundle."
+				));
 			}
 			else
 			{
