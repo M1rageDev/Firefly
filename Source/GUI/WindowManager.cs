@@ -116,6 +116,15 @@ namespace Firefly
 		/// </summary>
 		void OnWindow(int id)
 		{
+			if (ModLoadError.SeriousErrorCount > 0)
+			{
+				GUILayout.BeginVertical();
+				GUILayout.Label("The mod detected at least one serious error while loading. Cannot show menu.");
+				if (GUILayout.Button("Show error list")) errorListWindow.windowActive = true;
+				GUILayout.EndVertical();
+				GUI.DragWindow();
+			}
+
 			// effect editor
 			if (GUILayout.Button($"{(effectEditorActive ? "Close" : "Open")} effect editor"))
 			{

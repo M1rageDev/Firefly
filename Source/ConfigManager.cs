@@ -247,11 +247,12 @@ namespace Firefly
 				for (int i = 0; i < urlConfigs.Length; i++)
 				{
 					ConfigNode node = urlConfigs[i].config;
+					string nodeName = node.GetValue("name");
 
 					try
 					{
 						bool success = ProcessPlanetPackNode(node, out PlanetPackConfig cfg);
-						Logging.Log($"Processing planet pack cfg '{node.name}'");
+						Logging.Log($"Processing planet pack cfg '{nodeName}'");
 
 						if (!success)
 						{
@@ -265,12 +266,12 @@ namespace Firefly
 							continue;
 						}
 
-						Logging.Log($"Successfully registered planet pack cfg '{node.name}'");
+						Logging.Log($"Successfully registered planet pack cfg '{nodeName}'");
 						planetPackConfigs.Add(cfg);
 					} 
 					catch (Exception e)  // catching plain exception, to then log it
 					{
-						Logging.Log($"Exception while loading planet pack {node.name}.");
+						Logging.Log($"Exception while loading planet pack {nodeName}.");
 						Logging.Log(e.ToString());
 
 						errorList.Add(new ModLoadError(
