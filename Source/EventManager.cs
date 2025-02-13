@@ -51,7 +51,7 @@ namespace Firefly
 				// user or something else changed the fx quality to bigger than 0
 				// this means that the stock and Firefly effects will get mixed
 				// make sure to show a message to the user informing them of thath
-
+				WindowManager.Instance.stockEffectsWindow.windowActive = true;
 			}
 		}
 	}

@@ -29,7 +29,7 @@ namespace Firefly
 
 		// other windows
 		ErrorListWindow errorListWindow;
-		StockEffectsWindow stockEffectsWindow;
+		public StockEffectsWindow stockEffectsWindow;
 		
 		public void Awake()
 		{
