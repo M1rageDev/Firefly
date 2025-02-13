@@ -896,12 +896,14 @@ namespace Firefly
 		}
 
 		/// <summary>
-		/// Returns the speed of the airflow, based on the mach number and static pressure
+		/// Returns the speed of the airflow, based on the stock stuff
 		/// </summary>
 		float GetEntrySpeed()
 		{
-			// Pretty much just the FxScalar, but scaled with the strength base value, with an added modifier for the mach effects
-			float spd = AeroFX.FxScalar * (float)ModSettings.I["strength_base"] * Mathf.Lerp(0.13f, 1f, AeroFX.state);
+			// Pretty much just the FxScalar, but scaled with the strength base value, with an added modifier for the mach effects, and offset by the planet pack cfg
+			float transitionOffset = currentBody.planetPack.transitionOffset * AeroFX.state;
+			float fxScalar = AeroFX.FxScalar + transitionOffset;
+			float spd = fxScalar * (float)ModSettings.I["strength_base"] * Mathf.Lerp(0.13f, 1f, AeroFX.state);
 
 			// Smoothly interpolate the last frame's and this frame's results
 			// automatically adjusts the t value based on how much the results differ

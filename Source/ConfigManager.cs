@@ -101,6 +101,7 @@ namespace Firefly
 	{
 		public string cfgPath = "";
 		public string bodyName = "Unknown";
+		public PlanetPackConfig planetPack = new PlanetPackConfig();
 
 		// The entry speed gets multiplied by this before getting sent to the shader
 		public float strengthMultiplier = 1f;
@@ -165,8 +166,12 @@ namespace Firefly
 
 	public class PlanetPackConfig
 	{
-		// The speed gets multiplied by this after applying body configs
-		public float speedMultiplier = 1f;
+		// The strength gets multiplied by this after applying body configs
+		public float strengthMultiplier = 1f;
+
+		// The strength gets offset by this value (range 0-1)
+		// NOTE: This value gets multiplied by the FxState
+		public float transitionOffset = 0f;
 
 		// Affected bodies
 		public string[] affectedBodies;
@@ -393,7 +398,8 @@ namespace Firefly
 				// check if the body should be affected
 				if (planetPackConfigs[i].affectedBodies.Contains(bodyName))
 				{
-					body.strengthMultiplier *= planetPackConfigs[i].speedMultiplier;
+					body.planetPack = planetPackConfigs[i];
+					body.strengthMultiplier *= planetPackConfigs[i].strengthMultiplier;
 				}
 			}
 
@@ -411,7 +417,8 @@ namespace Firefly
 			bool isFormatted = true;
 			cfg = new PlanetPackConfig
 			{
-				speedMultiplier = ReadConfigValue(node, "speed_multiplier", ref isFormatted),
+				strengthMultiplier = ReadConfigValue(node, "speed_multiplier", ref isFormatted),
+				transitionOffset = ReadConfigValue(node, "transition_offset", ref isFormatted),
 			};
 
 			// read the affected body array
