@@ -459,7 +459,7 @@ namespace Firefly
 			bool isFormatted = true;
 			cfg = new PlanetPackConfig
 			{
-				strengthMultiplier = ReadConfigValue(node, "speed_multiplier", ref isFormatted),
+				strengthMultiplier = ReadConfigValue(node, "strength_multiplier", ref isFormatted),
 				transitionOffset = ReadConfigValue(node, "transition_offset", ref isFormatted),
 			};
 

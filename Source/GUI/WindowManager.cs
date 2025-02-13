@@ -27,8 +27,9 @@ namespace Firefly
 		Rect effectEditorPosition = new Rect(300, 100, 300, 100);
 		bool effectEditorActive = false;
 
-		// error list window
+		// other windows
 		ErrorListWindow errorListWindow;
+		StockEffectsWindow stockEffectsWindow;
 		
 		public void Awake()
 		{
@@ -36,6 +37,7 @@ namespace Firefly
 
 			effectEditor = new EffectEditor();
 			errorListWindow = new ErrorListWindow();
+			stockEffectsWindow = new StockEffectsWindow();
 		}
 
 		public void Start()
@@ -96,6 +98,7 @@ namespace Firefly
 			// draw the error list window, even if the app is closed
 			if (uiHidden || FlightGlobals.ActiveVessel == null) return;
 			if (errorListWindow.windowActive) errorListWindow.windowPosition = GUILayout.Window(899, errorListWindow.windowPosition, errorListWindow.Gui, "Firefly error list");
+			if (stockEffectsWindow.windowActive) stockEffectsWindow.windowPosition = GUILayout.Window(8991, stockEffectsWindow.windowPosition, stockEffectsWindow.Gui, "Firefly stock effects warning");
 
 			// if the app is open, draw the rest of the windows
 			if (!appToggle) return;
