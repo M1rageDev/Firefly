@@ -62,7 +62,7 @@ namespace Firefly
 					cause: ModLoadError.ProbableCause.IncorrectInstall,
 					isSerious: true,
 					sourcePath: "Firefly asset loader",
-					description: "The asset loader did not load every asset."
+					description: "The asset loader did not load every required asset."
 				));
 
 				return;
@@ -163,8 +163,8 @@ namespace Firefly
 				ConfigManager.Instance.errorList.Add(new ModLoadError(
 					cause: ModLoadError.ProbableCause.IncorrectInstall,
 					isSerious: true,
-					sourcePath: "Firefly asset bundle",
-					description: "The asset bundle loader could not load the asset bundle."
+					sourcePath: "Firefly asset loader",
+					description: "The asset loader could not load the asset bundle."
 				));
 			}
 			else

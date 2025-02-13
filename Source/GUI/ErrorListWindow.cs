@@ -40,6 +40,9 @@ namespace Firefly
 			if (seriousErrors.Count > 0)
 			{
 				GUILayout.Label($"The loader detected {seriousErrors.Count} serious errors. These will make the mod NOT function properly or AT ALL.", seriousErrorStyle);
+			} else
+			{
+				GUILayout.Label("These errors are not serious, but will likely make something not work (like custom configs not getting applied)");
 			}
 
 			// notification about incorrect install

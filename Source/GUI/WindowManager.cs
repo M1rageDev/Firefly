@@ -40,7 +40,8 @@ namespace Firefly
 
 		public void Start()
 		{
-			if (ModLoadError.SeriousErrorCount > 0)
+			// only create the app if there are no serious errors
+			if (ModLoadError.SeriousErrorCount < 1)
 			{
 				appButton = ApplicationLauncher.Instance.AddModApplication(
 					OnApplicationTrue,
