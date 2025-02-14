@@ -11,7 +11,6 @@ namespace Firefly
 		const int sliderSize = 220;
 
 		public Rect windowRect;
-		public string title;
 		public bool show;
 
 		public applyColorDelg onApplyColor;
@@ -39,10 +38,9 @@ namespace Firefly
 		bool isPicking;
 		float pickTimer;
 
-		public ColorPickerWindow(string title, float x, float y, Color c)
+		public ColorPickerWindow(float x, float y, Color c)
 		{
 			windowRect = new Rect(x, y, 300f, 100f);
-			this.title = title;
 
 			Init(c);
 		}
@@ -97,7 +95,7 @@ namespace Firefly
 		{
 			if (!show) return;
 
-			windowRect = GUILayout.Window(511, windowRect, Window, title);
+			windowRect = GUILayout.Window(511, windowRect, Window, "Color picker");
 		}
 
 		void Window(int id)

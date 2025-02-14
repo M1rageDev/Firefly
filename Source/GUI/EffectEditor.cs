@@ -140,7 +140,7 @@ namespace Firefly
 
 			bodyConfigs = ConfigManager.Instance.bodyConfigs.Keys.ToArray();
 
-			colorPicker = new ColorPickerWindow("Color picker", 900, 100, Color.red);
+			colorPicker = new ColorPickerWindow(900, 100, Color.red);
 			colorPicker.show = false;
 			colorPicker.onApplyColor = OnApplyColor;
 
@@ -369,8 +369,11 @@ namespace Firefly
 
 		void DrawSimConfiguration()
 		{
-			effectSpeed = GuiUtils.LabelSlider("Effect strength", effectSpeed, 0f, (float)ModSettings.I["strength_base"]);
-			effectState = GuiUtils.LabelSlider("Effect state", effectState, 0f, 1f);
+			GUILayout.Label("These sliders should only be used while actually editing configs.");
+			GUILayout.Label("They are for previewing the effects while not reentering.");
+			GUILayout.Label("Do not use these during normal gameplay!");
+			effectSpeed = GuiUtils.LabelSlider("Simulated effect strength", effectSpeed, 0f, (float)ModSettings.I["strength_base"]);
+			effectState = GuiUtils.LabelSlider("Simulated effect state", effectState, 0f, 1f);
 		}
 
 		void DrawBodyConfiguration()
