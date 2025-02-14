@@ -111,7 +111,7 @@ GS_INPUT gs_vert(VS_INPUT IN)
 	return OUT;
 }
 
-[maxvertexcount(12)]
+[maxvertexcount(6)]
 void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStream)
 {
 	// don't draw anything if the speed is low enough
@@ -298,6 +298,8 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 			// 
 			// SECOND LAYER (WRAP)
 			// 
+			
+			/*
 						
 			// if the state is low enough, don't draw the wrap layer at all
 			if (_FxState < 0.6) return;
@@ -349,6 +351,8 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 						
 			// restart the strip again
 			triStream.RestartStrip();
+			
+			*/
 		}
 	}
 
