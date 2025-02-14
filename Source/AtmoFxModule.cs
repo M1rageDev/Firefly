@@ -600,6 +600,8 @@ namespace Firefly
 				if (fxVessel.alternateChunkParticles != null) Destroy(fxVessel.alternateChunkParticles.gameObject);
 				if (fxVessel.smokeParticles != null) Destroy(fxVessel.smokeParticles.gameObject);
 
+				lastSpeed = 0f;
+
 				fxVessel = null;
 			}
 
