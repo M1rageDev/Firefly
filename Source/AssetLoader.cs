@@ -11,16 +11,14 @@ namespace Firefly
 		public static AssetLoader Instance { get; private set; }
 
 		// path to the assets
-		public const string texturePrefix = "Firefly/Assets/Textures/";
+		public const string texturePath = "Firefly/Assets/Textures/";
 		public const string bundlePath = "GameData/Firefly/Assets/Shaders/fxshaders.ksp";
 
-		// loaded textures
-		public Dictionary<string, Texture2D> loadedTextures = new Dictionary<string, Texture2D>();
-
-		// our loaded assets
+		// loaded assets
 		public Dictionary<string, Shader> loadedShaders = new Dictionary<string, Shader>();
 		public Dictionary<string, Material> loadedMaterials = new Dictionary<string, Material>();
 		public Dictionary<string, GameObject> loadedPrefabs = new Dictionary<string, GameObject>();
+		public Dictionary<string, Texture2D> loadedTextures = new Dictionary<string, Texture2D>();
 
 		// the actual stuff
 		public Material globalMaterial;
@@ -150,7 +148,7 @@ namespace Firefly
 			};
 			for (int i = 0; i < texturesToLoad.Length; i++)
 			{
-				loadedTextures[texturesToLoad[i]] = GameDatabase.Instance.GetTexture(texturePrefix + texturesToLoad[i], false);
+				loadedTextures[texturesToLoad[i]] = GameDatabase.Instance.GetTexture(texturePath + texturesToLoad[i], false);
 			}
 
 			// load the asset bundle
