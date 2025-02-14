@@ -126,7 +126,7 @@ namespace Firefly
 			}
 
 			// effect editor
-			if (GUILayout.Button($"{(effectEditorActive ? "Close" : "Open")} effect editor"))
+			if (GUILayout.Button($"{(effectEditorActive ? "Close" : "Open")} config editor"))
 			{
 				effectEditorActive = !effectEditorActive;
 				if (effectEditorActive) effectEditor.Open();
