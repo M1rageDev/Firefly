@@ -56,6 +56,12 @@ namespace Firefly
 
 			GameEvents.onHideUI.Add(OnHideUi);
 			GameEvents.onShowUI.Add(OnShowUi);
+
+			if (GameSettings.AERO_FX_QUALITY > 0)
+			{
+				// inform users about conflicting effects when instantiating this class
+				stockEffectsWindow.windowActive = true;
+			}
 		}
 
 		public void OnDestroy()
