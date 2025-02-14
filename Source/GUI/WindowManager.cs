@@ -164,6 +164,11 @@ namespace Firefly
 				return;
 			}
 
+			if (fxModule.doEffectEditor)
+			{
+				GUILayout.Label("Effect editor is open.");
+			}
+
 			// info
 			DrawInfo(vessel, fxModule);
 			GUILayout.Space(40);
