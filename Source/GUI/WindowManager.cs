@@ -145,7 +145,19 @@ namespace Firefly
 			if (!fxModule.isLoaded)
 			{
 				GUILayout.BeginVertical();
-				GUILayout.Label("FX are not loaded for the active vessel");
+
+				if (!vessel.mainBody.atmosphere)
+				{
+					GUILayout.Label("Current body does not have an atmosphere, FX are unloaded.");
+				}
+				else if (vessel.altitude > vessel.mainBody.atmosphereDepth)
+				{
+					GUILayout.Label("Ship is not in atmosphere, FX are unloaded.");
+				} else
+				{
+					GUILayout.Label("FX are not loaded for the active vessel");
+				}
+				
 				GUILayout.Label("Not showing info and quick action sections");
 				GUILayout.EndVertical();
 				GUI.DragWindow();
@@ -176,7 +188,11 @@ namespace Firefly
 			GUILayout.Label($"Current config is {fxModule.currentBody.bodyName}");
 			GUILayout.Label($"Active vessel is {vessel.vesselName}");
 			GUILayout.Label($"Vessel radius is {fxModule.fxVessel.vesselBoundRadius}");
-			if (!fxModule.doEffectEditor) GUILayout.Label($"Entry strength is {fxModule.GetAdjustedEntrySpeed()}");
+			if (!fxModule.doEffectEditor)
+			{
+				GUILayout.Label($"Entry strength is {fxModule.GetAdjustedEntrySpeed()}");
+			}
+
 
 			GUILayout.EndVertical();
 		}
@@ -188,7 +204,6 @@ namespace Firefly
 		{
 			GUILayout.BeginVertical();
 			GUILayout.Label("Settings:");
-
 			GUILayout.Label("Fields that need a reload to update are marked with *");
 
 			// draw config fields

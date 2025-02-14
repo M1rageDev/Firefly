@@ -267,6 +267,9 @@ namespace Firefly
 
 		public void Gui(int id)
 		{
+			GUILayout.BeginVertical();
+			GUILayout.Label("Note: the effect editor should not be open during normal gameplay.");
+
 			// split editor into 2 parts
 			GUILayout.BeginHorizontal();
 
@@ -278,6 +281,7 @@ namespace Firefly
 
 			// end window
 			GUILayout.EndHorizontal();
+			GUILayout.EndVertical();
 			GUI.DragWindow();
 
 			// apply stuff
@@ -369,9 +373,7 @@ namespace Firefly
 
 		void DrawSimConfiguration()
 		{
-			GUILayout.Label("These sliders should only be used while actually editing configs.");
-			GUILayout.Label("They are for previewing the effects while not reentering.");
-			GUILayout.Label("Do not use these during normal gameplay!");
+			GUILayout.Label("These sliders are for previewing the effects while not reentering. Do not use these during normal gameplay!");
 			effectSpeed = GuiUtils.LabelSlider("Simulated effect strength", effectSpeed, 0f, (float)ModSettings.I["strength_base"]);
 			effectState = GuiUtils.LabelSlider("Simulated effect state", effectState, 0f, 1f);
 		}
