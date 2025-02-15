@@ -111,7 +111,7 @@ GS_INPUT gs_vert(VS_INPUT IN)
 	return OUT;
 }
 
-[maxvertexcount(6)]
+[maxvertexcount(12)]
 void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStream)
 {
 	// don't draw anything if the speed is low enough
@@ -298,9 +298,7 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 			// 
 			// SECOND LAYER (WRAP)
 			// 
-			
-			/*
-						
+				
 			// if the state is low enough, don't draw the wrap layer at all
 			if (_FxState < 0.6) return;
 						
@@ -351,8 +349,6 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 						
 			// restart the strip again
 			triStream.RestartStrip();
-			
-			*/
 		}
 	}
 
@@ -364,7 +360,8 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 half4 gs_frag(GS_DATA IN) : SV_Target
 {
 	float4 c = IN.color;
-				
+	
+	/*
 	float entrySpeed = GetEntrySpeed() / 4000 - 0.08 * _FxState;
 	float speedScalar = saturate(lerp(0, 2.5, entrySpeed));
 				
@@ -414,6 +411,7 @@ half4 gs_frag(GS_DATA IN) : SV_Target
 	float dither = _DitherTex.SampleLevel(sampler_DitherTex, IN.screenPos.xy / _ScreenParams.xy * 500 + _Time.x, 0).r * trailPos.y;
 	float3 cd = lerp(c.rgb, dither, DitheringGrain);
 	c.rgb = lerp(cd + (-DitheringGrain / 4), c.rgb, _Hdr);
+	*/
 
 	return c;
 }
