@@ -298,13 +298,17 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 			// 
 			// SECOND LAYER (WRAP)
 			// 
-				
+			
+			// COMMENTED OUT:
+			// This likely breaks the effects on Linux, with Proton and AMD GPUs
+			// Instead of doing this, we still add the vertices to the trianglestream, but marked as discarded vertices to not use the fragment shader.
+			/*
 			// if the state is low enough, don't draw the wrap layer at all
 			if (_FxState < 0.6) 
 			{
-				triStream.RestartStrip();
 				return;
 			}
+			*/
 						
 			// clamp the entry speed to the max value
 			entrySpeed = clamp(entrySpeed, 0, 1);
@@ -340,16 +344,20 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 						
 			vertex_t0 = vertex[i].position - endSide + layerOffset - vertex[i].velocityOS * effectLength[i] + vertex[i].normalOS * normalMultiplier * entrySpeed;
 			vertex_t1 = vertex[j].position + endSide + layerOffset - vertex[j].velocityOS * effectLength[j] + vertex[j].normalOS * normalMultiplier * entrySpeed;
+			
+			// should we discard this batch?
+			float discardWrap = (_FxState < 0.6) ? 2.0 : 0.0;
 
 			// add the set of vertices to the tri strip
-			triStream.Append(CreateVertex(vertex_b0, 1, vertex[i].airstreamNDC, 0, 0, col, alpha));
-			triStream.Append(CreateVertex(vertex_b1, 1, vertex[j].airstreamNDC, 1, 0, col, alpha));
+			// NOTE: the discard variable gets subtracted from the layer, to let the frag shader know if it should clip
+			triStream.Append(CreateVertex(vertex_b0, 1 - discardWrap, vertex[i].airstreamNDC, 0, 0, col, alpha));
+			triStream.Append(CreateVertex(vertex_b1, 1 - discardWrap, vertex[j].airstreamNDC, 1, 0, col, alpha));
 						
-			triStream.Append(CreateVertex(vertex_m0, 1, vertex[i].airstreamNDC, 0, 0.5, middleCol, alpha));
-			triStream.Append(CreateVertex(vertex_m1, 1, vertex[j].airstreamNDC, 1, 0.5, middleCol, alpha));
+			triStream.Append(CreateVertex(vertex_m0, 1 - discardWrap, vertex[i].airstreamNDC, 0, 0.5, middleCol, alpha));
+			triStream.Append(CreateVertex(vertex_m1, 1 - discardWrap, vertex[j].airstreamNDC, 1, 0.5, middleCol, alpha));
 						
-			triStream.Append(CreateVertex(vertex_t0, 1, vertex[i].airstreamNDC, 0, 1, endCol, 0));
-			triStream.Append(CreateVertex(vertex_t1, 1, vertex[j].airstreamNDC, 1, 1, endCol, 0));
+			triStream.Append(CreateVertex(vertex_t0, 1 - discardWrap, vertex[i].airstreamNDC, 0, 1, endCol, 0));
+			triStream.Append(CreateVertex(vertex_t1, 1 - discardWrap, vertex[j].airstreamNDC, 1, 1, endCol, 0));
 						
 			// restart the strip again
 			triStream.RestartStrip();
@@ -364,6 +372,9 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 half4 gs_frag(GS_DATA IN) : SV_Target
 {
 	float4 c = IN.color;
+	
+	// first of all, clip the pixel if it's marked as discarded (layer < 0)
+	clip(IN.layer);
 	
 	float entrySpeed = GetEntrySpeed() / 4000 - 0.08 * _FxState;
 	float speedScalar = saturate(lerp(0, 2.5, entrySpeed));
