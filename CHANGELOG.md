@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 1.0.1 - 2025-02-17
 
 #### WARNING FOR PLANET PACK MAKERS:
+
 This update makes some changes to the **planet pack** configs. Please make sure you update them.
 
 * Add custom envelopes for benjee10's SOCK
@@ -13,6 +14,7 @@ This update makes some changes to the **planet pack** configs. Please make sure 
 * Change planet pack config `speed_multiplier` to `strength_multiplier`
 * Fix RSS reentry starting too late
 * Fix graphics bug on Linux + Proton (Mac is still broken though), huge thanks to **@bmsbwd, @KlyithSA and @Cypherthe1st** for helping to find the fix
+
 
 ## 1.0.0.0 - 2025-02-05
 
