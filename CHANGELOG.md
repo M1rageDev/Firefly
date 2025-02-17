@@ -1,11 +1,6 @@
 # Changelog
 
-## 1.0.1 - 2025-02-17
-
-There is nothing permanent except change
-
-
-## 1.0.1 - 2025-02-17
+## Unreleased
 
 #### WARNING FOR PLANET PACK MAKERS:
 
