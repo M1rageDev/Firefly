@@ -2,6 +2,11 @@
 
 ## 1.0.1 - 2025-02-17
 
+There is nothing permanent except change
+
+
+## 1.0.1 - 2025-02-17
+
 #### WARNING FOR PLANET PACK MAKERS:
 
 This update makes some changes to the **planet pack** configs. Please make sure you update them.
