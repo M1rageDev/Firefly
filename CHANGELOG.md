@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-* Add configs for Kcalbeloh and OPM (thanks @SPACEMAN9813 )
+* Add configs for Kcalbeloh and OPM (thanks **@SPACEMAN9813**)
 
 ## 1.0.1 - 2025-02-17
 
