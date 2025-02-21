@@ -907,8 +907,8 @@ namespace Firefly
 			float fxScalar = AeroFX.FxScalar + transitionOffset;
 			fxScalar *= Mathf.Lerp(0.13f, 1f, AeroFX.state);
 
-			// add additional value, for faster transition
-			fxScalar += Mathf.Min((float)vessel.dynamicPressurekPa * 10f, 0.2f);
+			// add additional value (only for reentry state), for faster transition
+			fxScalar += Mathf.Min((float)vessel.dynamicPressurekPa * 10f, 0.2f) * AeroFX.state;
 
 			// make sure to clamp the value to 1
 			fxScalar = Mathf.Min(fxScalar, 1f);
