@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEngine;
 using System.Collections.Generic;
+using KSP.UI.Screens.DebugToolbar.Screens.Physics;
 
 namespace Firefly
 {
@@ -202,8 +203,8 @@ namespace Firefly
 			if (!fxModule.doEffectEditor)
 			{
 				GUILayout.Label($"Entry strength is {fxModule.GetAdjustedEntrySpeed()}");
+				GUILayout.Label($"Dynamic pressure [kPa] {vessel.dynamicPressurekPa}");
 			}
-
 
 			GUILayout.EndVertical();
 		}

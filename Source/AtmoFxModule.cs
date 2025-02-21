@@ -904,8 +904,17 @@ namespace Firefly
 		{
 			// Pretty much just the FxScalar, but scaled with the strength base value, with an added modifier for the mach effects, and offset by the planet pack cfg
 			float transitionOffset = currentBody.planetPack.transitionOffset * AeroFX.state;
-			float fxScalar = Mathf.Min(AeroFX.FxScalar + transitionOffset, 1f);  // make sure to clamp the value to 1
-			float spd = fxScalar * (float)ModSettings.I["strength_base"] * Mathf.Lerp(0.13f, 1f, AeroFX.state);
+			float fxScalar = AeroFX.FxScalar + transitionOffset;
+			fxScalar *= Mathf.Lerp(0.13f, 1f, AeroFX.state);
+
+			// add additional value, for faster transition
+			fxScalar += Mathf.Min((float)vessel.dynamicPressurekPa * 10f, 0.2f);
+
+			// make sure to clamp the value to 1
+			fxScalar = Mathf.Min(fxScalar, 1f);
+
+			// scale with base
+			float spd = fxScalar * (float)ModSettings.I["strength_base"];
 
 			// Smoothly interpolate the last frame's and this frame's results
 			// automatically adjusts the t value based on how much the results differ
