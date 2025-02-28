@@ -25,13 +25,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6456826674957717894}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0.9851244, y: 0, z: 0, w: 0.17184307}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: -160.21, y: 0, z: 0}
 --- !u!198 &5968764124204222088
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -41,7 +41,7 @@ ParticleSystem:
   m_GameObject: {fileID: 6456826674957717894}
   serializedVersion: 6
   lengthInSec: 5
-  simulationSpeed: 4
+  simulationSpeed: 1
   stopAction: 0
   cullingMode: 0
   ringBufferMode: 0
@@ -167,9 +167,9 @@ ParticleSystem:
         m_RotationOrder: 4
     startSpeed:
       serializedVersion: 2
-      minMaxState: 0
-      scalar: 0
-      minScalar: 5
+      minMaxState: 3
+      scalar: 405
+      minScalar: 375
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -990,6 +990,15 @@ ParticleSystem:
           inWeight: 0
           outWeight: 0.10701106
         - serializedVersion: 3
+          time: 0.63518107
+          value: 0.634841
+          inSlope: 0.83112097
+          outSlope: 0.83112097
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.33333334
+          outWeight: 0.33333334
+        - serializedVersion: 3
           time: 1
           value: 1
           inSlope: 2
@@ -1304,7 +1313,7 @@ ParticleSystem:
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 0}
-        key1: {r: 0.796781, g: 0.546, b: 1, a: 0.3764706}
+        key1: {r: 0.796781, g: 0.546, b: 1, a: 0.5176471}
         key2: {r: 1, g: 0.27877468, b: 0, a: 0.27450982}
         key3: {r: 0.5754717, g: 0.5754717, b: 0.5754717, a: 0}
         key4: {r: 1, g: 1, b: 1, a: 0}
@@ -1484,7 +1493,7 @@ ParticleSystem:
     flipU: 0
     flipV: 0
   VelocityModule:
-    enabled: 1
+    enabled: 0
     x:
       serializedVersion: 2
       minMaxState: 3
@@ -2068,7 +2077,7 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
-    inWorldSpace: 1
+    inWorldSpace: 0
   InheritVelocityModule:
     enabled: 0
     m_Mode: 0

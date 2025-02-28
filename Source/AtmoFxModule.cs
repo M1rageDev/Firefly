@@ -446,7 +446,7 @@ namespace Firefly
 			fxVessel.allParticles.Add(ps);
 
 			// change transform name
-			ps.gameObject.name = "FireflyPS_" + name;
+			ps.gameObject.name = vessel.name + "_FireflyPS_" + name;
 
 			// store original emission rate
 			ParticleSystem.MinMaxCurve curve = ps.emission.rateOverTime;
@@ -504,24 +504,9 @@ namespace Firefly
 		/// <summary>
 		/// Updates the velocity vector for a given particle system
 		/// </summary>
-		void UpdateParticleVel(ParticleSystem system, Vector3 dir, float min, float max)
+		void UpdateParticleVel(ParticleSystem system, Vector3 dir)
 		{
-			ParticleSystem.VelocityOverLifetimeModule velocityModule = system.velocityOverLifetime;
-
-			ParticleSystem.MinMaxCurve range = velocityModule.x;
-			range.constantMin = dir.x * min;
-			range.constantMax = dir.x * max;
-			velocityModule.x = range;
-
-			range = velocityModule.y;
-			range.constantMin = dir.y * min;
-			range.constantMax = dir.y * max;
-			velocityModule.y = range;
-
-			range = velocityModule.z;
-			range.constantMin = dir.z * min;
-			range.constantMax = dir.z * max;
-			velocityModule.z = range;
+			system.transform.forward = dir;
 		}
 
 		/// <summary>
@@ -567,10 +552,10 @@ namespace Firefly
 			fxVessel.smokeParticles.transform.localPosition = fxVessel.vesselBoundCenter + direction * -2f * Mathf.Max(lengthMultiplier * 0.5f, 1f);
 
 			// directions
-			UpdateParticleVel(fxVessel.sparkParticles, worldVel, 30f, 70f);
-			UpdateParticleVel(fxVessel.chunkParticles, worldVel, 30f, 70f);
-			UpdateParticleVel(fxVessel.alternateChunkParticles, worldVel, 15f, 20f);
-			UpdateParticleVel(fxVessel.smokeParticles, worldVel, 125f, 135f);
+			UpdateParticleVel(fxVessel.sparkParticles, worldVel);
+			UpdateParticleVel(fxVessel.chunkParticles, worldVel);
+			UpdateParticleVel(fxVessel.alternateChunkParticles, worldVel);
+			UpdateParticleVel(fxVessel.smokeParticles, worldVel);
 		}
 
 		/// <summary>
