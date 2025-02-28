@@ -4,6 +4,7 @@
 
 * Add configs for Kcalbeloh and OPM (thanks **@SPACEMAN9813**)
 * Add Sol compatibility
+* Add temporary workaround for drill envelope
 * Make the dynamic pressure affect the effect strength more, fixing the RSS transition (again)
 
 ## 1.0.1 - 2025-02-17

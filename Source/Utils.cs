@@ -166,7 +166,8 @@ namespace Firefly
 			return !(
 				part.Modules.Contains("ModuleConformalDecal") ||
 				part.Modules.Contains("ModuleConformalFlag") ||
-				part.Modules.Contains("ModuleConformalText")
+				part.Modules.Contains("ModuleConformalText") ||
+				part.name.Contains("RadialDrill")  // TODO: Actually fix this, instead of making a workaround like this
 			);
 		}
 
