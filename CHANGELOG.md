@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.2 - 2025-03-01
 
 * Add configs for Kcalbeloh and OPM (thanks **@SPACEMAN9813**)
 * Add Sol compatibility
@@ -8,6 +8,7 @@
 * Make the smoke particles much faster and longer
 * Make the dynamic pressure affect the effect strength more, fixing the RSS transition (again)
 * Fix particle systems going in wrong direction in certain cases
+
 
 ## 1.0.1 - 2025-02-17
 
