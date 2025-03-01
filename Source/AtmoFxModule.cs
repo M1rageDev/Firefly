@@ -506,7 +506,7 @@ namespace Firefly
 		/// </summary>
 		void UpdateParticleVel(ParticleSystem system, Vector3 dir)
 		{
-			system.transform.forward = dir;
+			system.transform.rotation = Quaternion.LookRotation(dir, vessel.transform.up);
 		}
 
 		/// <summary>

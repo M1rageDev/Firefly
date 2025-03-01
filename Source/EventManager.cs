@@ -12,8 +12,6 @@ namespace Firefly
 			GameEvents.onVesselPartCountChanged.Add(OnVesselPartCountChanged);
 			GameEvents.onVesselSOIChanged.Add(OnVesselSOIChanged);
 			GameEvents.OnGameSettingsApplied.Add(OnGameSettingsApplied);
-
-			GameEvents.onPartJointBreak.Add(OnJointBreak);
 		}
 
 		public void OnDestroy()
@@ -55,11 +53,6 @@ namespace Firefly
 				// make sure to show a message to the user informing them of thath
 				WindowManager.Instance.stockEffectsWindow.windowActive = true;
 			}
-		}
-
-		void OnJointBreak(PartJoint joint, float n)
-		{
-			
 		}
 	}
 }
