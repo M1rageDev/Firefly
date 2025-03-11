@@ -1,6 +1,7 @@
 ﻿using CommNet.Network;
 using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using UnityEngine;
 
@@ -177,6 +178,27 @@ namespace Firefly
 		public string[] affectedBodies;
 	}
 
+	public class ParticleSingleConfig
+	{
+		public string name = "";
+
+		public string mainTexture = "";
+		public string emissionTexture = "";
+
+		public float offset = 0f;
+		public bool useHalfOffset = false;
+
+		public FloatPair lifetime;
+		public FloatPair velocity;
+	}
+
+	public class ParticleConfig
+	{
+		public string name = "";
+
+		public Dictionary<string, ParticleSingleConfig> systems = new Dictionary<string, ParticleSingleConfig>();
+	}
+
 	[KSPAddon(KSPAddon.Startup.Instantly, true)]
 	public class ConfigManager : MonoBehaviour
 	{
@@ -185,6 +207,7 @@ namespace Firefly
 		public const string NewConfigPath = "GameData/Firefly/Configs/Saved/";
 
 		// loaded configs
+		public Dictionary<string, ParticleSingleConfig> particleConfigs = new Dictionary<string, ParticleSingleConfig>();
 		public Dictionary<string, BodyColors> partConfigs = new Dictionary<string, BodyColors>();
 		public Dictionary<string, BodyConfig> bodyConfigs = new Dictionary<string, BodyConfig>();
 		public List<PlanetPackConfig> planetPackConfigs = new List<PlanetPackConfig>();
@@ -226,6 +249,7 @@ namespace Firefly
 			settingsManager.LoadModSettings();
 			LoadPlanetConfigs();
 			LoadPartConfigs();
+			LoadParticleConfigs();
 		}
 
 		/// <summary>
@@ -389,6 +413,24 @@ namespace Firefly
 			}
 		}
 
+		void LoadParticleConfigs()
+		{
+			// get the nodes
+			ConfigNode[] nodes = GameDatabase.Instance.GetConfigNodes("ATMOFX_PARTICLES");
+
+			// check if there's actually anything to load
+			if (nodes.Length > 0)
+			{
+				for (int i = 0; i < nodes.Length; i++)
+				{
+					string name = nodes[i].GetValue("name");
+					ProcessParticleConfigNode(nodes[i], out _);
+
+					Logging.Log($"Processed particle config {name}");
+				}
+			}
+		}
+
 		/// <summary>
 		/// Processes single node
 		/// </summary>
@@ -503,6 +545,57 @@ namespace Firefly
 		bool ProcessPartConfigNode(ConfigNode node, out BodyColors cfg)
 		{
 			bool isFormatted = ProcessBodyColors(node, true, out cfg);
+
+			return isFormatted;
+		}
+
+		void ProcessParticleConfigNode(ConfigNode node, out ParticleConfig cfg)
+		{
+			cfg = new ParticleConfig();
+			string cfgName = node.GetValue("name");
+
+			for (int i = 0; i < node.CountNodes; i++)
+			{
+				ConfigNode singleNode = node.nodes[i];
+				string name = singleNode.name;
+
+				bool success = ProcessSingleParticleNode(singleNode, out ParticleSingleConfig singleCfg);
+
+				if (!success)
+				{
+					Logging.Log($"Couldn't process single particle config {name} in {cfgName}");
+					errorList.Add(new ModLoadError(
+						cause: ModLoadError.ProbableCause.BadConfig,
+						isSerious: false,
+						sourcePath: $"Single particle system {name} in {cfgName}",
+						description: "This config could not be registered. " + ModLoadError.BadConfigAdvice
+					));
+					continue;
+				}
+
+				cfg.systems.Add(name, singleCfg);
+				particleConfigs.Add(name, singleCfg);
+			}
+		}
+
+		bool ProcessSingleParticleNode(ConfigNode node, out ParticleSingleConfig cfg)
+		{
+			bool isFormatted = true;
+			cfg = new ParticleSingleConfig()
+			{
+				name = node.name,
+
+				mainTexture = node.GetValue("mainTexture"),
+				emissionTexture = node.GetValue("emissionTexture")
+			};
+
+			if (cfg.emissionTexture == "unused") cfg.emissionTexture = "";
+
+			isFormatted = isFormatted && Utils.EvaluateFloat(node.GetValue("offset"), out cfg.offset);
+			isFormatted = isFormatted && Utils.EvaluateBool(node.GetValue("useHalfOffset"), out cfg.useHalfOffset);
+
+			isFormatted = isFormatted && Utils.EvaluateFloatPair(node.GetValue("lifetime"), out cfg.lifetime);
+			isFormatted = isFormatted && Utils.EvaluateFloatPair(node.GetValue("velocity"), out cfg.velocity);
 
 			return isFormatted;
 		}

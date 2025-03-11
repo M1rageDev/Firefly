@@ -26,6 +26,32 @@ namespace Firefly
 		}
 	}
 
+	public struct FxParticleSystem
+	{
+		public string name;
+
+		public ParticleSystem system;
+
+		public float offset;
+		public bool useHalfOffset;
+
+		public FloatPair rate;
+		public FloatPair velocity;
+
+		public FxParticleSystem(string name, ParticleSystem system, float offset, bool useHalfOffset, FloatPair rate, FloatPair velocity)
+		{
+			this.name = name;
+
+			this.system = system;
+
+			this.offset = offset;
+			this.useHalfOffset = useHalfOffset;
+
+			this.rate = rate;
+			this.velocity = velocity;
+		}
+	}
+
 	/// <summary>
 	/// Stores the data and instances of the effects
 	/// </summary>
@@ -38,12 +64,8 @@ namespace Firefly
 		public bool hasParticles = false;
 
 		public List<Material> particleMaterials = new List<Material>();
-		public List<ParticleSystem> allParticles = new List<ParticleSystem>();
-		public List<FloatPair> orgParticleRates = new List<FloatPair>();
-		public ParticleSystem sparkParticles;
-		public ParticleSystem chunkParticles;
-		public ParticleSystem alternateChunkParticles;
-		public ParticleSystem smokeParticles;
+		public Dictionary<string, FxParticleSystem> allParticles = new Dictionary<string, FxParticleSystem>();
+		public List<string> particleKeys = new List<string>();
 		public bool areParticlesKilled = false;
 
 		public Camera airstreamCamera;
@@ -407,27 +429,27 @@ namespace Firefly
 
 			fxVessel.particleMaterials.Clear();
 			fxVessel.allParticles.Clear();
-			fxVessel.orgParticleRates.Clear();
+			fxVessel.particleKeys.Clear();
 
 			// spawn particle systems
-			fxVessel.sparkParticles = CreateParticleSystem(AssetLoader.Instance.sparkParticles, "Sparks", "ChunkSprite", "ChunkSprite");
-			fxVessel.chunkParticles = CreateParticleSystem(AssetLoader.Instance.chunkParticles, "Chunks", "ChunkSprite", "");
-			fxVessel.alternateChunkParticles = CreateParticleSystem(AssetLoader.Instance.alternateChunkParticles, "ChunksAlternate", "ChunkSprite1", "");
-			fxVessel.smokeParticles = CreateParticleSystem(AssetLoader.Instance.smokeParticles, "Smoke", "SmokeSprite", "");
+			CreateParticleSystem("Sparks");
+			CreateParticleSystem("Debris");
+			CreateParticleSystem("AlternateDebris");
+			CreateParticleSystem("Smoke");
 
 			// disable if needed
-			if ((bool)ModSettings.I["disable_sparks"]) fxVessel.sparkParticles.gameObject.SetActive(false);
+			if ((bool)ModSettings.I["disable_sparks"]) fxVessel.allParticles["Sparks"].system.gameObject.SetActive(false);
 			if ((bool)ModSettings.I["disable_debris"])
 			{
-				fxVessel.chunkParticles.gameObject.SetActive(false);
-				fxVessel.alternateChunkParticles.gameObject.SetActive(false);
+				fxVessel.allParticles["Debris"].system.gameObject.SetActive(false);
+				fxVessel.allParticles["AlternateDebris"].system.gameObject.SetActive(false);
 			}
-			if ((bool)ModSettings.I["disable_smoke"]) fxVessel.smokeParticles.gameObject.SetActive(false);
+			if ((bool)ModSettings.I["disable_smoke"]) fxVessel.allParticles["Smoke"].system.gameObject.SetActive(false);
 
 			// update the particle system properties for every one of them
 			for (int i = 0; i < fxVessel.allParticles.Count; i++)
 			{
-				ParticleSystem ps = fxVessel.allParticles[i];
+				ParticleSystem ps = fxVessel.allParticles[fxVessel.particleKeys[i]].system;
 
 				ParticleSystem.ShapeModule shapeModule = ps.shape;
 				shapeModule.scale = fxVessel.vesselBoundExtents * 2f;
@@ -439,18 +461,24 @@ namespace Firefly
 			}
 		}
 
-		ParticleSystem CreateParticleSystem(GameObject prefab, string name, string texture, string emissionTexture)
+		ParticleSystem CreateParticleSystem(string name)
 		{
+			// get the config
+			ParticleSingleConfig cfg = ConfigManager.Instance.particleConfigs[name];
+
 			// instantiate prefab
-			ParticleSystem ps = Instantiate(prefab, vessel.transform).GetComponent<ParticleSystem>();
-			fxVessel.allParticles.Add(ps);
+			ParticleSystem ps = Instantiate(AssetLoader.Instance.loadedPrefabs[name + "Particles"], vessel.transform).GetComponent<ParticleSystem>();
 
 			// change transform name
 			ps.gameObject.name = vessel.name + "_FireflyPS_" + name;
 
 			// store original emission rate
 			ParticleSystem.MinMaxCurve curve = ps.emission.rateOverTime;
-			fxVessel.orgParticleRates.Add(new FloatPair(curve.constantMin, curve.constantMax));
+			FloatPair orgRate = new FloatPair(curve.constantMin, curve.constantMax);
+
+			// initialize lifetime
+			ParticleSystem.MainModule mainModule = ps.main;
+			mainModule.startLifetime = new ParticleSystem.MinMaxCurve(cfg.lifetime.x, cfg.lifetime.y);
 
 			// initialize transform pos and rot
 			ps.transform.localRotation = Quaternion.identity;
@@ -462,12 +490,27 @@ namespace Firefly
 			renderer.material.SetTexture("_AirstreamTex", fxVessel.airstreamTexture);
 
 			// pick appropriate texture for the particle
-			renderer.material.SetTexture("_MainTex", AssetLoader.Instance.loadedTextures[texture]);
+			renderer.material.SetTexture("_MainTex", AssetLoader.Instance.loadedTextures[cfg.mainTexture]);
 
 			// set an emission texture, if required
-			if (!string.IsNullOrEmpty(emissionTexture)) renderer.material.SetTexture("_EmissionMap", AssetLoader.Instance.loadedTextures[emissionTexture]);
+			if (!string.IsNullOrEmpty(cfg.emissionTexture)) 
+				renderer.material.SetTexture("_EmissionMap", AssetLoader.Instance.loadedTextures[cfg.emissionTexture]);
 
 			fxVessel.particleMaterials.Add(renderer.material);
+
+			fxVessel.allParticles.Add(name, new FxParticleSystem()
+			{
+				name = name,
+
+				system = ps,
+
+				offset = cfg.offset,
+				useHalfOffset = cfg.useHalfOffset,
+
+				rate = orgRate,
+				velocity = cfg.velocity
+			});
+			fxVessel.particleKeys.Add(name);
 
 			return ps;
 		}
@@ -481,7 +524,7 @@ namespace Firefly
 
 			for (int i = 0; i < fxVessel.allParticles.Count; i++)
 			{
-				UpdateParticleRate(fxVessel.allParticles[i], 0f, 0f);
+				UpdateParticleRate(fxVessel.allParticles[fxVessel.particleKeys[i]].system, 0f, 0f);
 			}
 
 			fxVessel.areParticlesKilled = true;
@@ -504,9 +547,13 @@ namespace Firefly
 		/// <summary>
 		/// Updates the velocity vector for a given particle system
 		/// </summary>
-		void UpdateParticleVel(ParticleSystem system, Vector3 dir)
+		void UpdateParticleVel(ParticleSystem system, Vector3 dir, FloatPair velocity)
 		{
-			system.transform.rotation = Quaternion.LookRotation(dir, vessel.transform.up);
+			ParticleSystem.VelocityOverLifetimeModule velocityModule = system.velocityOverLifetime;
+
+			velocityModule.x = new ParticleSystem.MinMaxCurve(dir.x * velocity.x, dir.x * velocity.y);
+			velocityModule.y = new ParticleSystem.MinMaxCurve(dir.y * velocity.x, dir.y * velocity.y);
+			velocityModule.z = new ParticleSystem.MinMaxCurve(dir.z * velocity.x, dir.z * velocity.y);
 		}
 
 		/// <summary>
@@ -525,37 +572,30 @@ namespace Firefly
 
 			fxVessel.areParticlesKilled = false;
 
-			// rate
+			// world velocity
+			Vector3 worldVel = doEffectEditor ? -EffectEditor.Instance.GetWorldDirection() : -AeroFX.velocity.normalized;
+			Vector3 direction = doEffectEditor ? EffectEditor.Instance.effectDirection : vessel.transform.InverseTransformDirection(worldVel);
+			float lengthMultiplier = GetLengthMultiplier();
+			float halfLengthMultiplier = Mathf.Max(lengthMultiplier * 0.5f, 1f);
+
+			// update for each particle
 			desiredRate = Mathf.Clamp01((entrySpeed - currentBody.particleThreshold) / 600f);
 			for (int i = 0; i < fxVessel.allParticles.Count; i++)
 			{
-				ParticleSystem ps = fxVessel.allParticles[i];
+				FxParticleSystem particle = fxVessel.allParticles[fxVessel.particleKeys[i]];
+				ParticleSystem ps = particle.system;
 
-				float min = fxVessel.orgParticleRates[i].x * desiredRate;
-				float max = fxVessel.orgParticleRates[i].y * desiredRate;
-
+				// rate
+				float min = particle.rate.x * desiredRate;
+				float max = particle.rate.y * desiredRate;
 				UpdateParticleRate(ps, min, max);
+
+				// offset
+				ps.transform.localPosition = fxVessel.vesselBoundCenter + direction * particle.offset * (particle.useHalfOffset ? halfLengthMultiplier : lengthMultiplier);
+
+				// velocity
+				UpdateParticleVel(ps, worldVel, particle.velocity);
 			}
-
-			// world velocity
-			Vector3 direction = doEffectEditor ? EffectEditor.Instance.effectDirection : vessel.transform.InverseTransformDirection(GetEntryVelocity());
-			Vector3 worldVel = doEffectEditor ? -EffectEditor.Instance.GetWorldDirection() : -GetEntryVelocity();
-
-			float lengthMultiplier = GetLengthMultiplier();
-
-			fxVessel.sparkParticles.transform.localPosition = fxVessel.vesselBoundCenter + direction * -0.5f * lengthMultiplier;
-
-			fxVessel.chunkParticles.transform.localPosition = fxVessel.vesselBoundCenter + direction * -1.24f * lengthMultiplier;
-
-			fxVessel.alternateChunkParticles.transform.localPosition = fxVessel.vesselBoundCenter + direction * -1.62f * lengthMultiplier;
-
-			fxVessel.smokeParticles.transform.localPosition = fxVessel.vesselBoundCenter + direction * -2f * Mathf.Max(lengthMultiplier * 0.5f, 1f);
-
-			// directions
-			UpdateParticleVel(fxVessel.sparkParticles, worldVel);
-			UpdateParticleVel(fxVessel.chunkParticles, worldVel);
-			UpdateParticleVel(fxVessel.alternateChunkParticles, worldVel);
-			UpdateParticleVel(fxVessel.smokeParticles, worldVel);
 		}
 
 		/// <summary>
@@ -580,10 +620,10 @@ namespace Firefly
 				if (fxVessel.airstreamTexture != null) Destroy(fxVessel.airstreamTexture);
 
 				// destroy the particles
-				if (fxVessel.sparkParticles != null) Destroy(fxVessel.sparkParticles.gameObject);
-				if (fxVessel.chunkParticles != null) Destroy(fxVessel.chunkParticles.gameObject);
-				if (fxVessel.alternateChunkParticles != null) Destroy(fxVessel.alternateChunkParticles.gameObject);
-				if (fxVessel.smokeParticles != null) Destroy(fxVessel.smokeParticles.gameObject);
+				for (int i = 0; i < fxVessel.allParticles.Count; i++)
+				{
+					if (fxVessel.allParticles[fxVessel.particleKeys[i]].system != null) Destroy(fxVessel.allParticles[fxVessel.particleKeys[i]].system.gameObject);
+				}
 
 				lastSpeed = 0f;
 

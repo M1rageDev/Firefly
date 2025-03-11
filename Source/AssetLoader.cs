@@ -27,18 +27,6 @@ namespace Firefly
 		public Shader globalShader;
 		public bool hasShader = false;
 
-		public GameObject sparkParticles;
-		public bool hasSparkParticles = false;
-
-		public GameObject chunkParticles;
-		public bool hasChunkParticles = false;
-
-		public GameObject alternateChunkParticles;
-		public bool hasAlternateChunkParticles = false;
-
-		public GameObject smokeParticles;
-		public bool hasSmokeParticles = false;
-
 		// is everything loaded?
 		public bool allAssetsLoaded = false;
 
@@ -102,23 +90,6 @@ namespace Firefly
 			// initialize material
 			globalMaterial.shader = globalShader;
 
-			// load particle systems
-			hasSparkParticles = TryGetPrefab("SparkParticles", out sparkParticles);
-			hasChunkParticles = TryGetPrefab("ChunkParticles", out chunkParticles);
-			hasAlternateChunkParticles = TryGetPrefab("AlternateChunkParticles", out alternateChunkParticles);
-			hasSmokeParticles = TryGetPrefab("SmokeParticles", out smokeParticles);
-
-			if (!hasSparkParticles || !hasChunkParticles || !hasAlternateChunkParticles || !hasSmokeParticles)
-			{
-				Logging.Log($"Spark particles loaded? {hasSparkParticles}");
-				Logging.Log($"Chunk particles loaded? {hasChunkParticles}");
-				Logging.Log($"Alternate chunk particles loaded? {hasAlternateChunkParticles}");
-				Logging.Log($"Smoke particles loaded? {hasSmokeParticles}");
-
-				Logging.Log("Failed to load particles, halting startup");
-				return;
-			}
-
 			allAssetsLoaded = true;
 		}
 
@@ -137,7 +108,7 @@ namespace Firefly
 		/// </summary>
 		internal void LoadAssets()
 		{
-			// load the textures
+			// load the required textures
 			string[] texturesToLoad = new string[5]
 			{
 				"Icon",

@@ -78,6 +78,22 @@ namespace Firefly
 			return bool.TryParse(text.ToLower(), out val);
 		}
 
+		// parses a float pair
+		public static bool EvaluateFloatPair(string text, out FloatPair val)
+		{
+			bool isFormatted = true;
+			val = new FloatPair(0f, 0f);
+
+			string[] channels = text.Split(' ');
+			if (channels.Length < 2) return false;
+
+			// evaluate the values
+			isFormatted = isFormatted && EvaluateFloat(channels[0], out val.x);
+			isFormatted = isFormatted && EvaluateFloat(channels[1], out val.y);
+
+			return isFormatted;
+		}
+
 		// parses a vector3
 		public static bool EvaluateFloat3(string text, out Vector3 val)
 		{
