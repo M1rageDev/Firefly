@@ -11,7 +11,7 @@ namespace Firefly
 		public static AssetLoader Instance { get; private set; }
 
 		// path to the assets
-		public const string texturePath = "Firefly/Assets/Textures/";
+		public const string iconTexturePath = "Firefly/Assets/Textures/Icon";
 		public const string bundlePath = "GameData/Firefly/Assets/Shaders/fxshaders.ksp";
 
 		// loaded assets
@@ -26,6 +26,8 @@ namespace Firefly
 
 		public Shader globalShader;
 		public bool hasShader = false;
+
+		public Texture2D iconTexture;
 
 		// is everything loaded?
 		public bool allAssetsLoaded = false;
@@ -108,18 +110,11 @@ namespace Firefly
 		/// </summary>
 		internal void LoadAssets()
 		{
-			// load the required textures
-			string[] texturesToLoad = new string[5]
+			// load icon and other textures
+			iconTexture = GameDatabase.Instance.GetTexture(iconTexturePath, false);
+			for (int i = 0; i < ConfigManager.Instance.texturesToLoad.Count; i++)
 			{
-				"Icon",
-				"ChunkSprite",
-				"ChunkSprite1",
-				"SmokeSprite",
-				"SparkSprite"
-			};
-			for (int i = 0; i < texturesToLoad.Length; i++)
-			{
-				loadedTextures[texturesToLoad[i]] = GameDatabase.Instance.GetTexture(texturePath + texturesToLoad[i], false);
+				loadedTextures[ConfigManager.Instance.texturesToLoad[i]] = GameDatabase.Instance.GetTexture(ConfigManager.Instance.texturesToLoad[i], false);
 			}
 
 			// load the asset bundle

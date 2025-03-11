@@ -432,10 +432,11 @@ namespace Firefly
 			fxVessel.particleKeys.Clear();
 
 			// spawn particle systems
-			CreateParticleSystem("Sparks");
-			CreateParticleSystem("Debris");
-			CreateParticleSystem("AlternateDebris");
-			CreateParticleSystem("Smoke");
+			foreach (string key in ConfigManager.Instance.particleConfigs.Keys)
+			{
+				ParticleSingleConfig cfg = ConfigManager.Instance.particleConfigs[key];
+				CreateParticleSystem(cfg);
+			}
 
 			// disable if needed
 			if ((bool)ModSettings.I["disable_sparks"]) fxVessel.allParticles["Sparks"].system.gameObject.SetActive(false);
@@ -461,16 +462,13 @@ namespace Firefly
 			}
 		}
 
-		ParticleSystem CreateParticleSystem(string name)
+		ParticleSystem CreateParticleSystem(ParticleSingleConfig cfg)
 		{
-			// get the config
-			ParticleSingleConfig cfg = ConfigManager.Instance.particleConfigs[name];
-
 			// instantiate prefab
-			ParticleSystem ps = Instantiate(AssetLoader.Instance.loadedPrefabs[name + "Particles"], vessel.transform).GetComponent<ParticleSystem>();
+			ParticleSystem ps = Instantiate(AssetLoader.Instance.loadedPrefabs[cfg.name + "Particles"], vessel.transform).GetComponent<ParticleSystem>();
 
 			// change transform name
-			ps.gameObject.name = vessel.name + "_FireflyPS_" + name;
+			ps.gameObject.name = vessel.name + "_FireflyPS_" + cfg.name;
 
 			// store original emission rate
 			ParticleSystem.MinMaxCurve curve = ps.emission.rateOverTime;
@@ -498,9 +496,9 @@ namespace Firefly
 
 			fxVessel.particleMaterials.Add(renderer.material);
 
-			fxVessel.allParticles.Add(name, new FxParticleSystem()
+			fxVessel.allParticles.Add(cfg.name, new FxParticleSystem()
 			{
-				name = name,
+				name = cfg.name,
 
 				system = ps,
 
@@ -510,7 +508,7 @@ namespace Firefly
 				rate = orgRate,
 				velocity = cfg.velocity
 			});
-			fxVessel.particleKeys.Add(name);
+			fxVessel.particleKeys.Add(cfg.name);
 
 			return ps;
 		}
@@ -574,7 +572,7 @@ namespace Firefly
 
 			// world velocity
 			Vector3 worldVel = doEffectEditor ? -EffectEditor.Instance.GetWorldDirection() : -AeroFX.velocity.normalized;
-			Vector3 direction = doEffectEditor ? EffectEditor.Instance.effectDirection : vessel.transform.InverseTransformDirection(worldVel);
+			Vector3 direction = vessel.transform.InverseTransformDirection(worldVel);
 			float lengthMultiplier = GetLengthMultiplier();
 			float halfLengthMultiplier = Mathf.Max(lengthMultiplier * 0.5f, 1f);
 

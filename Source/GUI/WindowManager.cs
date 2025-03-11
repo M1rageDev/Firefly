@@ -51,7 +51,7 @@ namespace Firefly
 					OnApplicationFalse,
 					null, null, null, null,
 					ApplicationLauncher.AppScenes.FLIGHT,
-					AssetLoader.Instance.loadedTextures["Icon"]
+					AssetLoader.Instance.iconTexture
 				);
 			}
 

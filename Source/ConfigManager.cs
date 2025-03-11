@@ -213,6 +213,8 @@ namespace Firefly
 		public List<PlanetPackConfig> planetPackConfigs = new List<PlanetPackConfig>();
 		public string[] loadedBodyConfigs;
 
+		public List<string> texturesToLoad = new List<string>();
+
 		public BodyConfig defaultConfig;
 
 		// error list
@@ -415,6 +417,9 @@ namespace Firefly
 
 		void LoadParticleConfigs()
 		{
+			particleConfigs.Clear();
+			texturesToLoad.Clear();
+
 			// get the nodes
 			ConfigNode[] nodes = GameDatabase.Instance.GetConfigNodes("ATMOFX_PARTICLES");
 
@@ -572,6 +577,9 @@ namespace Firefly
 					));
 					continue;
 				}
+
+				texturesToLoad.Add(singleCfg.mainTexture);
+				texturesToLoad.Add(singleCfg.emissionTexture);
 
 				cfg.systems.Add(name, singleCfg);
 				particleConfigs.Add(name, singleCfg);
