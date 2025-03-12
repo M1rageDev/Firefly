@@ -465,7 +465,7 @@ namespace Firefly
 		ParticleSystem CreateParticleSystem(ParticleSingleConfig cfg)
 		{
 			// instantiate prefab
-			ParticleSystem ps = Instantiate(AssetLoader.Instance.loadedPrefabs[cfg.name + "Particles"], vessel.transform).GetComponent<ParticleSystem>();
+			ParticleSystem ps = Instantiate(AssetLoader.Instance.loadedPrefabs[cfg.prefab], vessel.transform).GetComponent<ParticleSystem>();
 
 			// change transform name
 			ps.gameObject.name = vessel.name + "_FireflyPS_" + cfg.name;

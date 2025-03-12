@@ -182,6 +182,8 @@ namespace Firefly
 	{
 		public string name = "";
 
+		public string prefab = "";
+
 		public string mainTexture = "";
 		public string emissionTexture = "";
 
@@ -592,6 +594,8 @@ namespace Firefly
 			cfg = new ParticleSingleConfig()
 			{
 				name = node.name,
+
+				prefab = node.GetValue("prefab"),
 
 				mainTexture = node.GetValue("mainTexture"),
 				emissionTexture = node.GetValue("emissionTexture")
