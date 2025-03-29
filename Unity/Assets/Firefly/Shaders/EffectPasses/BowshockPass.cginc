@@ -76,14 +76,14 @@ GS_INPUT gs_vert(VS_INPUT IN)
 [maxvertexcount(9)]
 void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStream)
 {
-	if (GetEntrySpeed() < 1000 || _DisableBowshock > 0) return;
+	if (_EntrySpeed < 1000 || _DisableBowshock > 0) return;
 				
 	// Initialize iterator variable
 	int i = 0;
 				
 	// Scale the entry speed
-	float clampedEntrySpeed = min(GetEntrySpeed(), 2300);
-	float entrySpeed = min(GetEntrySpeed() / 4000, 0.57);
+	float clampedEntrySpeed = min(_EntrySpeed, 2300);
+	float entrySpeed = min(_EntrySpeed / 4000, 0.57);
 	float scaledEntrySpeed = lerp(0, entrySpeed + 0.55, saturate((entrySpeed - 0.32) * 2));
 
 	// Get the occlusion for each vertex

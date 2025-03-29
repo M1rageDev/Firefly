@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+* Add particle config
+* Major refactor of entire project
+
 ## 1.0.2 - 2025-03-01
 
 * Add configs for Kcalbeloh and OPM (thanks **@SPACEMAN9813**)

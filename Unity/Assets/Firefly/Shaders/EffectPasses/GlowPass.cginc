@@ -77,7 +77,7 @@ half4 frag(FS_INPUT IN) : SV_Target
 	float shadow = Shadow(IN.airstreamNDC, -0.003, 1);
 
 	// Acquiring the alpha
-	float entrySpeed = saturate(GetEntrySpeed() / 4000);
+	float entrySpeed = saturate(_EntrySpeed / 4000);
 	float whiteRatio = saturate(entrySpeed / 0.42);  // white when below 1680
 	float faintRatio = saturate(entrySpeed / 0.5) / 2;
 

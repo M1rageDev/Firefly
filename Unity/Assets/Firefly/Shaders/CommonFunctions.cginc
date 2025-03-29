@@ -8,7 +8,6 @@ Texture2D _DitherTex;
 SamplerState sampler_DitherTex;
 
 float _EntrySpeed;
-float _EntrySpeedMultiplier;
 
 float3 _ModelScale;
 float3 _EnvelopeScaleFactor;
@@ -16,10 +15,6 @@ float3 _Velocity;
 float4x4 _AirstreamVP;
 
 // Gets the scaled entry speed
-float GetEntrySpeed()
-{
-	return _EntrySpeed * _EntrySpeedMultiplier;
-}
 float Shadow(float3 airstreamNDC, float bias, float shadowStrength)
 {
 	if (airstreamNDC.x < -1.0f || airstreamNDC.x > 1.0f || airstreamNDC.y < -1.0f || airstreamNDC.y > 1.0f) 

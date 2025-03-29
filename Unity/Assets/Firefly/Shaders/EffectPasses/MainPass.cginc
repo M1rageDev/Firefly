@@ -3,9 +3,7 @@ float _AngleOfAttack;
 int _Hdr;
 int _UnityEditor = 0;
 int _VertexSamples = 3;
-			
-float _VelDotPower;
-float _ShadowPower;
+
 float _LengthMultiplier;
 
 float _TrailAlphaMultiplier;
@@ -115,12 +113,10 @@ GS_INPUT gs_vert(VS_INPUT IN)
 void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStream)
 {
 	// don't draw anything if the speed is low enough
-	if (GetEntrySpeed() < 50) return;
+	if (_EntrySpeed < 50) return;
 	uint i = 0;
 
-	float entrySpeed = GetEntrySpeed() / 4000 - 0.08 * _FxState;
-	float whiteRatio = entrySpeed / 0.25;  // white when below 1000
-	float transparentRatio = saturate(entrySpeed / 0.025);
+	float entrySpeed = _EntrySpeed / 4000 - 0.08 * _FxState;
 
 	// Get the occlusion for each vertex
 	float3 occlusion = float3(
@@ -134,7 +130,7 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 	for (i = 0; i < 3; i++) velDots[i] = dot(-vertex[i].normal, _Velocity);
 
 	// Calculate the base length
-	float baseLength = GetEntrySpeed() * 0.0013;
+	float baseLength = _EntrySpeed * 0.0013;
 	float maxBaseLength = 5.2;  // 4000 * 0.0013
 
 	// calculate the noise values for each vertex
@@ -206,12 +202,12 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 			endCol = lerp(middleCol, endCol, _Hdr);
 
 			// opacity of the trail
-			float alpha = (0.004 * _TrailAlphaMultiplier + vertNoise * 0.004);
+			float alpha = saturate(entrySpeed / 0.025) * (0.004 * _TrailAlphaMultiplier + vertNoise * 0.004);
 
 			// Changes colors and opacity for mach effects
-			if (whiteRatio < 2)
+			if (entrySpeed < 0.5)
 			{
-				float t = saturate(whiteRatio - 1);
+				float t = saturate((entrySpeed / 0.25) - 1);
 							
 				// reduces the FxState based on if the ship's going up or down
 				// if it's going up then the state should be reduced
@@ -238,10 +234,6 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 			effectLength = abs(effectLength);
 			middleLength = abs(middleLength);
 						
-			// make the effect transparent at extremely low speeds
-			// (this basically scales the opacity with speed again)
-			alpha *= transparentRatio;
-						
 			// calculate the normal vector of the segment
 			float3 trailDir = (vertex[i].position - vertex[i].velocityOS * effectLength[i] + vertex[i].normalOS * normalMultiplier * entrySpeed) - vertex[i].position;
 			float3 normal = normalize(cross(sizeVector, trailDir));
@@ -250,7 +242,7 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 			float vertFresnel = Fresnel(vertex[i].normal, vertex[i].viewDir, 2);
 			alpha *= saturate(vertFresnel + 0.5 + vertNoise * 0.3) * edgeMul;
 						
-			// Random streaks, either standard colored streaks or random ones for asteroids/comets
+			// random streaks, either standard colored streaks or random ones for asteroids/comets
 			int streakValue = 0;  // value deciding if the current segment is a streak or not
 			float streakNoise = vertNoise2;
 			float4 streakColor = lerp(float4(4, 1, 1, 1), float4(1, 4, 1, 1), streakNoise);
@@ -276,7 +268,7 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 			float3 vertex_t0 = vertex[i].position - endSide - vertex[i].velocityOS * effectLength[i] + vertex[i].normalOS * normalMultiplier * entrySpeed;
 			float3 vertex_t1 = vertex[j].position + endSide - vertex[j].velocityOS * effectLength[j] + vertex[j].normalOS * normalMultiplier * entrySpeed;
 						
-			// Limit length
+			// limit length
 			float3 m0_ndc = GetAirstreamNDC(lerp(vertex_b0, vertex_m0, lerp(0.5, 0.1, saturate(entrySpeed - 0.5))));
 			float depth = Shadow(m0_ndc, -0.003, 1);
 						
@@ -376,7 +368,7 @@ half4 gs_frag(GS_DATA IN) : SV_Target
 	// first of all, clip the pixel if it's marked as discarded (layer < 0)
 	clip(IN.layer);
 	
-	float entrySpeed = GetEntrySpeed() / 4000 - 0.08 * _FxState;
+	float entrySpeed = _EntrySpeed / 4000 - 0.08 * _FxState;
 	float speedScalar = saturate(lerp(0, 2.5, entrySpeed));
 				
 	// fragment angle

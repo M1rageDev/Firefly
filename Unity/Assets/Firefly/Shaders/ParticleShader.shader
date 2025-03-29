@@ -1,4 +1,4 @@
-﻿Shader "MirageDev/ParticleShader"
+﻿Shader "Firefly/Particles"
 {
 	Properties
 	{
@@ -10,6 +10,7 @@
 
 		_Blending ("Blend: Additive<->Multiply", Range(0, 1)) = 0
 
+		_AirstreamBlending ("Airstream Blending", Range(0, 1)) = 1
 		_AirstreamTex ("Airstream Texture", 2D) = "white" {}
 	}
 	SubShader
@@ -55,6 +56,9 @@
 
 			half4 _Color;
 			half4 _EmissionColor;
+
+			float _AirstreamBlending;
+
 			int _Blending;
 
 			FS_INPUT vert (VS_INPUT v)
@@ -87,7 +91,7 @@
 
 				// change alpha based on occlusion and lifetime
 				// particles are less affected by the occlusion the longer they exist
-				col.a *= lerp(i.shadow, 1.0, i.lifetime);
+				col.a *= lerp(1.0, lerp(i.shadow, 1.0, i.lifetime), _AirstreamBlending);
 
 				// blend texture color with particle color
 				half3 additive = col.rgb + i.color.rgb;  // additive blending

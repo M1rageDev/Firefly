@@ -819,9 +819,6 @@ namespace Firefly
 			fxVessel.material.SetInt("_Hdr", CameraManager.Instance.ActualHdrState ? 1 : 0);
 			fxVessel.material.SetFloat("_FxState", doEffectEditor ? EffectEditor.Instance.effectState : AeroFX.state);
 			fxVessel.material.SetFloat("_AngleOfAttack", doEffectEditor ? 0f : Utils.GetAngleOfAttack(vessel));
-			fxVessel.material.SetFloat("_ShadowPower", 0f);
-			fxVessel.material.SetFloat("_VelDotPower", 0f);
-			fxVessel.material.SetFloat("_EntrySpeedMultiplier", 1f);
 
 			fxVessel.material.SetInt("_DisableBowshock", (bool)ModSettings.I["disable_bowshock"] ? 1 : 0);
 

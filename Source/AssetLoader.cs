@@ -12,7 +12,7 @@ namespace Firefly
 
 		// path to the assets
 		public const string iconTexturePath = "Firefly/Assets/Textures/Icon";
-		public const string bundlePath = "GameData/Firefly/Assets/Shaders/fxshaders.ksp";
+		public const string bundlePath = "GameData/Firefly/Assets/fireflybundle.ksp";
 
 		// loaded assets
 		public Dictionary<string, Shader> loadedShaders = new Dictionary<string, Shader>();
@@ -72,7 +72,7 @@ namespace Firefly
 			Logging.Log(Versioning.Version(this));
 
 			// load shader
-			bool hasShader = TryGetShader("MirageDev/AtmosphericEntry", out Shader sh);
+			bool hasShader = TryGetShader("Firefly/Firefly", out Shader sh);
 			if (!hasShader)
 			{
 				Logging.Log("Failed to load shader, halting startup");
@@ -81,10 +81,10 @@ namespace Firefly
 			globalShader = sh;
 
 			// load material
-			bool hasMaterial = TryGetMaterial("Reentry", out Material mt);
+			bool hasMaterial = TryGetMaterial("Firefly", out Material mt);
 			if (!hasMaterial)
 			{
-				Logging.Log("Failed to load reentry material, halting startup");
+				Logging.Log("Failed to load Firefly material, halting startup");
 				return;
 			}
 			globalMaterial = mt;

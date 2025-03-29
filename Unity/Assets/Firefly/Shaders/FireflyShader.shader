@@ -1,4 +1,4 @@
-Shader "MirageDev/AtmosphericEntry"
+Shader "Firefly/Firefly"
 {
 	Properties
 	{
