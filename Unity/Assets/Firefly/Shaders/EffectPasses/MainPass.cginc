@@ -113,10 +113,10 @@ GS_INPUT gs_vert(VS_INPUT IN)
 void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStream)
 {
 	// don't draw anything if the speed is low enough
-	if (_EntrySpeed < 50) return;
+	if (_EntryStrength < 50) return;
 	uint i = 0;
 
-	float entrySpeed = _EntrySpeed / 4000 - 0.08 * _FxState;
+	float entrySpeed = _EntryStrength / 4000 - 0.08 * _FxState;
 
 	// Get the occlusion for each vertex
 	float3 occlusion = float3(
@@ -130,7 +130,7 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 	for (i = 0; i < 3; i++) velDots[i] = dot(-vertex[i].normal, _Velocity);
 
 	// Calculate the base length
-	float baseLength = _EntrySpeed * 0.0013;
+	float baseLength = _EntryStrength * 0.0013;
 	float maxBaseLength = 5.2;  // 4000 * 0.0013
 
 	// calculate the noise values for each vertex
@@ -368,7 +368,7 @@ half4 gs_frag(GS_DATA IN) : SV_Target
 	// first of all, clip the pixel if it's marked as discarded (layer < 0)
 	clip(IN.layer);
 	
-	float entrySpeed = _EntrySpeed / 4000 - 0.08 * _FxState;
+	float entrySpeed = _EntryStrength / 4000 - 0.08 * _FxState;
 	float speedScalar = saturate(lerp(0, 2.5, entrySpeed));
 				
 	// fragment angle

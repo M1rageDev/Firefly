@@ -202,7 +202,7 @@ namespace Firefly
 			GUILayout.Label($"Vessel radius is {fxModule.fxVessel.vesselBoundRadius}");
 			if (!fxModule.doEffectEditor)
 			{
-				GUILayout.Label($"Entry strength is {fxModule.GetAdjustedEntrySpeed()}");
+				GUILayout.Label($"Entry strength is {fxModule.GetEntryStrength()}");
 				GUILayout.Label($"Dynamic pressure [kPa] {vessel.dynamicPressurekPa}");
 			}
 

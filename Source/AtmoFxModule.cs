@@ -96,7 +96,7 @@ namespace Firefly
 
 		float lastFixedTime;
 		float desiredRate;
-		float lastSpeed;
+		float lastStrength;
 
 		double vslLastAlt;
 
@@ -559,10 +559,10 @@ namespace Firefly
 		/// </summary>
 		void UpdateParticleSystems()
 		{
-			float entrySpeed = GetAdjustedEntrySpeed();
+			float entryStrength = GetEntryStrength();
 
 			// check if we should actually do the particles
-			if (entrySpeed < currentBody.particleThreshold)
+			if (entryStrength < currentBody.particleThreshold)
 			{
 				KillAllParticles();
 				return;
@@ -577,7 +577,7 @@ namespace Firefly
 			float halfLengthMultiplier = Mathf.Max(lengthMultiplier * 0.5f, 1f);
 
 			// update for each particle
-			desiredRate = Mathf.Clamp01((entrySpeed - currentBody.particleThreshold) / 600f);
+			desiredRate = Mathf.Clamp01((entryStrength - currentBody.particleThreshold) / 600f);
 			for (int i = 0; i < fxVessel.allParticles.Count; i++)
 			{
 				FxParticleSystem particle = fxVessel.allParticles[fxVessel.particleKeys[i]];
@@ -623,7 +623,7 @@ namespace Firefly
 					if (fxVessel.allParticles[fxVessel.particleKeys[i]].system != null) Destroy(fxVessel.allParticles[fxVessel.particleKeys[i]].system.gameObject);
 				}
 
-				lastSpeed = 0f;
+				lastStrength = 0f;
 
 				fxVessel = null;
 			}
@@ -690,10 +690,6 @@ namespace Firefly
 			{
 				lastFixedTime = Time.fixedTime;
 
-				EffectEditor editor = EffectEditor.Instance;
-
-				float entrySpeed = GetAdjustedEntrySpeed();
-
 				// update particle stuff like strength and direction
 				if (fxVessel.hasParticles) UpdateParticleSystems();
 
@@ -701,26 +697,10 @@ namespace Firefly
 				fxVessel.airstreamCamera.transform.position = GetOrthoCameraPosition();
 				fxVessel.airstreamCamera.transform.LookAt(vessel.transform.TransformPoint(fxVessel.vesselBoundCenter));
 
-				// view projection matrix for the airstream camera
-				Matrix4x4 V = fxVessel.airstreamCamera.worldToCameraMatrix;
-				Matrix4x4 P = GL.GetGPUProjectionMatrix(fxVessel.airstreamCamera.projectionMatrix, true);
-				Matrix4x4 VP = P * V;
-
-				// update the material with dynamic properties
-				fxVessel.material.SetVector("_Velocity", doEffectEditor ? editor.GetWorldDirection() : GetEntryVelocity());
-				fxVessel.material.SetFloat("_EntrySpeed", entrySpeed);
-				fxVessel.material.SetMatrix("_AirstreamVP", VP);
-
-				// particle properties, setting the VP matrix separately
-				for (int i = 0; i < fxVessel.particleMaterials.Count; i++)
-				{
-					fxVessel.particleMaterials[i].SetMatrix("_AirstreamVP", VP);
-				}
-
 				UpdateMaterialProperties();
 			}
 
-			// Check if the ship goes outside of the atmosphere (and the speed is low enough), unload the effects if so
+			// Check if the ship goes outside of the atmosphere, unload the effects if so
 			if (vessel.altitude > vessel.mainBody.atmosphereDepth && isLoaded && !doEffectEditor)
 			{
 				RemoveVesselFx(false);
@@ -816,6 +796,24 @@ namespace Firefly
 		/// </summary>
 		void UpdateMaterialProperties()
 		{
+			float entryStrength = GetEntryStrength();
+
+			// calculate view-projection matrix for the airstream camera
+			Matrix4x4 V = fxVessel.airstreamCamera.worldToCameraMatrix;
+			Matrix4x4 P = GL.GetGPUProjectionMatrix(fxVessel.airstreamCamera.projectionMatrix, true);
+			Matrix4x4 VP = P * V;
+
+			// update the particle properties, setting the VP matrix separately
+			for (int i = 0; i < fxVessel.particleMaterials.Count; i++)
+			{
+				fxVessel.particleMaterials[i].SetMatrix("_AirstreamVP", VP);
+			}
+
+			// update the material with dynamic properties
+			fxVessel.material.SetVector("_Velocity", doEffectEditor ? EffectEditor.Instance.GetWorldDirection() : GetEntryVelocity());
+			fxVessel.material.SetFloat("_EntryStrength", entryStrength);
+			fxVessel.material.SetMatrix("_AirstreamVP", VP);
+
 			fxVessel.material.SetInt("_Hdr", CameraManager.Instance.ActualHdrState ? 1 : 0);
 			fxVessel.material.SetFloat("_FxState", doEffectEditor ? EffectEditor.Instance.effectState : AeroFX.state);
 			fxVessel.material.SetFloat("_AngleOfAttack", doEffectEditor ? 0f : Utils.GetAngleOfAttack(vessel));
@@ -918,9 +916,9 @@ namespace Firefly
 		}
 
 		/// <summary>
-		/// Returns the speed of the airflow, based on the stock stuff
+		/// Returns the strength of the effects
 		/// </summary>
-		float GetEntrySpeed()
+		public float GetEntryStrength()
 		{
 			// Pretty much just the FxScalar, but scaled with the strength base value, with an added modifier for the mach effects, and offset by the planet pack cfg
 			float transitionOffset = currentBody.planetPack.transitionOffset * AeroFX.state;
@@ -934,16 +932,22 @@ namespace Firefly
 			fxScalar = Mathf.Min(fxScalar, 1f);
 
 			// scale with base
-			float spd = fxScalar * (float)ModSettings.I["strength_base"];
+			float strength = fxScalar * (float)ModSettings.I["strength_base"];
 
 			// Smoothly interpolate the last frame's and this frame's results
 			// automatically adjusts the t value based on how much the results differ
-			float delta = Mathf.Abs(spd - lastSpeed) / (float)ModSettings.I["strength_base"];
-			spd = Mathf.Lerp(lastSpeed, spd, TimeWarp.deltaTime * (1f + delta * 2f));
+			float delta = Mathf.Abs(strength - lastStrength) / (float)ModSettings.I["strength_base"];
+			strength = Mathf.Lerp(lastStrength, strength, TimeWarp.deltaTime * (1f + delta * 2f));
 
-			lastSpeed = spd;
+			lastStrength = strength;
 
-			return spd;
+			if (doEffectEditor)
+			{
+				return EffectEditor.Instance.effectStrength * currentBody.strengthMultiplier;
+			} else
+			{
+				return strength * currentBody.strengthMultiplier;
+			}
 		}
 
 		/// <summary>
@@ -966,14 +970,6 @@ namespace Firefly
 		float GetLengthMultiplier()
 		{
 			return fxVessel.baseLengthMultiplier * currentBody.lengthMultiplier * (float)ModSettings.I["length_mult"];
-		}
-
-		/// <summary>
-		/// Returns the entry speed adjusted to the atmosphere parameters, and takes the effect editor into account
-		/// </summary>
-		public float GetAdjustedEntrySpeed()
-		{
-			return doEffectEditor ? (EffectEditor.Instance.effectSpeed * currentBody.strengthMultiplier) : (GetEntrySpeed() * currentBody.strengthMultiplier);
 		}
 
 		/// <summary>

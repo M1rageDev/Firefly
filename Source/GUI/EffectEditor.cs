@@ -97,7 +97,7 @@ namespace Firefly
 		public static EffectEditor Instance { get; private set; }
 
 		public Vector3 effectDirection = -Vector3.up;
-		public float effectSpeed;
+		public float effectStrength;
 		public float effectState;
 
 		public BodyConfig config;
@@ -374,7 +374,7 @@ namespace Firefly
 		void DrawSimConfiguration()
 		{
 			GUILayout.Label("These sliders are for previewing the effects while not reentering. Do not use these during normal gameplay!");
-			effectSpeed = GuiUtils.LabelSlider("Simulated effect strength", effectSpeed, 0f, (float)ModSettings.I["strength_base"]);
+			effectStrength = GuiUtils.LabelSlider("Simulated effect strength", effectStrength, 0f, (float)ModSettings.I["strength_base"]);
 			effectState = GuiUtils.LabelSlider("Simulated effect state", effectState, 0f, 1f);
 		}
 

@@ -7,7 +7,7 @@ SamplerState sampler_NoiseTex;
 Texture2D _DitherTex;
 SamplerState sampler_DitherTex;
 
-float _EntrySpeed;
+float _EntryStrength;
 
 float3 _ModelScale;
 float3 _EnvelopeScaleFactor;

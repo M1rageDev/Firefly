@@ -104,7 +104,7 @@ namespace Firefly
 		public string bodyName = "Unknown";
 		public PlanetPackConfig planetPack = new PlanetPackConfig();
 
-		// The entry speed gets multiplied by this before getting sent to the shader
+		// The entry strength gets multiplied by this before getting sent to the shader
 		public float strengthMultiplier = 1f;
 
 		// The trail length gets multiplied by this
