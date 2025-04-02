@@ -14,6 +14,8 @@ namespace Firefly.GUI
 		{
 			title = $"Firefly {Versioning.Version(this)}";
 			windowRect = new Rect(0, 100, 300, 100);
+
+			Show();
 		}
 
 		public override void Draw(int id)

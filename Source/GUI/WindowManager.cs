@@ -16,6 +16,7 @@ namespace Firefly.GUI
 		// windows
 		public FireflyWindow fireflyWindow;
 		public EffectEditor effectEditor;
+		public ParticleEditor particleEditor;
 		public ErrorListWindow errorListWindow;
 		public StockEffectsWindow stockEffectsWindow;
 		
@@ -25,6 +26,7 @@ namespace Firefly.GUI
 
 			fireflyWindow = new FireflyWindow();
 			effectEditor = new EffectEditor();
+			particleEditor = new ParticleEditor();
 			errorListWindow = new ErrorListWindow();
 			stockEffectsWindow = new StockEffectsWindow();
 		}
@@ -85,6 +87,7 @@ namespace Firefly.GUI
 			effectEditor.RunGui();
 			effectEditor.colorPicker.RunGui();
 			effectEditor.createConfigPopup.RunGui();
+			particleEditor.RunGui();
 		}
 	}
 }

@@ -10,7 +10,7 @@ namespace Firefly.GUI
 
 		public ParticleEditor() : base("Particle Editor")
 		{
-			windowRect = new Rect(900f, 100f, 300f, 300f);
+			windowRect = new Rect(900f, 100f, 600f, 300f);
 
 			Instance = this;
 		}
