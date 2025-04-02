@@ -134,7 +134,7 @@ namespace Firefly
 		/// </summary>
 		public void CreateVesselFx()
 		{
-			if (!WindowManager.Instance.tgl_EffectToggle) return;
+			if (!GUI.WindowManager.Instance.fireflyWindow.tgl_EffectToggle) return;
 
 			// check if the vessel is actually loaded, and if it has any parts
 			if (vessel == null || (!vessel.loaded) || vessel.parts.Count < 1 )
@@ -571,7 +571,7 @@ namespace Firefly
 			fxVessel.areParticlesKilled = false;
 
 			// world velocity
-			Vector3 worldVel = doEffectEditor ? -EffectEditor.Instance.GetWorldDirection() : -AeroFX.velocity.normalized;
+			Vector3 worldVel = doEffectEditor ? -GUI.EffectEditor.Instance.GetWorldDirection() : -AeroFX.velocity.normalized;
 			Vector3 direction = vessel.transform.InverseTransformDirection(worldVel);
 			float lengthMultiplier = GetLengthMultiplier();
 			float halfLengthMultiplier = Mathf.Max(lengthMultiplier * 0.5f, 1f);
@@ -778,7 +778,7 @@ namespace Firefly
 					currentBody = cfg;
 				} else
 				{
-					currentBody = EffectEditor.Instance.config;
+					currentBody = GUI.EffectEditor.Instance.config;
 				}
 				
 				if (!atLoad)
@@ -810,12 +810,12 @@ namespace Firefly
 			}
 
 			// update the material with dynamic properties
-			fxVessel.material.SetVector("_Velocity", doEffectEditor ? EffectEditor.Instance.GetWorldDirection() : GetEntryVelocity());
+			fxVessel.material.SetVector("_Velocity", doEffectEditor ? GUI.EffectEditor.Instance.GetWorldDirection() : GetEntryVelocity());
 			fxVessel.material.SetFloat("_EntryStrength", entryStrength);
 			fxVessel.material.SetMatrix("_AirstreamVP", VP);
 
 			fxVessel.material.SetInt("_Hdr", CameraManager.Instance.ActualHdrState ? 1 : 0);
-			fxVessel.material.SetFloat("_FxState", doEffectEditor ? EffectEditor.Instance.effectState : AeroFX.state);
+			fxVessel.material.SetFloat("_FxState", doEffectEditor ? GUI.EffectEditor.Instance.effectState : AeroFX.state);
 			fxVessel.material.SetFloat("_AngleOfAttack", doEffectEditor ? 0f : Utils.GetAngleOfAttack(vessel));
 
 			fxVessel.material.SetInt("_DisableBowshock", (bool)ModSettings.I["disable_bowshock"] ? 1 : 0);
@@ -943,7 +943,7 @@ namespace Firefly
 
 			if (doEffectEditor)
 			{
-				return EffectEditor.Instance.effectStrength * currentBody.strengthMultiplier;
+				return GUI.EffectEditor.Instance.effectStrength * currentBody.strengthMultiplier;
 			} else
 			{
 				return strength * currentBody.strengthMultiplier;
@@ -980,7 +980,7 @@ namespace Firefly
 			float maxExtent = fxVessel.vesselBoundRadius;
 			float distance = maxExtent * 1.1f;
 
-			Vector3 localDir = doEffectEditor ? EffectEditor.Instance.effectDirection : vessel.transform.InverseTransformDirection(GetEntryVelocity());
+			Vector3 localDir = doEffectEditor ? GUI.EffectEditor.Instance.effectDirection : vessel.transform.InverseTransformDirection(GetEntryVelocity());
 			Vector3 localPos = fxVessel.vesselBoundCenter + distance * localDir;
 
 			return vessel.transform.TransformPoint(localPos);

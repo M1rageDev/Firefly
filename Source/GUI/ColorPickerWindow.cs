@@ -1,17 +1,14 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Firefly
+namespace Firefly.GUI
 {
-	internal class ColorPickerWindow
+	internal class ColorPickerWindow : Window
 	{
 		public delegate void applyColorDelg();
 
 		const int pickerSize = 300;
 		const int sliderSize = 220;
-
-		public Rect windowRect;
-		public bool show;
 
 		public applyColorDelg onApplyColor;
 		public Color color;
@@ -38,22 +35,21 @@ namespace Firefly
 		bool isPicking;
 		float pickTimer;
 
-		public ColorPickerWindow(float x, float y, Color c)
+		public ColorPickerWindow(float x, float y, Color c) : base("Color picker")
 		{
 			windowRect = new Rect(x, y, 300f, 100f);
 
-			Init(c);
+			Open(c);
+			Hide();
 		}
 
-		public void Show(Color c)
+		/// <summary>
+		/// Opens the window with a specified color
+		/// </summary>
+		public void Open(Color c)
 		{
-			show = true;
+			Show();
 
-			Init(c);
-		}
-
-		void Init(Color c)
-		{
 			color = c;
 			Utils.ColorHSV(c, out h, out s, out v);
 			intensity = c.a;
@@ -91,14 +87,7 @@ namespace Firefly
 			ui_raw[3] = $"{(raw[3] * 5f):F1}";
 		}
 
-		public void Gui()
-		{
-			if (!show) return;
-
-			windowRect = GUILayout.Window(511, windowRect, Window, "Color picker");
-		}
-
-		void Window(int id)
+		public override void Draw(int id)
 		{
 			GUILayout.BeginVertical();
 
@@ -142,31 +131,31 @@ namespace Firefly
 		void DrawColor()
 		{
 			Rect rect = GUILayoutUtility.GetRect(120f, 20f, GUILayout.Width(pickerSize));
-			GUI.DrawTexture(rect, colorTex);
+			UnityEngine.GUI.DrawTexture(rect, colorTex);
 		}
 
 		// draws the hue selection bar
 		void DrawHueBar()
 		{
 			Rect rect = GUILayoutUtility.GetRect(120f, 20f, GUILayout.Width(pickerSize));
-			GUI.DrawTexture(rect, hueTex);
+			UnityEngine.GUI.DrawTexture(rect, hueTex);
 			hueBarRect = GUIUtility.GUIToScreenRect(rect);
 
 			// selector
 			rect = new Rect(rect.x + h * rect.width, rect.y - 1, 3, 22);
-			GUI.DrawTexture(rect, hueSelectorTex);
+			UnityEngine.GUI.DrawTexture(rect, hueSelectorTex);
 		}
 
 		// draws the saturation and value selection field
 		void DrawPicker()
 		{
 			Rect rect = GUILayoutUtility.GetRect(120f, 120f, GUILayout.Width(pickerSize), GUILayout.Height(pickerSize));
-			GUI.DrawTexture(rect, pickerTex);
+			UnityEngine.GUI.DrawTexture(rect, pickerTex);
 			pickerRect = GUIUtility.GUIToScreenRect(rect);
 
 			// selector
 			rect = new Rect(rect.x + s * rect.width, rect.y + (1f - v) * rect.height, 3, 3);
-			GUI.DrawTexture(rect, pickerSelectorTex);
+			UnityEngine.GUI.DrawTexture(rect, pickerSelectorTex);
 		}
 
 		// draws individual color sliders
@@ -188,12 +177,12 @@ namespace Firefly
 
 			// slider
 			Rect rect = GUILayoutUtility.GetRect(120f, 20f, GUILayout.Width(sliderSize));
-			GUI.DrawTexture(rect, sliderTex[index]);
+			UnityEngine.GUI.DrawTexture(rect, sliderTex[index]);
 			sliderRects[index] = GUIUtility.GUIToScreenRect(rect);
 
 			// selector
 			rect = new Rect(rect.x + raw[index] * rect.width, rect.y - 1, 5, 22);
-			GUI.DrawTexture(rect, hueSelectorTex);
+			UnityEngine.GUI.DrawTexture(rect, hueSelectorTex);
 
 			// number input
 			string newText = GUILayout.TextField(ui_raw[index], GUILayout.Width(40));
@@ -291,7 +280,7 @@ namespace Firefly
 			if (pickTimer > 0f) pickTimer -= Time.deltaTime;
 
 			// handle drag
-			if (!isPicking && pickTimer <= 0f) GUI.DragWindow();
+			if (!isPicking && pickTimer <= 0f) UnityEngine.GUI.DragWindow();
 		}
 
 		void UpdateColor()

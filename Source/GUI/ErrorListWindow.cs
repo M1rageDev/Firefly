@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Firefly
+namespace Firefly.GUI
 {
-	internal class ErrorListWindow
+	internal class ErrorListWindow : Window
 	{
-		public Rect windowPosition = new Rect(300, 100, 600, 100);
-		public bool windowActive = false;
-
 		List<ModLoadError> seriousErrors = new List<ModLoadError>();
 		bool anyInstallErrors = false;
 
@@ -17,11 +14,12 @@ namespace Firefly
 
 		Texture2D whitePixel;
 
-		public ErrorListWindow()
+		public ErrorListWindow() : base("Firefly Error List")
 		{
+			windowRect = new Rect(300, 100, 600, 100);
 			if (ConfigManager.Instance.errorList.Count > 0)
 			{
-				windowActive = true;
+				Show();
 			}
 
 			seriousErrors = ConfigManager.Instance.errorList.Where(x => x.isSerious).ToList();
@@ -32,7 +30,7 @@ namespace Firefly
 			whitePixel = TextureUtils.GenerateColorTexture(1, 1, Color.white);
 		}
 
-		public void Gui(int id)
+		public override void Draw(int id)
 		{
 			GUILayout.BeginVertical();
 
@@ -57,10 +55,10 @@ namespace Firefly
 			DrawErrorList();
 
 			// draw close button
-			if (GUILayout.Button("Close error list (ignore errors)")) windowActive = false;
+			if (GUILayout.Button("Close error list (ignore errors)")) Hide();
 
 			GUILayout.EndVertical();
-			GUI.DragWindow();
+			UnityEngine.GUI.DragWindow();
 		}
 
 		void DrawErrorList()
@@ -83,7 +81,7 @@ namespace Firefly
 		void DrawSeparator()
 		{
 			Rect rect = GUILayoutUtility.GetRect(400f, 1f, GUILayout.Width(400f));
-			GUI.DrawTexture(rect, whitePixel);
+			UnityEngine.GUI.DrawTexture(rect, whitePixel);
 		}
 
 		void DrawError(ModLoadError error)

@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using static ProceduralSpaceObject;
 
-namespace Firefly
+namespace Firefly.GUI
 {
 	internal class GuiUtils
 	{
@@ -87,7 +83,7 @@ namespace Firefly
 			bool b = GUILayout.Button("", GUILayout.Width(60), GUILayout.Height(20));
 			Rect rect = GUILayoutUtility.GetLastRect();
 			rect = new Rect(rect.x + 4, rect.y + 4, rect.width - 8, rect.height - 8);
-			GUI.DrawTexture(rect, pix, ScaleMode.StretchToFill, false, 0f, color, 0f, 0f);
+			UnityEngine.GUI.DrawTexture(rect, pix, ScaleMode.StretchToFill, false, 0f, color, 0f, 0f);
 
 			GUILayout.EndHorizontal();
 

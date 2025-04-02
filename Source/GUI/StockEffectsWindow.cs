@@ -1,14 +1,15 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 
-namespace Firefly
+namespace Firefly.GUI
 {
-	internal class StockEffectsWindow
+	internal class StockEffectsWindow : Window
 	{
-		public Rect windowPosition = new Rect(300, 100, 600, 50);
-		public bool windowActive = false;
+		public StockEffectsWindow() : base("Firefly Stock Effects Warning")
+		{
+			windowRect = new Rect(300, 100, 600, 50);
+		}
 
-		public void Gui(int id)
+		public override void Draw(int id)
 		{
 			GUILayout.BeginVertical();
 
@@ -18,17 +19,17 @@ namespace Firefly
 			// draw close button
 			GUILayout.BeginHorizontal();
 			if (GUILayout.Button("Fix problem")) FixProblem();
-			if (GUILayout.Button("Ignore")) windowActive = false;
+			if (GUILayout.Button("Ignore")) Hide();
 			GUILayout.EndHorizontal();
 
 			GUILayout.EndVertical();
-			GUI.DragWindow();
+			UnityEngine.GUI.DragWindow();
 		}
 
 		void FixProblem()
 		{
 			GameSettings.AERO_FX_QUALITY = 0;
-			windowActive = false;
+			Hide();
 		}
 	}
 }

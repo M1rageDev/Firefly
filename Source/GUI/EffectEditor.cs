@@ -1,17 +1,12 @@
 ﻿using System.Linq;
 using UnityEngine;
 
-namespace Firefly
+namespace Firefly.GUI
 {
-	internal class CreateConfigPopup
+	internal class CreateConfigPopup : Window
 	{
 		public delegate void popupSaveDelg();
-
 		public popupSaveDelg onPopupSave;
-
-		public Rect windowRect = new Rect(900f, 100f, 300f, 300f);
-		public bool show = false;
-		int id;
 
 		string[] bodyConfigs;
 
@@ -24,29 +19,23 @@ namespace Firefly
 		Vector2 ui_bodyListPosition;
 		int ui_bodyChoice = 0;
 
-		public CreateConfigPopup()
+		public CreateConfigPopup() : base("New config")
 		{
-			id = this.GetHashCode();
+			windowRect = new Rect(900f, 100f, 300f, 300f);
 		}
 
-		public void Open(string[] bodyConfigs)
+		public void Init(string[] bodyConfigs)
 		{
 			ui_cfgName = "NewBody";
 			ui_bodyListPosition = Vector2.zero;
 			ui_bodyChoice = 0;
 
 			this.bodyConfigs = bodyConfigs;
-			show = true;
+
+			Show();
 		}
 
-		public void Gui()
-		{
-			if (!show) return;
-
-			windowRect = GUILayout.Window(id, windowRect, Window, "New config");
-		}
-
-		void Window(int id)
+		public override void Draw(int id)
 		{
 			GUILayout.BeginVertical();
 
@@ -59,26 +48,22 @@ namespace Firefly
 			DrawConfigSelector();
 
 			GUILayout.BeginHorizontal();
-			if (GUILayout.Button("Cancel")) Cancel();
+			if (GUILayout.Button("Cancel")) Hide();
 			if (GUILayout.Button("Done")) Done();
 			GUILayout.EndHorizontal();
 
 			GUILayout.EndVertical();
 
-			GUI.DragWindow();
+			UnityEngine.GUI.DragWindow();
 		}
 
 		void DrawConfigSelector()
 		{
 			ui_bodyListPosition = GUILayout.BeginScrollView(ui_bodyListPosition, GUILayout.Width(300f), GUILayout.Height(125f));
+
 			ui_bodyChoice = GUILayout.SelectionGrid(ui_bodyChoice, bodyConfigs, Mathf.Min(bodyConfigs.Length, 3));
 
 			GUILayout.EndScrollView();
-		}
-
-		void Cancel()
-		{
-			show = false;
 		}
 
 		void Done()
@@ -88,11 +73,11 @@ namespace Firefly
 
 			onPopupSave();
 
-			show = false;
+			Hide();
 		}
 	}
 
-	internal class EffectEditor
+	internal class EffectEditor : Window
 	{
 		public static EffectEditor Instance { get; private set; }
 
@@ -134,14 +119,14 @@ namespace Firefly
 		// for drawing color buttons
 		Texture2D whitePixel;
 
-		public EffectEditor()
+		public EffectEditor() : base("Effect editor")
 		{
+			windowRect = new Rect(300, 100, 300, 100);
 			Instance = this;
 
 			bodyConfigs = ConfigManager.Instance.bodyConfigs.Keys.ToArray();
 
 			colorPicker = new ColorPickerWindow(900, 100, Color.red);
-			colorPicker.show = false;
 			colorPicker.onApplyColor = OnApplyColor;
 
 			createConfigPopup = new CreateConfigPopup();
@@ -227,8 +212,10 @@ namespace Firefly
 			return vessel.transform.TransformDirection(effectDirection);
 		}
 
-		public void Open()
+		public override void Show()
 		{
+			base.Show();
+
 			Vessel vessel = FlightGlobals.ActiveVessel;
 			if (vessel == null) return;
 			fxModule = vessel.FindVesselModuleImplementing<AtmoFxModule>();
@@ -258,14 +245,16 @@ namespace Firefly
 			if (!fxModule.isLoaded) fxModule.CreateVesselFx();
 		}
 
-		public void Close()
+		public override void Hide()
 		{
+			base.Hide();
+
 			fxModule.doEffectEditor = false;
 
 			fxModule.currentBody = ConfigManager.Instance.bodyConfigs[currentBody];
 		}
 
-		public void Gui(int id)
+		public override void Draw(int id)
 		{
 			GUILayout.BeginVertical();
 			GUILayout.Label("Note: the effect editor should not be open during normal gameplay.");
@@ -282,7 +271,7 @@ namespace Firefly
 			// end window
 			GUILayout.EndHorizontal();
 			GUILayout.EndVertical();
-			GUI.DragWindow();
+			UnityEngine.GUI.DragWindow();
 
 			// apply stuff
 			fxModule.currentBody = config;
@@ -308,7 +297,7 @@ namespace Firefly
 			GUILayout.BeginVertical();
 
 			// config create
-			if (GUILayout.Button("Create new config") && !createConfigPopup.show) createConfigPopup.Open(bodyConfigs);
+			if (GUILayout.Button("Create new config") && !createConfigPopup.show) createConfigPopup.Init(bodyConfigs);
 			if (GUILayout.Button(removeConfigText) && currentBody != "Default") RemoveSelectedConfig();
 
 			// body selection
@@ -414,7 +403,7 @@ namespace Firefly
 			if (GuiUtils.DrawColorButton(label, whitePixel, c.baseColor))
 			{
 				currentlyPicking = colorKey;
-				colorPicker.Show(c.baseColor);
+				colorPicker.Open(c.baseColor);
 			}
 		}
 
