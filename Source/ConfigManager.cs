@@ -1,7 +1,5 @@
-﻿using CommNet.Network;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO.Ports;
 using System.Linq;
 using UnityEngine;
 
@@ -211,6 +209,18 @@ namespace Firefly
 			lifetime = new FloatPair(x.lifetime.x, x.lifetime.y);
 			velocity = new FloatPair(x.velocity.x, x.velocity.y);
 		}
+
+		public void SaveToNode(ConfigNode node)
+		{
+			node.AddValue("prefab", prefab);
+			node.AddValue("mainTexture", mainTexture);
+			node.AddValue("emissionTexture", emissionTexture);
+			node.AddValue("offset", offset.ToString());
+			node.AddValue("useHalfOffset", useHalfOffset.ToString());
+			node.AddValue("rate", rate.ToString());
+			node.AddValue("lifetime", lifetime.ToString());
+			node.AddValue("velocity", velocity.ToString());
+		}
 	}
 
 	[KSPAddon(KSPAddon.Startup.Instantly, true)]
@@ -219,6 +229,9 @@ namespace Firefly
 		public static ConfigManager Instance { get; private set; }
 
 		public const string NewConfigPath = "GameData/Firefly/Configs/Saved/";
+		public const string ParticleConfigPath = "GameData/Firefly/Configs/FireflyParticles.cfg";
+
+		public const string DefaultParticleNodeName = "FireflyParticles_Default";
 
 		// loaded configs
 		public Dictionary<string, ParticleConfig> particleConfigs = new Dictionary<string, ParticleConfig>();

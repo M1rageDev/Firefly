@@ -1,0 +1,64 @@
+ATMOFX_PARTICLESx
+{
+	name = FireflyParticles_Default
+	
+	Sparks
+	{
+		prefab = SparksParticles
+	
+		mainTexture = Firefly/Assets/Textures/ChunkSprite
+		emissionTexture = Firefly/Assets/Textures/ChunkSprite
+		
+		offset = 0.5
+		useHalfOffset = False
+		
+		rate = 46 46
+		lifetime = 0.07 0.7
+		velocity = 30 70
+	}
+	
+	Debris
+	{
+		prefab = DebrisParticles
+	
+		mainTexture = Firefly/Assets/Textures/ChunkSprite
+		emissionTexture = unused
+		
+		offset = 1.24
+		useHalfOffset = False
+		
+		rate = 20 20
+		lifetime = 0.25 1.23
+		velocity = 30 70
+	}
+	
+	AlternateDebris
+	{
+		prefab = AlternateDebrisParticles
+	
+		mainTexture = Firefly/Assets/Textures/ChunkSprite1
+		emissionTexture = unused
+		
+		offset = 1.62
+		useHalfOffset = False
+		
+		rate = 0.1 2
+		lifetime = 0.3 1
+		velocity = 15 20
+	}
+	
+	Smoke
+	{
+		prefab = SmokeParticles
+	
+		mainTexture = Firefly/Assets/Textures/SmokeSprite
+		emissionTexture = unused
+		
+		offset = 2
+		useHalfOffset = True
+		
+		rate = 206 255
+		lifetime = 8 10
+		velocity = 385 385
+	}
+}

@@ -586,7 +586,7 @@ namespace Firefly
 				UpdateParticleRate(ps, min, max);
 
 				// offset
-				ps.transform.localPosition = fxVessel.vesselBoundCenter + direction * particle.offset * (particle.useHalfOffset ? halfLengthMultiplier : lengthMultiplier);
+				ps.transform.localPosition = fxVessel.vesselBoundCenter + (direction * particle.offset * (particle.useHalfOffset ? halfLengthMultiplier : lengthMultiplier));
 
 				// velocity
 				UpdateParticleVel(ps, worldVel, particle.velocity);

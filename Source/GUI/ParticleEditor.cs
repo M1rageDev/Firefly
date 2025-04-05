@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using static Targeting;
+using System.IO;
 
 namespace Firefly.GUI
 {
@@ -25,6 +26,8 @@ namespace Firefly.GUI
 		GuiUtils.UiObjectInput<FloatPair> ui_rateRange = new GuiUtils.UiObjectInput<FloatPair>(new FloatPair(), 2);
 		GuiUtils.UiObjectInput<FloatPair> ui_lifetimeRange = new GuiUtils.UiObjectInput<FloatPair>(new FloatPair(), 2);
 		GuiUtils.UiObjectInput<FloatPair> ui_velocityRange = new GuiUtils.UiObjectInput<FloatPair>(new FloatPair(), 2);
+
+		GuiUtils.ConfirmingButton ui_saveButton = new GuiUtils.ConfirmingButton("Save all to file");
 
 		public ParticleEditor() : base("Particle Editor")
 		{
@@ -61,6 +64,13 @@ namespace Firefly.GUI
 			GUILayout.BeginVertical();
 
 			DrawConfigSelector();
+
+			GUILayout.Space(20f);
+
+			if (ui_saveButton.Draw(Time.time, GUILayout.Width(300f)))
+			{
+				SaveAllToCfg();
+			}
 
 			GUILayout.EndVertical();
 		}
@@ -147,6 +157,34 @@ namespace Firefly.GUI
 
 			ConfigManager.Instance.RefreshTextureList();
 			AssetLoader.Instance.ReloadAssets();
+		}
+
+		void SaveAllToCfg()
+		{
+			string path = Path.Combine(KSPUtil.ApplicationRootPath, ConfigManager.ParticleConfigPath);
+
+			// create a dummy parent node
+			ConfigNode parent = new ConfigNode("ATMOFX_PARTICLES");
+
+			// create the actual node
+			ConfigNode node = new ConfigNode("ATMOFX_PARTICLES");
+			node.AddValue("name", ConfigManager.DefaultParticleNodeName);
+
+			foreach (string key in ConfigManager.Instance.particleConfigs.Keys)
+			{
+				ParticleConfig config = ConfigManager.Instance.particleConfigs[key];
+
+				// create a separate node for each particle system
+				ConfigNode configNode = new ConfigNode(config.name);
+				config.SaveToNode(configNode);
+				node.AddNode(configNode);
+			}
+
+			// add to parent and save
+			parent.AddNode(node);
+			parent.Save(path);
+
+			ScreenMessages.PostScreenMessage("Saved all configs to file", 5f, ScreenMessageStyle.UPPER_CENTER);
 		}
 
 		public override void Show()

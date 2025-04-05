@@ -6,6 +6,10 @@ namespace Firefly.GUI
 {
 	internal class GuiUtils
 	{
+		/// <summary>
+		/// Holds a value and a text input field for it
+		/// Used for stuff like the effect/particle editor to simplify making the parameter controls
+		/// </summary>
 		public class UiObjectInput<T>
 		{
 			public string[] text;
@@ -36,6 +40,75 @@ namespace Firefly.GUI
 				{
 					this.text[0] = value.ToString();
 				}
+			}
+		}
+
+		/// <summary>
+		/// Button which will ask for confirmation before doing something
+		/// </summary>
+		public class ConfirmingButton
+		{
+			public enum State
+			{
+				Normal,
+				Confirming
+			}
+
+			public const string CONFIRM_LABEL = "Are you sure?";
+
+			public string normalLabel;
+			public float timeout;
+
+			string currentLabel;
+			State state;
+			float t;
+
+			public ConfirmingButton(string normalLabel, float timeout = 4f)
+			{
+				this.normalLabel = normalLabel;
+				this.timeout = timeout;
+				UpdateState(State.Normal);
+			}
+
+			// note that this method also ticks the logic
+			public bool Draw(float time, params GUILayoutOption[] options)
+			{
+				bool btn = GUILayout.Button(currentLabel, options);
+
+				// if state is confirming, then tick the time and return the button state
+				if (state == State.Confirming)
+				{
+					if ((time - t) > timeout || btn)
+					{
+						UpdateState(State.Normal);  // reset state if too much time has passed or button has been pressed
+					}
+
+					return btn;
+				}
+				else
+				{
+					// if state is normal, then change label to confirmation and return false
+					if (btn) UpdateState(State.Confirming, time);
+
+					return false;
+				}
+			}
+
+			void UpdateState(State newState, float time = 0f)
+			{
+				switch (newState)
+				{
+					case State.Normal:
+						currentLabel = normalLabel;
+						break;
+					case State.Confirming:
+						currentLabel = CONFIRM_LABEL;
+						t = time;
+						break;
+					default: break;
+				}
+
+				state = newState;
 			}
 		}
 
