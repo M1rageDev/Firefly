@@ -434,7 +434,7 @@ namespace Firefly
 			// spawn particle systems
 			foreach (string key in ConfigManager.Instance.particleConfigs.Keys)
 			{
-				ParticleSingleConfig cfg = ConfigManager.Instance.particleConfigs[key];
+				ParticleConfig cfg = ConfigManager.Instance.particleConfigs[key];
 				CreateParticleSystem(cfg);
 			}
 
@@ -462,17 +462,17 @@ namespace Firefly
 			}
 		}
 
-		ParticleSystem CreateParticleSystem(ParticleSingleConfig cfg)
+		void CreateParticleSystem(ParticleConfig cfg)
 		{
+			if (!AssetLoader.Instance.loadedTextures.ContainsKey(cfg.mainTexture)) return;
+			if (!string.IsNullOrEmpty(cfg.emissionTexture))
+				if (!AssetLoader.Instance.loadedTextures.ContainsKey(cfg.emissionTexture)) return;
+
 			// instantiate prefab
 			ParticleSystem ps = Instantiate(AssetLoader.Instance.loadedPrefabs[cfg.prefab], vessel.transform).GetComponent<ParticleSystem>();
 
 			// change transform name
 			ps.gameObject.name = vessel.name + "_FireflyPS_" + cfg.name;
-
-			// store original emission rate
-			ParticleSystem.MinMaxCurve curve = ps.emission.rateOverTime;
-			FloatPair orgRate = new FloatPair(curve.constantMin, curve.constantMax);
 
 			// initialize lifetime
 			ParticleSystem.MainModule mainModule = ps.main;
@@ -495,7 +495,6 @@ namespace Firefly
 				renderer.material.SetTexture("_EmissionMap", AssetLoader.Instance.loadedTextures[cfg.emissionTexture]);
 
 			fxVessel.particleMaterials.Add(renderer.material);
-
 			fxVessel.allParticles.Add(cfg.name, new FxParticleSystem()
 			{
 				name = cfg.name,
@@ -505,12 +504,10 @@ namespace Firefly
 				offset = cfg.offset,
 				useHalfOffset = cfg.useHalfOffset,
 
-				rate = orgRate,
+				rate = cfg.rate,
 				velocity = cfg.velocity
 			});
 			fxVessel.particleKeys.Add(cfg.name);
-
-			return ps;
 		}
 
 		/// <summary>

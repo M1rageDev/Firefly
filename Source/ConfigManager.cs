@@ -178,7 +178,7 @@ namespace Firefly
 		public string[] affectedBodies;
 	}
 
-	public class ParticleSingleConfig
+	public class ParticleConfig
 	{
 		public string name = "";
 
@@ -190,15 +190,27 @@ namespace Firefly
 		public float offset = 0f;
 		public bool useHalfOffset = false;
 
+		public FloatPair rate;
 		public FloatPair lifetime;
 		public FloatPair velocity;
-	}
 
-	public class ParticleConfig
-	{
-		public string name = "";
+		public ParticleConfig() { }
 
-		public Dictionary<string, ParticleSingleConfig> systems = new Dictionary<string, ParticleSingleConfig>();
+		public ParticleConfig(ParticleConfig x)
+		{
+			name = x.name;
+
+			prefab = x.prefab;
+
+			mainTexture = x.mainTexture;
+			emissionTexture = x.emissionTexture;
+
+			offset = x.offset;
+			useHalfOffset = x.useHalfOffset;
+
+			lifetime = new FloatPair(x.lifetime.x, x.lifetime.y);
+			velocity = new FloatPair(x.velocity.x, x.velocity.y);
+		}
 	}
 
 	[KSPAddon(KSPAddon.Startup.Instantly, true)]
@@ -209,7 +221,7 @@ namespace Firefly
 		public const string NewConfigPath = "GameData/Firefly/Configs/Saved/";
 
 		// loaded configs
-		public Dictionary<string, ParticleSingleConfig> particleConfigs = new Dictionary<string, ParticleSingleConfig>();
+		public Dictionary<string, ParticleConfig> particleConfigs = new Dictionary<string, ParticleConfig>();
 		public Dictionary<string, BodyColors> partConfigs = new Dictionary<string, BodyColors>();
 		public Dictionary<string, BodyConfig> bodyConfigs = new Dictionary<string, BodyConfig>();
 		public List<PlanetPackConfig> planetPackConfigs = new List<PlanetPackConfig>();
@@ -256,9 +268,6 @@ namespace Firefly
 			LoadParticleConfigs();
 		}
 
-		/// <summary>
-		/// Loads the planetpack and body configs
-		/// </summary>
 		void LoadPlanetConfigs()
 		{
 			// clear the dict and list
@@ -323,7 +332,7 @@ namespace Firefly
 				{
 					try
 					{
-						bool success = ProcessSingleNode(urlConfigs[i], out BodyConfig body);
+						bool success = ProcessSingleBodyNode(urlConfigs[i], out BodyConfig body);
 
 						// couldn't load the config
 						if (!success)
@@ -379,9 +388,6 @@ namespace Firefly
 			loadedBodyConfigs = bodyConfigs.Keys.ToArray();
 		}
 
-		/// <summary>
-		/// Loads the configs for individual parts
-		/// </summary>
 		void LoadPartConfigs()
 		{
 			// clear the dict
@@ -431,17 +437,14 @@ namespace Firefly
 				for (int i = 0; i < nodes.Length; i++)
 				{
 					string name = nodes[i].GetValue("name");
-					ProcessParticleConfigNode(nodes[i], out _);
+					ProcessParticleConfigNode(nodes[i]);
 
 					Logging.Log($"Processed particle config {name}");
 				}
 			}
 		}
 
-		/// <summary>
-		/// Processes single node
-		/// </summary>
-		bool ProcessSingleNode(UrlDir.UrlConfig cfg, out BodyConfig body)
+		bool ProcessSingleBodyNode(UrlDir.UrlConfig cfg, out BodyConfig body)
 		{
 			ConfigNode node = cfg.config;
 
@@ -498,9 +501,6 @@ namespace Firefly
 			return true;
 		}
 
-		/// <summary>
-		/// Processes planet pack nodes
-		/// </summary>
 		bool ProcessPlanetPackNode(ConfigNode node, out PlanetPackConfig cfg)
 		{
 			Logging.Log($"Loading planet pack config");
@@ -546,9 +546,6 @@ namespace Firefly
 			return true;
 		}
 
-		/// <summary>
-		/// Processes a single part config node
-		/// </summary>
 		bool ProcessPartConfigNode(ConfigNode node, out BodyColors cfg)
 		{
 			bool isFormatted = ProcessBodyColors(node, true, out cfg);
@@ -556,18 +553,19 @@ namespace Firefly
 			return isFormatted;
 		}
 
-		void ProcessParticleConfigNode(ConfigNode node, out ParticleConfig cfg)
+		void ProcessParticleConfigNode(ConfigNode node)
 		{
-			cfg = new ParticleConfig();
 			string cfgName = node.GetValue("name");
 
+			// process each particle system definition
 			for (int i = 0; i < node.CountNodes; i++)
 			{
 				ConfigNode singleNode = node.nodes[i];
 				string name = singleNode.name;
 
-				bool success = ProcessSingleParticleNode(singleNode, out ParticleSingleConfig singleCfg);
+				bool success = ProcessSingleParticleNode(singleNode, out ParticleConfig singleCfg);
 
+				// log error if the config is not formatted correctly
 				if (!success)
 				{
 					Logging.Log($"Couldn't process single particle config {name} in {cfgName}");
@@ -583,15 +581,14 @@ namespace Firefly
 				texturesToLoad.Add(singleCfg.mainTexture);
 				texturesToLoad.Add(singleCfg.emissionTexture);
 
-				cfg.systems.Add(name, singleCfg);
 				particleConfigs.Add(name, singleCfg);
 			}
 		}
 
-		bool ProcessSingleParticleNode(ConfigNode node, out ParticleSingleConfig cfg)
+		bool ProcessSingleParticleNode(ConfigNode node, out ParticleConfig cfg)
 		{
 			bool isFormatted = true;
-			cfg = new ParticleSingleConfig()
+			cfg = new ParticleConfig()
 			{
 				name = node.name,
 
@@ -601,15 +598,31 @@ namespace Firefly
 				emissionTexture = node.GetValue("emissionTexture")
 			};
 
-			if (cfg.emissionTexture == "unused") cfg.emissionTexture = "";
+			if (cfg.emissionTexture == "unused" || cfg.emissionTexture == "") cfg.emissionTexture = "";
 
 			isFormatted = isFormatted && Utils.EvaluateFloat(node.GetValue("offset"), out cfg.offset);
 			isFormatted = isFormatted && Utils.EvaluateBool(node.GetValue("useHalfOffset"), out cfg.useHalfOffset);
 
+			isFormatted = isFormatted && Utils.EvaluateFloatPair(node.GetValue("rate"), out cfg.rate);
 			isFormatted = isFormatted && Utils.EvaluateFloatPair(node.GetValue("lifetime"), out cfg.lifetime);
 			isFormatted = isFormatted && Utils.EvaluateFloatPair(node.GetValue("velocity"), out cfg.velocity);
 
 			return isFormatted;
+		}
+
+		/// <summary>
+		/// Adds all required textures to a list, to be loaded later by the AssetLoader
+		/// </summary>
+		public void RefreshTextureList()
+		{
+			texturesToLoad.Clear();
+
+			foreach (string key in particleConfigs.Keys)
+			{
+				ParticleConfig cfg = particleConfigs[key];
+				if (!texturesToLoad.Contains(cfg.mainTexture)) texturesToLoad.Add(cfg.mainTexture);
+				if (!texturesToLoad.Contains(cfg.emissionTexture)) texturesToLoad.Add(cfg.emissionTexture);
+			}
 		}
 
 		/// <summary>

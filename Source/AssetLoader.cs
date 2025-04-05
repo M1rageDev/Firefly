@@ -63,49 +63,6 @@ namespace Firefly
 		}
 
 		/// <summary>
-		/// Initializes all assets
-		/// </summary>
-		internal void InitAssets()
-		{
-			Logging.Log("Versioning:");
-			Logging.Log(Versioning.VersionAuthor(this));
-			Logging.Log(Versioning.Version(this));
-
-			// load shader
-			bool hasShader = TryGetShader("Firefly/Firefly", out Shader sh);
-			if (!hasShader)
-			{
-				Logging.Log("Failed to load shader, halting startup");
-				return;
-			}
-			globalShader = sh;
-
-			// load material
-			bool hasMaterial = TryGetMaterial("Firefly", out Material mt);
-			if (!hasMaterial)
-			{
-				Logging.Log("Failed to load Firefly material, halting startup");
-				return;
-			}
-			globalMaterial = mt;
-
-			// initialize material
-			globalMaterial.shader = globalShader;
-
-			allAssetsLoaded = true;
-		}
-
-		/// <summary>
-		/// Clears all loaded asset dictionaries
-		/// </summary>
-		internal void ClearAssets()
-		{
-			loadedShaders.Clear();
-			loadedMaterials.Clear();
-			loadedPrefabs.Clear();
-		}
-
-		/// <summary>
 		/// Loads all available assets from the asset bundle into the dictionaries
 		/// </summary>
 		internal void LoadAssets()
@@ -114,7 +71,8 @@ namespace Firefly
 			iconTexture = GameDatabase.Instance.GetTexture(iconTexturePath, false);
 			for (int i = 0; i < ConfigManager.Instance.texturesToLoad.Count; i++)
 			{
-				loadedTextures[ConfigManager.Instance.texturesToLoad[i]] = GameDatabase.Instance.GetTexture(ConfigManager.Instance.texturesToLoad[i], false);
+				Texture2D texture = GameDatabase.Instance.GetTexture(ConfigManager.Instance.texturesToLoad[i], false);
+				if (texture != null) loadedTextures[ConfigManager.Instance.texturesToLoad[i]] = texture;
 			}
 
 			// load the asset bundle
@@ -159,6 +117,49 @@ namespace Firefly
 					loadedPrefabs.Add(prefab.name, prefab);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Initializes all assets
+		/// </summary>
+		internal void InitAssets()
+		{
+			Logging.Log("Versioning:");
+			Logging.Log(Versioning.VersionAuthor(this));
+			Logging.Log(Versioning.Version(this));
+
+			// load shader
+			bool hasShader = TryGetShader("Firefly/Firefly", out Shader sh);
+			if (!hasShader)
+			{
+				Logging.Log("Failed to load shader, halting startup");
+				return;
+			}
+			globalShader = sh;
+
+			// load material
+			bool hasMaterial = TryGetMaterial("Firefly", out Material mt);
+			if (!hasMaterial)
+			{
+				Logging.Log("Failed to load Firefly material, halting startup");
+				return;
+			}
+			globalMaterial = mt;
+
+			// initialize material
+			globalMaterial.shader = globalShader;
+
+			allAssetsLoaded = true;
+		}
+
+		/// <summary>
+		/// Clears all loaded asset dictionaries
+		/// </summary>
+		internal void ClearAssets()
+		{
+			loadedShaders.Clear();
+			loadedMaterials.Clear();
+			loadedPrefabs.Clear();
 		}
 
 		public void ReloadAssets()

@@ -6,6 +6,39 @@ namespace Firefly.GUI
 {
 	internal class GuiUtils
 	{
+		public class UiObjectInput<T>
+		{
+			public string[] text;
+			public object value;
+
+			public UiObjectInput(object value, int textCount = 1)
+			{
+				this.text = new string[textCount];
+				this.value = value;
+			}
+
+			public T GetValue()
+			{
+				return (T)value;
+			}
+
+			public void Overwrite(object value)
+			{
+				this.value = value;
+
+				// if the value is a floatpair, we need to set both values
+				if (value is FloatPair pair)
+				{
+					this.text[0] = pair.x.ToString();
+					this.text[1] = pair.y.ToString();
+				}
+				else
+				{
+					this.text[0] = value.ToString();
+				}
+			}
+		}
+
 		// draws a setting bool override field
 		public static void DrawConfigFieldBool(string label, Dictionary<string, ModSettings.Field> tgl)
 		{
@@ -43,6 +76,17 @@ namespace Firefly.GUI
 		}
 
 		// draws a float input field
+		public static void DrawFloatInput(string label, ref UiObjectInput<float> uiInput, params GUILayoutOption[] layoutOptions)
+		{
+			GUILayout.BeginHorizontal(layoutOptions);
+			GUILayout.Label(label);
+
+			uiInput.text[0] = GUILayout.TextField(uiInput.text[0]);
+			bool hasValue = float.TryParse(uiInput.text[0], out float v);
+			if (hasValue) uiInput.value = v;
+
+			GUILayout.EndHorizontal();
+		}
 		public static void DrawFloatInput(string label, ref string text, ref float value, params GUILayoutOption[] layoutOptions)
 		{
 			GUILayout.BeginHorizontal(layoutOptions);
@@ -51,6 +95,49 @@ namespace Firefly.GUI
 			text = GUILayout.TextField(text);
 			bool hasValue = float.TryParse(text, out float v);
 			if (hasValue) value = v;
+
+			GUILayout.EndHorizontal();
+		}
+
+		// draws a string input field
+		public static void DrawStringInput(string label, ref string text, params GUILayoutOption[] layoutOptions)
+		{
+			GUILayout.BeginHorizontal(layoutOptions);
+			GUILayout.Label(label);
+
+			text = GUILayout.TextField(text);
+
+			GUILayout.EndHorizontal();
+		}
+
+		// draws a boolean input field
+		public static void DrawBoolInput(string label, ref bool val, params GUILayoutOption[] layoutOptions)
+		{
+			GUILayout.BeginHorizontal(layoutOptions);
+			GUILayout.Label(label);
+
+			val = GUILayout.Toggle(val, "");
+
+			GUILayout.EndHorizontal();
+		}
+
+		// draws a float pair input field (2 float values)
+		public static void DrawFloatPairInput(string label, ref UiObjectInput<FloatPair> uiInput, params GUILayoutOption[] layoutOptions)
+		{
+			GUILayout.BeginHorizontal(layoutOptions);
+			GUILayout.Label(label);
+
+			FloatPair newValue = (FloatPair)uiInput.value;
+
+			uiInput.text[0] = GUILayout.TextField(uiInput.text[0]);
+			bool hasValue = float.TryParse(uiInput.text[0], out float v);
+			if (hasValue) newValue.x = v;
+
+			uiInput.text[1] = GUILayout.TextField(uiInput.text[1]);
+			hasValue = float.TryParse(uiInput.text[1], out v);
+			if (hasValue) newValue.y = v;
+
+			uiInput.value = newValue;
 
 			GUILayout.EndHorizontal();
 		}
