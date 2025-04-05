@@ -3,14 +3,16 @@ using UnityEngine;
 
 namespace Firefly.GUI
 {
+	
+
 	internal class ColorPickerWindow : Window
 	{
-		public delegate void applyColorDelg();
+		public delegate void ColorPickerApply();
 
 		const int pickerSize = 300;
 		const int sliderSize = 220;
 
-		public applyColorDelg onApplyColor;
+		public ColorPickerApply onApplyColor;
 		public Color color;
 		float intensity;
 		float h, s, v;
@@ -158,7 +160,7 @@ namespace Firefly.GUI
 			UnityEngine.GUI.DrawTexture(rect, pickerSelectorTex);
 		}
 
-		// draws individual color sliders
+		// draws all color sliders
 		void DrawSliders()
 		{
 			DrawColorSlider(rgbMode ? "R" : "H", 0, true);
@@ -168,6 +170,7 @@ namespace Firefly.GUI
 			DrawColorSlider("I", 3, false);  // HDR intensity
 		}
 
+		// draws a single color component slider
 		void DrawColorSlider(string label, int index, bool isColor)
 		{
 			GUILayout.BeginHorizontal();

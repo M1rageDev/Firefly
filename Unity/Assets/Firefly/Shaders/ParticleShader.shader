@@ -91,7 +91,7 @@
 
 				// change alpha based on occlusion and lifetime
 				// particles are less affected by the occlusion the longer they exist
-				//col.a *= lerp(1.0, lerp(i.shadow, 1.0, saturate(i.lifetime)), _AirstreamBlending);
+				col.a *= lerp(1.0, lerp(i.shadow, 1.0, saturate(i.lifetime)), _AirstreamBlending);
 
 				// blend texture color with particle color
 				half3 additive = col.rgb + i.color.rgb;  // additive blending
