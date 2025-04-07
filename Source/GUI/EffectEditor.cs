@@ -39,21 +39,20 @@ namespace Firefly.GUI
 		{
 			GUILayout.BeginVertical();
 
-			GUILayout.BeginHorizontal();
-			GUILayout.Label("Config name");
-			ui_cfgName = GUILayout.TextField(ui_cfgName);
-			GUILayout.EndHorizontal();
+			// name input
+			GuiUtils.DrawStringInput("Config name", ref ui_cfgName);
 
+			// config selector
 			GUILayout.Label("Select a template config");
 			DrawConfigSelector();
 
+			// cancel/done controls
 			GUILayout.BeginHorizontal();
 			if (GUILayout.Button("Cancel")) Hide();
 			if (GUILayout.Button("Done")) Done();
 			GUILayout.EndHorizontal();
 
 			GUILayout.EndVertical();
-
 			UnityEngine.GUI.DragWindow();
 		}
 
@@ -93,13 +92,8 @@ namespace Firefly.GUI
 		AtmoFxModule fxModule = null;
 
 		// gui
-		string removeConfigText = "Remove selected config";
-		int removeConfigState = 0;
-		float removeConfigStateTimer = 0f;
-
-		string saveConfigText = "Save selected to cfg file";
-		int saveConfigState = 0;
-		float saveConfigStateTimer = 0f;
+		GuiUtils.ConfirmingButton ui_removeConfigBtn = new GuiUtils.ConfirmingButton("Remove selected config");
+		GuiUtils.ConfirmingButton ui_saveConfigBtn = new GuiUtils.ConfirmingButton("Save selected to cfg file");
 
 		Vector2 ui_bodyListPosition;
 		int ui_bodyChoice;
@@ -116,9 +110,6 @@ namespace Firefly.GUI
 
 		public CreateConfigPopup createConfigPopup;	
 
-		// for drawing color buttons
-		Texture2D whitePixel;
-
 		public EffectEditor() : base("Effect editor")
 		{
 			windowRect = new Rect(300, 100, 300, 100);
@@ -131,85 +122,6 @@ namespace Firefly.GUI
 
 			createConfigPopup = new CreateConfigPopup();
 			createConfigPopup.onPopupSave = OnPopupSave;
-
-			whitePixel = TextureUtils.GenerateColorTexture(1, 1, Color.white);
-		}
-
-		// saves config to cfg file
-		void SaveConfig()
-		{
-			// check state and ask for confirmation
-			if (saveConfigState == 0)
-			{
-				saveConfigText = "Are you sure?";
-				saveConfigState = 1;
-				saveConfigStateTimer = Time.time;
-				return;
-			}
-
-			// save config to ConfigManager
-			if (currentBody != "Default") ConfigManager.Instance.bodyConfigs[currentBody] = new BodyConfig(config);
-			else ConfigManager.Instance.defaultConfig = new BodyConfig(config);
-
-			Logging.Log($"Saving body config {currentBody}");
-
-			// decide saving path
-			string path = config.cfgPath;
-			if (!ConfigManager.Instance.loadedBodyConfigs.Contains(currentBody))
-			{
-				path = KSPUtil.ApplicationRootPath + ConfigManager.NewConfigPath + config.bodyName + ".cfg";
-			}
-
-			// create a parent node
-			ConfigNode parent = new ConfigNode("ATMOFX_BODY");
-
-			// create the node
-			ConfigNode node = new ConfigNode("ATMOFX_BODY");
-
-			config.SaveToNode(ref node);
-
-			// add to parent and save
-			parent.AddNode(node);
-			parent.Save(path);
-
-			ScreenMessages.PostScreenMessage($"Saved config to file at path\n{path}", 5f);
-
-			// reset state
-			ResetSaveConfigState();
-		}
-
-		// resets the ui input texts
-		void ResetFieldText()
-		{
-			ui_strengthMultiplier = config.strengthMultiplier.ToString();
-			ui_lengthMultiplier = config.lengthMultiplier.ToString();
-			ui_opacityMultiplier = config.opacityMultiplier.ToString();
-			ui_wrapFresnelModifier = config.wrapFresnelModifier.ToString();
-			ui_particleThreshold = config.particleThreshold.ToString();
-		}
-
-		// sets the direction to the current camera facing
-		void ApplyCameraDirection()
-		{
-			Vessel vessel = FlightGlobals.ActiveVessel;
-			if (vessel == null) return;
-			if (FlightCamera.fetch.mainCamera == null) return;
-
-			effectDirection = vessel.transform.InverseTransformDirection(FlightCamera.fetch.mainCamera.transform.forward);
-		}
-
-		// sets the direction to the ship's axis
-		void ApplyShipDirection()
-		{
-			effectDirection = -Vector3.up;
-		}
-
-		public Vector3 GetWorldDirection()
-		{
-			Vessel vessel = FlightGlobals.ActiveVessel;
-			if (vessel == null) return Vector3.zero;
-
-			return vessel.transform.TransformDirection(effectDirection);
 		}
 
 		public override void Show()
@@ -250,7 +162,6 @@ namespace Firefly.GUI
 			base.Hide();
 
 			fxModule.doEffectEditor = false;
-
 			fxModule.currentBody = ConfigManager.Instance.bodyConfigs[currentBody];
 		}
 
@@ -280,16 +191,6 @@ namespace Firefly.GUI
 			if (fxModule == null || fxModule.fxVessel == null) return;
 			Transform camTransform = fxModule.fxVessel.airstreamCamera.transform;
 			if (!fxModule.debugMode) DrawingUtils.DrawArrow(camTransform.position, camTransform.forward, camTransform.right, camTransform.up, Color.cyan);
-
-			// timed gui states
-			if ((Time.time - saveConfigStateTimer) >= 4f && saveConfigState == 1)
-			{
-				ResetSaveConfigState();
-			}
-			if ((Time.time - removeConfigStateTimer) >= 4f && removeConfigState == 1)
-			{
-				ResetRemoveConfigState();
-			}
 		}
 
 		void DrawLeftEditor()
@@ -298,7 +199,7 @@ namespace Firefly.GUI
 
 			// config create
 			if (GUILayout.Button("Create new config") && !createConfigPopup.show) createConfigPopup.Init(bodyConfigs);
-			if (GUILayout.Button(removeConfigText) && currentBody != "Default") RemoveSelectedConfig();
+			if (ui_removeConfigBtn.Draw(Time.time) && currentBody != "Default") RemoveSelectedConfig();
 
 			// body selection
 			GUILayout.Label("Select a config:");
@@ -309,10 +210,10 @@ namespace Firefly.GUI
 			DrawSimConfiguration();
 			GUILayout.Space(20);
 
-			// saving
+			// bottom controls
 			if (GUILayout.Button("Align effects to camera")) ApplyCameraDirection();
 			if (GUILayout.Button("Align effects to ship")) ApplyShipDirection();
-			if (GUILayout.Button(saveConfigText)) SaveConfig();
+			if (ui_saveConfigBtn.Draw(Time.time)) SaveConfig();
 
 			// end
 			GUILayout.EndVertical();
@@ -400,11 +301,90 @@ namespace Firefly.GUI
 		{
 			HDRColor c = config.colors[colorKey];
 
-			if (GuiUtils.DrawColorButton(label, whitePixel, c.baseColor))
+			if (GuiUtils.DrawColorButton(label, Texture2D.whiteTexture, c.baseColor))
 			{
 				currentlyPicking = colorKey;
 				colorPicker.Open(c.baseColor);
 			}
+		}
+
+		// saves config to cfg file
+		void SaveConfig()
+		{
+			// save config to ConfigManager
+			if (currentBody != "Default") ConfigManager.Instance.bodyConfigs[currentBody] = new BodyConfig(config);
+			else ConfigManager.Instance.defaultConfig = new BodyConfig(config);
+
+			Logging.Log($"Saving body config {currentBody}");
+
+			// decide saving path
+			string path = config.cfgPath;
+			if (!ConfigManager.Instance.loadedBodyConfigs.Contains(currentBody))
+			{
+				path = KSPUtil.ApplicationRootPath + ConfigManager.NewConfigPath + config.bodyName + ".cfg";
+			}
+
+			// create a parent node
+			ConfigNode parent = new ConfigNode("ATMOFX_BODY");
+
+			// create the node
+			ConfigNode node = new ConfigNode("ATMOFX_BODY");
+
+			config.SaveToNode(ref node);
+
+			// add to parent and save
+			parent.AddNode(node);
+			parent.Save(path);
+
+			ScreenMessages.PostScreenMessage($"Saved config to file at path\n{path}", 5f);
+			Logging.Log("Saved body config " + path);
+		}
+
+		void RemoveSelectedConfig()
+		{
+			ConfigManager.Instance.bodyConfigs.Remove(currentBody);
+			config = new BodyConfig(ConfigManager.Instance.bodyConfigs["Default"]);
+			currentBody = "Default";
+			ui_bodyChoice = 0;
+
+			bodyConfigs = ConfigManager.Instance.bodyConfigs.Keys.ToArray();
+			ResetFieldText();
+
+			fxModule.ReloadVessel();
+		}
+
+		// resets the ui input texts
+		void ResetFieldText()
+		{
+			ui_strengthMultiplier = config.strengthMultiplier.ToString();
+			ui_lengthMultiplier = config.lengthMultiplier.ToString();
+			ui_opacityMultiplier = config.opacityMultiplier.ToString();
+			ui_wrapFresnelModifier = config.wrapFresnelModifier.ToString();
+			ui_particleThreshold = config.particleThreshold.ToString();
+		}
+
+		// sets the direction to the current camera facing
+		void ApplyCameraDirection()
+		{
+			Vessel vessel = FlightGlobals.ActiveVessel;
+			if (vessel == null) return;
+			if (FlightCamera.fetch.mainCamera == null) return;
+
+			effectDirection = vessel.transform.InverseTransformDirection(FlightCamera.fetch.mainCamera.transform.forward);
+		}
+
+		// sets the direction to the ship's axis
+		void ApplyShipDirection()
+		{
+			effectDirection = -Vector3.up;
+		}
+
+		public Vector3 GetWorldDirection()
+		{
+			Vessel vessel = FlightGlobals.ActiveVessel;
+			if (vessel == null) return Vector3.zero;
+
+			return vessel.transform.TransformDirection(effectDirection);
 		}
 
 		// gets called when the color picker applies a color
@@ -444,44 +424,6 @@ namespace Firefly.GUI
 
 			fxModule.currentBody = config;
 			fxModule.ReloadVessel();
-		}
-
-		void RemoveSelectedConfig()
-		{
-			// ask for confirmation
-			if (removeConfigState == 0)
-			{
-				removeConfigText = "Are you sure?";
-				removeConfigState = 1;
-				removeConfigStateTimer = Time.time;
-
-				return;
-			}
-
-			ConfigManager.Instance.bodyConfigs.Remove(currentBody);
-			config = new BodyConfig(ConfigManager.Instance.bodyConfigs["Default"]);
-			currentBody = "Default";
-			ui_bodyChoice = 0;
-
-			bodyConfigs = ConfigManager.Instance.bodyConfigs.Keys.ToArray();
-			ResetFieldText();
-
-			fxModule.ReloadVessel();
-
-			// reset state
-			ResetRemoveConfigState();
-		}
-
-		void ResetSaveConfigState()
-		{
-			saveConfigState = 0;
-			saveConfigText = "Save selected to cfg file";
-		}
-
-		void ResetRemoveConfigState()
-		{
-			removeConfigText = "Remove selected config";
-			removeConfigState = 0;
 		}
 	}
 }

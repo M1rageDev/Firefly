@@ -1,10 +1,7 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Firefly.GUI
 {
-	
-
 	internal class ColorPickerWindow : Window
 	{
 		public delegate void ColorPickerApply();
@@ -124,9 +121,9 @@ namespace Firefly.GUI
 			if (GUILayout.Button("Save and close"))
 			{
 				onApplyColor();
-				show = false;
+				Hide();
 			}
-			if (GUILayout.Button("Close without saving")) show = false;
+			if (GUILayout.Button("Close without saving")) Hide();
 		}
 
 		// draws color preview

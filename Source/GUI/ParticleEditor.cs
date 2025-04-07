@@ -110,7 +110,7 @@ namespace Firefly.GUI
 				GUILayout.Label($"Current config: {currentConfigName}", GUILayout.Width(300f));
 
 				// draw all configuration options
-				GuiUtils.DrawStringInput("Prefab name", ref ui_prefabName, GUILayout.Width(300f));
+				GuiUtils.DrawStringInput("Unity bundle prefab name", ref ui_prefabName, GUILayout.Width(300f));
 				GUILayout.Space(20f);
 				GuiUtils.DrawStringInput("Main texture", ref ui_mainTexPath);
 				GuiUtils.DrawStringInput("Emission texture", ref ui_emissionTexPath);
@@ -185,6 +185,7 @@ namespace Firefly.GUI
 			parent.Save(path);
 
 			ScreenMessages.PostScreenMessage("Saved all configs to file", 5f, ScreenMessageStyle.UPPER_CENTER);
+			Logging.Log($"Saved particle config {ConfigManager.ParticleConfigPath}");
 		}
 
 		public override void Show()

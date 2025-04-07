@@ -249,5 +249,19 @@ namespace Firefly.GUI
 
 			return b;
 		}
+
+		// draws a 1px thick white line with specified width
+		public static void DrawHorizontalSeparator(float width)
+		{
+			Rect rect = GUILayoutUtility.GetRect(width, 1f, GUILayout.Width(width));
+			UnityEngine.GUI.DrawTexture(rect, Texture2D.whiteTexture);
+		}
+
+		// draws a 1px thick white line with specified height
+		public static void DrawVerticalSeparator(float height)
+		{
+			Rect rect = GUILayoutUtility.GetRect(1f, height, GUILayout.Height(height));
+			UnityEngine.GUI.DrawTexture(rect, Texture2D.whiteTexture);
+		}
 	}
 }

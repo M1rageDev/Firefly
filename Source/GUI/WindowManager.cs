@@ -75,19 +75,18 @@ namespace Firefly.GUI
 
 		public void OnGUI()
 		{
-			// draw the error list window, even if the app is closed
+			// if F2 or there's no active vessel dont draw anything
 			if (uiHidden || FlightGlobals.ActiveVessel == null) return;
-			errorListWindow.RunGui();
-			stockEffectsWindow.RunGui();
 
-			// if the app is open, draw the rest of the windows
-			if (!appToggle) return;
+			// draw all windows
+			for (int i = 0; i < Window.AllWindows.Count; i++)
+			{
+				Window window = Window.AllWindows[i];
 
-			fireflyWindow.RunGui();
-			effectEditor.RunGui();
-			effectEditor.colorPicker.RunGui();
-			effectEditor.createConfigPopup.RunGui();
-			particleEditor.RunGui();
+				// always draw global windows, otherwise check if the app is open
+				if (window.isGlobal) window.RunGui();
+				else if (appToggle) window.RunGui();
+			}
 		}
 	}
 }

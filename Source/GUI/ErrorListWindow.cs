@@ -12,8 +12,6 @@ namespace Firefly.GUI
 		GUIStyle seriousErrorStyle = new GUIStyle();
 		Vector2 ui_errorListPosition;
 
-		Texture2D whitePixel;
-
 		public ErrorListWindow() : base("Firefly Error List")
 		{
 			windowRect = new Rect(300, 100, 600, 100);
@@ -26,8 +24,6 @@ namespace Firefly.GUI
 			anyInstallErrors = ConfigManager.Instance.errorList.Where(x => x.cause == ModLoadError.ProbableCause.IncorrectInstall).Count() > 0;
 
 			seriousErrorStyle.normal.textColor = Color.red;
-
-			whitePixel = TextureUtils.GenerateColorTexture(1, 1, Color.white);
 		}
 
 		public override void Draw(int id)
@@ -67,21 +63,15 @@ namespace Firefly.GUI
 			ui_errorListPosition = GUILayout.BeginScrollView(ui_errorListPosition, GUILayout.Height(300f));
 
 			GUILayout.BeginVertical();
-			DrawSeparator();
+			GuiUtils.DrawHorizontalSeparator(400f);
 			for (int i = 0; i < ConfigManager.Instance.errorList.Count; i++)
 			{
 				DrawError(ConfigManager.Instance.errorList[i]);
-				DrawSeparator();
+				GuiUtils.DrawHorizontalSeparator(400f);
 			}
 			GUILayout.EndVertical();
 
 			GUILayout.EndScrollView();
-		}
-
-		void DrawSeparator()
-		{
-			Rect rect = GUILayoutUtility.GetRect(400f, 1f, GUILayout.Width(400f));
-			UnityEngine.GUI.DrawTexture(rect, whitePixel);
 		}
 
 		void DrawError(ModLoadError error)

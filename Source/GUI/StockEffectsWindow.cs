@@ -16,7 +16,7 @@ namespace Firefly.GUI
 			GUILayout.Label("The mod detected that the \"Aero effect quality\" setting is set higher than minimal.");
 			GUILayout.Label("This will make the stock effects mix with the ones from Firefly.");
 
-			// draw close button
+			// draw controls
 			GUILayout.BeginHorizontal();
 			if (GUILayout.Button("Fix problem")) FixProblem();
 			if (GUILayout.Button("Ignore")) Hide();
@@ -26,6 +26,9 @@ namespace Firefly.GUI
 			UnityEngine.GUI.DragWindow();
 		}
 
+		/// <summary>
+		/// Fix the problem by setting the Aero effect quality to minimal
+		/// </summary>
 		void FixProblem()
 		{
 			GameSettings.AERO_FX_QUALITY = 0;
