@@ -124,17 +124,17 @@ namespace Firefly.GUI
 				GUILayout.Label($"Current config: {currentConfigName}", GUILayout.Width(300f));
 
 				// draw all configuration options
-				GuiUtils.DrawStringInput("Unity bundle prefab name", ref ui_prefabName, GUILayout.Width(300f));
+				GuiUtils.DrawStringInput("Unity bundle prefab name", ref ui_prefabName, GUILayout.Width(300f), GUILayout.MaxWidth(300f));
 				GUILayout.Space(20f);
-				GuiUtils.DrawStringInput("Main texture", ref ui_mainTexPath);
-				GuiUtils.DrawStringInput("Emission texture", ref ui_emissionTexPath);
+				GuiUtils.DrawStringInput("Main texture", ref ui_mainTexPath, GUILayout.Width(300f), GUILayout.MaxWidth(300f));
+				GuiUtils.DrawStringInput("Emission texture", ref ui_emissionTexPath, GUILayout.Width(300f), GUILayout.MaxWidth(300f));
 				GUILayout.Space(20f);
-				GuiUtils.DrawFloatInput("Emitter offset", ref ui_offset);
-				GuiUtils.DrawBoolInput("Use half offset", ref ui_useHalfOffset);
+				GuiUtils.DrawFloatInput("Emitter offset", ref ui_offset, GUILayout.Width(300f), GUILayout.MaxWidth(300f));
+				GuiUtils.DrawBoolInput("Use half offset", ref ui_useHalfOffset, GUILayout.Width(300f), GUILayout.MaxWidth(300f));
 				GUILayout.Space(20f);
-				GuiUtils.DrawFloatPairInput("Rate range", ref ui_rateRange);
-				GuiUtils.DrawFloatPairInput("Lifetime range", ref ui_lifetimeRange);
-				GuiUtils.DrawFloatPairInput("Velocity range", ref ui_velocityRange);
+				GuiUtils.DrawFloatPairInput("Rate range", ref ui_rateRange, GUILayout.Width(300f), GUILayout.MaxWidth(300f));
+				GuiUtils.DrawFloatPairInput("Lifetime range", ref ui_lifetimeRange, GUILayout.Width(300f), GUILayout.MaxWidth(300f));
+				GuiUtils.DrawFloatPairInput("Velocity range", ref ui_velocityRange, GUILayout.Width(300f), GUILayout.MaxWidth(300f));
 
 				// saves everything to config and to ConfigManager
 				if (GUILayout.Button("Apply"))
