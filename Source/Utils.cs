@@ -33,9 +33,6 @@ namespace Firefly
 		}
 	}
 
-	/// <summary>
-	/// Stores a pair of floats
-	/// </summary>
 	public struct FloatPair
 	{
 		public float x;
@@ -66,6 +63,32 @@ namespace Firefly
 		public static void Log(object message)
 		{
 			Debug.Log(Prefix + message);
+		}
+	}
+
+	public class HDRColor
+	{
+		public Color baseColor;
+		public Color hdr;
+		public float intensity;
+
+		public bool hasValue;
+
+		public HDRColor(Color sdri)
+		{
+			baseColor = sdri;
+			hdr = Utils.SDRI_To_HDR(sdri);
+			intensity = sdri.a;
+		}
+
+		public string SDRIString()
+		{
+			return $"{Mathf.RoundToInt(baseColor.r * 255f)} {Mathf.RoundToInt(baseColor.g * 255f)} {Mathf.RoundToInt(baseColor.b * 255f)} {baseColor.a}";
+		}
+
+		public static implicit operator Color(HDRColor x)
+		{
+			return x.hdr;
 		}
 	}
 

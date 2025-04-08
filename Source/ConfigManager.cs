@@ -5,39 +5,6 @@ using UnityEngine;
 
 namespace Firefly
 {
-	public class HDRColor
-	{
-		public Color baseColor;
-		public Color hdr;
-		public float intensity;
-
-		public bool hasValue;
-
-		public HDRColor(Color sdri)
-		{
-			baseColor = sdri;
-			hdr = Utils.SDRI_To_HDR(sdri);
-			intensity = sdri.a;
-		}
-
-		public string SDRIString()
-		{
-			return $"{Mathf.RoundToInt(baseColor.r * 255f)} {Mathf.RoundToInt(baseColor.g * 255f)} {Mathf.RoundToInt(baseColor.b * 255f)} {baseColor.a}";
-		}
-
-		public static HDRColor CreateNull()
-		{
-			HDRColor c = new HDRColor(Color.black);
-			c.hasValue = false;
-			return c;
-		}
-
-		public static implicit operator Color(HDRColor x)
-		{
-			return x.hdr;
-		}
-	}
-
 	public class BodyColors
 	{
 		public Dictionary<string, HDRColor> fields = new Dictionary<string, HDRColor>();
@@ -206,6 +173,7 @@ namespace Firefly
 			offset = x.offset;
 			useHalfOffset = x.useHalfOffset;
 
+			rate = new FloatPair(x.rate.x, x.rate.y);
 			lifetime = new FloatPair(x.lifetime.x, x.lifetime.y);
 			velocity = new FloatPair(x.velocity.x, x.velocity.y);
 		}
@@ -243,9 +211,6 @@ namespace Firefly
 		public List<string> texturesToLoad = new List<string>();
 
 		public BodyConfig defaultConfig;
-
-		// error list
-		public List<ModLoadError> errorList = new List<ModLoadError>();
 
 		// internal SettingsManager handle, used to instantiate it
 		SettingsManager settingsManager;
@@ -307,7 +272,7 @@ namespace Firefly
 						if (!success)
 						{
 							Logging.Log("Planet pack cfg can't be registered");
-							errorList.Add(new ModLoadError(
+							ErrorManager.Instance.RegisterError(new ModLoadError(
 								cause: ModLoadError.ProbableCause.BadConfig,
 								isSerious: false,
 								sourcePath: urlConfigs[i].url,
@@ -324,7 +289,7 @@ namespace Firefly
 						Logging.Log($"Exception while loading planet pack {nodeName}.");
 						Logging.Log(e.ToString());
 
-						errorList.Add(new ModLoadError(
+						ErrorManager.Instance.RegisterError(new ModLoadError(
 							cause: ModLoadError.ProbableCause.BadConfig,
 							isSerious: false,
 							sourcePath: urlConfigs[i].url,
@@ -351,7 +316,7 @@ namespace Firefly
 						if (!success)
 						{
 							Logging.Log("Body couldn't be loaded");
-							errorList.Add(new ModLoadError(
+							ErrorManager.Instance.RegisterError(new ModLoadError(
 								cause: ModLoadError.ProbableCause.BadConfig,
 								isSerious: false,
 								sourcePath: urlConfigs[i].url,
@@ -366,7 +331,7 @@ namespace Firefly
 					{
 						Logging.Log($"Exception while loading config for {urlConfigs[i].config.GetValue("name")}.");
 						Logging.Log(e.ToString());
-						errorList.Add(new ModLoadError(
+						ErrorManager.Instance.RegisterError(new ModLoadError(
 							cause: ModLoadError.ProbableCause.BadConfig,
 							isSerious: false,
 							sourcePath: urlConfigs[i].url,
@@ -386,7 +351,7 @@ namespace Firefly
 				Logging.Log("This likely means a corrupted install.");
 				Logging.Log("-------------------------------------------");
 
-				errorList.Add(new ModLoadError(
+				ErrorManager.Instance.RegisterError(new ModLoadError(
 					cause: ModLoadError.ProbableCause.IncorrectInstall,
 					isSerious: true,
 					sourcePath: "Default body config",
@@ -422,7 +387,7 @@ namespace Firefly
 					if (!success)
 					{
 						Logging.Log($"Couldn't process override config for part {partId}");
-						errorList.Add(new ModLoadError(
+						ErrorManager.Instance.RegisterError(new ModLoadError(
 							cause: ModLoadError.ProbableCause.BadConfig,
 							isSerious: false,
 							sourcePath: "Part override config for " + partId,
@@ -582,7 +547,7 @@ namespace Firefly
 				if (!success)
 				{
 					Logging.Log($"Couldn't process single particle config {name} in {cfgName}");
-					errorList.Add(new ModLoadError(
+					ErrorManager.Instance.RegisterError(new ModLoadError(
 						cause: ModLoadError.ProbableCause.BadConfig,
 						isSerious: false,
 						sourcePath: $"Single particle system {name} in {cfgName}",

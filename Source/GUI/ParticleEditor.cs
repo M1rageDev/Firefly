@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using System.Collections.Generic;
-using UnityEngine;
-using static Targeting;
+﻿using UnityEngine;
 using System.IO;
 
 namespace Firefly.GUI
@@ -27,13 +24,18 @@ namespace Firefly.GUI
 		GuiUtils.UiObjectInput<FloatPair> ui_lifetimeRange = new GuiUtils.UiObjectInput<FloatPair>(new FloatPair(), 2);
 		GuiUtils.UiObjectInput<FloatPair> ui_velocityRange = new GuiUtils.UiObjectInput<FloatPair>(new FloatPair(), 2);
 
+		GuiUtils.ConfirmingButton ui_deleteButton = new GuiUtils.ConfirmingButton("Delete selected config");
 		GuiUtils.ConfirmingButton ui_saveButton = new GuiUtils.ConfirmingButton("Save all to file");
+
+		Popup ui_createPopup;
 
 		public ParticleEditor() : base("Particle Editor")
 		{
 			windowRect = new Rect(900f, 100f, 600f, 300f);
 
 			Instance = this;
+
+			ui_createPopup = new Popup("Create from preset", new Vector2(300f, 100f), CreatePopupCallback, CreatePopupDraw);
 		}
 
 		public override void Draw(int id)
@@ -63,13 +65,27 @@ namespace Firefly.GUI
 		{
 			GUILayout.BeginVertical();
 
+			GUILayout.Label("Select a config:", GUILayout.Width(300f));
 			DrawConfigSelector();
 
 			GUILayout.Space(20f);
 
+			if (GUILayout.Button("Create new config from preset", GUILayout.Width(300f)))
+			{
+				// initialize and show popup
+				ui_createPopup.customData.Clear();
+				ui_createPopup.customData["listPosition"] = Vector2.zero;
+				ui_createPopup.customData["newName"] = "";
+				ui_createPopup.windowRect.position = this.windowRect.position + new Vector2(0f, this.windowRect.height);  // position below the window
+				ui_createPopup.Show();
+			}
 			if (ui_saveButton.Draw(Time.time, GUILayout.Width(300f)))
 			{
 				SaveAllToCfg();
+			}
+			if (ui_deleteButton.Draw(Time.time, GUILayout.Width(300f)))
+			{
+				DeleteSelected();
 			}
 
 			GUILayout.EndVertical();
@@ -86,8 +102,6 @@ namespace Firefly.GUI
 
 		void DrawConfigSelector()
 		{
-			GUILayout.Label("Select a config:", GUILayout.Width(300f));
-
 			ui_configListPosition = GUILayout.BeginScrollView(ui_configListPosition, GUILayout.Width(300f));
 			
 			foreach (string key in ConfigManager.Instance.particleConfigs.Keys)
@@ -132,6 +146,41 @@ namespace Firefly.GUI
 			}
 		}
 
+		private void CreatePopupDraw()
+		{
+			GUILayout.Label("Pick a preset particle system to create a new config from");
+
+			// if selected something, tell what
+			if (ui_createPopup.customData.ContainsKey("selection")) 
+				GUILayout.Label($"Currently selected: {ui_createPopup.customData["selection"]}");
+
+			// selection list
+			ui_createPopup.customData["listPosition"] = GUILayout.BeginScrollView((Vector2)ui_createPopup.customData["listPosition"], GUILayout.Width(300f));
+			foreach (string key in ConfigManager.Instance.particleConfigs.Keys)
+			{
+				if (GUILayout.Button(key))
+				{
+					ui_createPopup.customData["selection"] = key;
+				}
+			}
+			GUILayout.EndScrollView();
+
+			// new name
+			string newConfigName = (string)ui_createPopup.customData["newName"];
+			GuiUtils.DrawStringInput("New config name", ref newConfigName);
+			ui_createPopup.customData["newName"] = newConfigName;
+		}
+
+		private void CreatePopupCallback(Popup.CallbackType type)
+		{
+			// if pressed ok, create a new config from the selected preset
+			if (type == Popup.CallbackType.Ok)
+			{
+				CreateFromPreset((string)ui_createPopup.customData["selection"], (string)ui_createPopup.customData["newName"]);
+			}
+		}
+
+		// updates the ui values from the current config
 		void UpdateUiValues()
 		{
 			ui_prefabName = currentConfig.prefab;
@@ -144,6 +193,7 @@ namespace Firefly.GUI
 			ui_velocityRange.Overwrite(currentConfig.velocity);
 		}
 
+		// updates the current config with the ui values
 		void ApplyConfigValues()
 		{
 			currentConfig.prefab = ui_prefabName;
@@ -157,6 +207,36 @@ namespace Firefly.GUI
 
 			ConfigManager.Instance.RefreshTextureList();
 			AssetLoader.Instance.ReloadAssets();
+		}
+
+		void CreateFromPreset(string presetKey, string newName)
+		{
+			// create a new config from the preset
+			ParticleConfig preset = new ParticleConfig(ConfigManager.Instance.particleConfigs[presetKey]);
+			preset.name = newName;
+
+			// add to configman
+			ConfigManager.Instance.particleConfigs[newName] = preset;
+
+			// set as current
+			currentConfig = preset;
+			currentConfigName = newName;
+			UpdateUiValues();
+		}
+
+		void DeleteSelected()
+		{
+			if (currentConfig == null) return;
+
+			// remove from config manager
+			ConfigManager.Instance.particleConfigs.Remove(currentConfigName);
+
+			// reset
+			currentConfig = null;
+			currentConfigName = "";
+			ConfigManager.Instance.RefreshTextureList();
+			AssetLoader.Instance.ReloadAssets();
+			fxModule?.ReloadVessel();
 		}
 
 		void SaveAllToCfg()
@@ -195,11 +275,6 @@ namespace Firefly.GUI
 			Vessel vessel = FlightGlobals.ActiveVessel;
 			if (vessel == null) return;
 			fxModule = vessel.FindVesselModuleImplementing<AtmoFxModule>();
-		}
-
-		public override void Hide()
-		{
-			base.Hide();
 		}
 	}
 }

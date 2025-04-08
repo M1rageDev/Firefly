@@ -1,27 +1,21 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Firefly.GUI
 {
 	internal class ErrorListWindow : Window
 	{
-		List<ModLoadError> seriousErrors = new List<ModLoadError>();
-		bool anyInstallErrors = false;
-
 		GUIStyle seriousErrorStyle = new GUIStyle();
+
+		// ui stuff
 		Vector2 ui_errorListPosition;
 
 		public ErrorListWindow() : base("Firefly Error List")
 		{
 			windowRect = new Rect(300, 100, 600, 100);
-			if (ConfigManager.Instance.errorList.Count > 0)
+			if (ErrorManager.Instance.errorList.Count > 0)
 			{
 				Show();
 			}
-
-			seriousErrors = ConfigManager.Instance.errorList.Where(x => x.isSerious).ToList();
-			anyInstallErrors = ConfigManager.Instance.errorList.Where(x => x.cause == ModLoadError.ProbableCause.IncorrectInstall).Count() > 0;
 
 			seriousErrorStyle.normal.textColor = Color.red;
 		}
@@ -31,16 +25,16 @@ namespace Firefly.GUI
 			GUILayout.BeginVertical();
 
 			// notification about serious errors
-			if (seriousErrors.Count > 0)
+			if (ErrorManager.Instance.seriousErrors.Count > 0)
 			{
-				GUILayout.Label($"The loader detected {seriousErrors.Count} serious errors. These will make the mod NOT function properly or AT ALL.", seriousErrorStyle);
+				GUILayout.Label($"The loader detected {ErrorManager.Instance.seriousErrors.Count} serious errors. These will make the mod NOT function properly or AT ALL.", seriousErrorStyle);
 			} else
 			{
 				GUILayout.Label("These errors are not serious, but will likely make something not work (like custom configs not getting applied)");
 			}
 
 			// notification about incorrect install
-			if (anyInstallErrors)
+			if (ErrorManager.Instance.anyInstallErrors)
 			{
 				GUILayout.Space(20f);
 				GUILayout.Label("One or more of the errors are probably caused by an incorrect install of the mod. Please make sure you installed it according to the install instructions.");
@@ -64,9 +58,9 @@ namespace Firefly.GUI
 
 			GUILayout.BeginVertical();
 			GuiUtils.DrawHorizontalSeparator(400f);
-			for (int i = 0; i < ConfigManager.Instance.errorList.Count; i++)
+			for (int i = 0; i < ErrorManager.Instance.errorList.Count; i++)
 			{
-				DrawError(ConfigManager.Instance.errorList[i]);
+				DrawError(ErrorManager.Instance.errorList[i]);
 				GuiUtils.DrawHorizontalSeparator(400f);
 			}
 			GUILayout.EndVertical();

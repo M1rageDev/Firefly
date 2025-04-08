@@ -84,8 +84,7 @@ namespace Firefly.GUI
 				Window window = Window.AllWindows[i];
 
 				// always draw global windows, otherwise check if the app is open
-				if (window.isGlobal) window.RunGui();
-				else if (appToggle) window.RunGui();
+				if (window.isGlobal || appToggle) window.RunGui();
 			}
 		}
 	}

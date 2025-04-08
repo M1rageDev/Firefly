@@ -46,7 +46,7 @@ namespace Firefly
 
 			if (!allAssetsLoaded)
 			{
-				ConfigManager.Instance.errorList.Add(new ModLoadError(
+				ErrorManager.Instance.RegisterError(new ModLoadError(
 					cause: ModLoadError.ProbableCause.IncorrectInstall,
 					isSerious: true,
 					sourcePath: "Firefly asset loader",
@@ -82,7 +82,7 @@ namespace Firefly
 			if (!bundle)
 			{
 				Logging.Log($"Bundle couldn't be loaded: {loadPath}");
-				ConfigManager.Instance.errorList.Add(new ModLoadError(
+				ErrorManager.Instance.RegisterError(new ModLoadError(
 					cause: ModLoadError.ProbableCause.IncorrectInstall,
 					isSerious: true,
 					sourcePath: "Firefly asset loader",
