@@ -52,9 +52,6 @@ namespace Firefly
 					{ "hdr_override", new Field(true, ValueType.Boolean, false) },
 					{ "disable_bowshock", new Field(false, ValueType.Boolean, false) },
 					{ "disable_particles", new Field(false, ValueType.Boolean, true) },
-					{ "disable_sparks", new Field(false, ValueType.Boolean, true) },
-					{ "disable_debris", new Field(false, ValueType.Boolean, true) },
-					{ "disable_smoke", new Field(false, ValueType.Boolean, true) },
 					{ "strength_base", new Field(2800f, ValueType.Float, false) },
 					{ "length_mult", new Field(1f, ValueType.Float, false) }
 				}

@@ -15,6 +15,7 @@ namespace Firefly.GUI
 		// ui values
 		Vector2 ui_configListPosition = Vector2.zero;
 
+		bool ui_cfgIsActive = false;
 		string ui_prefabName = "";
 		string ui_mainTexPath = "";
 		string ui_emissionTexPath = "";
@@ -124,10 +125,11 @@ namespace Firefly.GUI
 				GUILayout.Label($"Current config: {currentConfigName}", GUILayout.Width(300f));
 
 				// draw all configuration options
-				GuiUtils.DrawStringInput("Unity bundle prefab name", ref ui_prefabName, GUILayout.Width(300f));
+				GuiUtils.DrawBoolInput("Is active", ref ui_cfgIsActive, GUILayout.Width(300f));
+				GuiUtils.DrawStringInput("Unity bundle prefab name", ref ui_prefabName, 300f, GUILayout.Width(300f));
 				GUILayout.Space(20f);
-				GuiUtils.DrawStringInput("Main texture", ref ui_mainTexPath, GUILayout.Width(300f));
-				GuiUtils.DrawStringInput("Emission texture", ref ui_emissionTexPath, GUILayout.Width(300f));
+				GuiUtils.DrawStringInput("Main texture", ref ui_mainTexPath, 300f, GUILayout.Width(300f));
+				GuiUtils.DrawStringInput("Emission texture", ref ui_emissionTexPath, 300f, GUILayout.Width(300f));
 				GUILayout.Space(20f);
 				GuiUtils.DrawFloatInput("Emitter offset", ref ui_offset, GUILayout.Width(300f));
 				GuiUtils.DrawBoolInput("Use half offset", ref ui_useHalfOffset, GUILayout.Width(300f));
@@ -183,6 +185,7 @@ namespace Firefly.GUI
 		// updates the ui values from the current config
 		void UpdateUiValues()
 		{
+			ui_cfgIsActive = currentConfig.isActive;
 			ui_prefabName = currentConfig.prefab;
 			ui_mainTexPath = currentConfig.mainTexture;
 			ui_emissionTexPath = currentConfig.emissionTexture;
@@ -196,6 +199,7 @@ namespace Firefly.GUI
 		// updates the current config with the ui values
 		void ApplyConfigValues()
 		{
+			currentConfig.isActive = ui_cfgIsActive;
 			currentConfig.prefab = ui_prefabName;
 			currentConfig.mainTexture = ui_mainTexPath;
 			currentConfig.emissionTexture = ui_emissionTexPath;

@@ -438,15 +438,6 @@ namespace Firefly
 				CreateParticleSystem(cfg);
 			}
 
-			// disable if needed
-			if ((bool)ModSettings.I["disable_sparks"]) fxVessel.allParticles["Sparks"].system.gameObject.SetActive(false);
-			if ((bool)ModSettings.I["disable_debris"])
-			{
-				fxVessel.allParticles["Debris"].system.gameObject.SetActive(false);
-				fxVessel.allParticles["AlternateDebris"].system.gameObject.SetActive(false);
-			}
-			if ((bool)ModSettings.I["disable_smoke"]) fxVessel.allParticles["Smoke"].system.gameObject.SetActive(false);
-
 			// update the particle system properties for every one of them
 			for (int i = 0; i < fxVessel.allParticles.Count; i++)
 			{
@@ -467,6 +458,12 @@ namespace Firefly
 			if (!AssetLoader.Instance.loadedTextures.ContainsKey(cfg.mainTexture)) return;
 			if (!string.IsNullOrEmpty(cfg.emissionTexture))
 				if (!AssetLoader.Instance.loadedTextures.ContainsKey(cfg.emissionTexture)) return;
+
+			if (!cfg.isActive)
+			{
+				Logging.Log($"Skipping particle system {cfg.name}, since it is marked as inactive");
+				return;
+			}
 
 			// instantiate prefab
 			ParticleSystem ps = Instantiate(AssetLoader.Instance.loadedPrefabs[cfg.prefab], vessel.transform).GetComponent<ParticleSystem>();

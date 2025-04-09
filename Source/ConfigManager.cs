@@ -146,6 +146,7 @@ namespace Firefly
 	public class ParticleConfig
 	{
 		public string name = "";
+		public bool isActive = false;
 
 		public string prefab = "";
 
@@ -164,6 +165,7 @@ namespace Firefly
 		public ParticleConfig(ParticleConfig x)
 		{
 			name = x.name;
+			isActive = x.isActive;
 
 			prefab = x.prefab;
 
@@ -180,6 +182,7 @@ namespace Firefly
 
 		public void SaveToNode(ConfigNode node)
 		{
+			node.AddValue("isActive", isActive);
 			node.AddValue("prefab", prefab);
 			node.AddValue("mainTexture", mainTexture);
 			node.AddValue("emissionTexture", emissionTexture);
@@ -577,6 +580,8 @@ namespace Firefly
 			};
 
 			if (cfg.emissionTexture == "unused" || cfg.emissionTexture == "") cfg.emissionTexture = "";
+
+			isFormatted = isFormatted && Utils.EvaluateBool(node.GetValue("isActive"), out cfg.isActive);
 
 			isFormatted = isFormatted && Utils.EvaluateFloat(node.GetValue("offset"), out cfg.offset);
 			isFormatted = isFormatted && Utils.EvaluateBool(node.GetValue("useHalfOffset"), out cfg.useHalfOffset);

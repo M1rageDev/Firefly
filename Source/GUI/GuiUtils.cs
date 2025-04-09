@@ -173,12 +173,18 @@ namespace Firefly.GUI
 		}
 
 		// draws a string input field
-		public static void DrawStringInput(string label, ref string text, params GUILayoutOption[] layoutOptions)
+		public static void DrawStringInput(string label, ref string text, float maxFieldWidth = -1f, params GUILayoutOption[] layoutOptions)
 		{
 			GUILayout.BeginHorizontal(layoutOptions);
 			GUILayout.Label(label);
 
-			text = GUILayout.TextField(text);
+			if (maxFieldWidth > 0f)
+			{
+				text = GUILayout.TextField(text, GUILayout.MaxWidth(maxFieldWidth));
+			} else
+			{
+				text = GUILayout.TextField(text);
+			}
 
 			GUILayout.EndHorizontal();
 		}
