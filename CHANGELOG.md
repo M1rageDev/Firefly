@@ -4,6 +4,7 @@
 
 * Add particle config
 * Add particle editor
+* Add Ervo config from MPE
 * Remove individual particle toggles from settings (replaced by particle editor)
 * Improve smoke trail particles
 
