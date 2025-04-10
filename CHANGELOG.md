@@ -1,12 +1,13 @@
 # Changelog
 
-## Unreleased
+## 1.0.3 - 2025-04-10
 
 * Add particle config
 * Add particle editor
 * Add Ervo config from MPE
 * Remove individual particle toggles from settings (replaced by particle editor)
 * Improve smoke trail particles
+
 
 ## 1.0.2 - 2025-03-01
 
