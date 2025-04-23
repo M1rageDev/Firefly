@@ -155,7 +155,7 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 		float velDot = velDots[i];
 					
 		// DEBUG
-		//triStream.Append(CreateVertex(vertex[i].position, 0, 0, velDot, 1));
+		//triStream.Append(CreateVertex(vertex[i].position, 0, vertex[i].airstreamNDC, 0, 0, 1, 1));
 		// DEBUG
 
 		// Only proceed if the vertex isnt occluded and it's at a high enough angle, creating a rim from which the plasma trail is created
@@ -191,38 +191,31 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 			// value which determines the outward spread of the segment
 			float normalMultiplier = 0.8 * pow(_LengthMultiplier, lerp(5, 1, saturate(_LengthMultiplier))) + lerp(2 * _LengthMultiplier * _FxState, 0, saturate((entrySpeed - 0.2) * 4));
 
-			// color at the start of the trail, random between primary and secondary
+			// colors
 			float4 col = lerp(_PrimaryColor, _SecondaryColor, vertNoise * 0.3);
-
-			// color at the middle of the trail, mix of the start color and secondary
 			float4 middleCol = lerp(col, _SecondaryColor, 0.5);
-
-			// color at the end, secondary or tertiary, determined by the entry speed
 			float4 endCol = lerp(_SecondaryColor, _TertiaryColor, clamp(entrySpeed, 0, 1.7));
 			endCol = lerp(middleCol, endCol, _Hdr);
 
 			// opacity of the trail
 			float alpha = saturate(entrySpeed / 0.025) * (0.004 * _TrailAlphaMultiplier + vertNoise * 0.004);
 
-			// Changes colors and opacity for mach effects
-			if (entrySpeed < 0.5)
-			{
-				float t = saturate((entrySpeed / 0.25) - 1);
+			// colors and opacity for mach effects
+			float t = saturate(entrySpeed / 0.25 - 1);
 							
-				// reduces the FxState based on if the ship's going up or down
-				// if it's going up then the state should be reduced
-				float fxState = lerp(_FxState, _FxState * 0.05, sign(_Velocity.y));
-				float interpolation = saturate(t + _FxState);
+			// reduces the FxState based on if the ship's going up or down
+			// if it's going up then the state should be reduced
+			float fxState = lerp(_FxState, _FxState * 0.05, saturate(sign(_Velocity.y)));
+			float interpolation = saturate(t + _FxState);
 
-				// interpolate between white and the actual color 
-				col = lerp(1, col, interpolation);
-				middleCol = lerp(1, middleCol, interpolation);
-				endCol = lerp(1, endCol, interpolation);
+			// interpolate between white and the actual color 
+			col = lerp(1, col, interpolation);
+			middleCol = lerp(1, middleCol, interpolation);
+			endCol = lerp(1, endCol, interpolation);
 							
-				// increase/decrease the opacity based on the angle of attack
-				float aoa = pow(saturate(_AngleOfAttack / 20), 4);
-				alpha *= saturate(aoa + t + 0.5);
-			}
+			// increase/decrease the opacity based on the angle of attack
+			float aoa = pow(saturate(_AngleOfAttack / 20), 4);
+			alpha *= saturate(aoa + t + 0.5);
 						
 			// scale the width vectors and the outward spread vector
 			side *= _ModelScale.x;
@@ -271,22 +264,23 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 			// limit length
 			float3 m0_ndc = GetAirstreamNDC(lerp(vertex_b0, vertex_m0, lerp(0.5, 0.1, saturate(entrySpeed - 0.5))));
 			float depth = Shadow(m0_ndc, -0.003, 1);
-						
-			if (depth < 0.9) return;
+			
+			//if (depth < 0.9) return;
+			float discardSegment = (depth < 0.9) ? 2.0 : 0.0;
 
 			// add the vertices to the trianglestrip
-			triStream.Append(CreateVertex(vertex_b0, 0, vertex[i].airstreamNDC, 0, 0, col, alpha));
-			triStream.Append(CreateVertex(vertex_b1, 0, vertex[j].airstreamNDC, 1, 0, col, alpha));
+			triStream.Append(CreateVertex(vertex_b0, 0 - discardSegment, vertex[i].airstreamNDC, 0, 0, col, alpha));
+			triStream.Append(CreateVertex(vertex_b1, 0 - discardSegment, vertex[j].airstreamNDC, 1, 0, col, alpha));
 						
-			triStream.Append(CreateVertex(vertex_m0, 0, vertex[i].airstreamNDC, 0, 0.5, middleCol, alpha));
-			triStream.Append(CreateVertex(vertex_m1, 0, vertex[j].airstreamNDC, 1, 0.5, middleCol, alpha));
+			triStream.Append(CreateVertex(vertex_m0, 0 - discardSegment, vertex[i].airstreamNDC, 0, 0.5, middleCol, alpha));
+			triStream.Append(CreateVertex(vertex_m1, 0 - discardSegment, vertex[j].airstreamNDC, 1, 0.5, middleCol, alpha));
 						
-			triStream.Append(CreateVertex(vertex_t0, 0, vertex[i].airstreamNDC, 0, 1, endCol, 0));
-			triStream.Append(CreateVertex(vertex_t1, 0, vertex[j].airstreamNDC, 1, 1, endCol, 0));
+			triStream.Append(CreateVertex(vertex_t0, 0 - discardSegment, vertex[i].airstreamNDC, 0, 1, endCol, 0));
+			triStream.Append(CreateVertex(vertex_t1, 0 - discardSegment, vertex[j].airstreamNDC, 1, 1, endCol, 0));
 
 			// restart the trianglestrip, to allow for the next segment
 			triStream.RestartStrip();
-						
+			
 			// 
 			// SECOND LAYER (WRAP)
 			// 
@@ -294,13 +288,11 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 			// COMMENTED OUT:
 			// This likely breaks the effects on Linux, with Proton and AMD GPUs
 			// Instead of doing this, we still add the vertices to the trianglestream, but marked as discarded vertices to not use the fragment shader.
-			/*
 			// if the state is low enough, don't draw the wrap layer at all
-			if (_FxState < 0.6) 
-			{
-				return;
-			}
-			*/
+			//if (_FxState < 0.6) 
+			//{
+			//	return;
+			//}
 						
 			// clamp the entry speed to the max value
 			entrySpeed = clamp(entrySpeed, 0, 1);
@@ -337,7 +329,7 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 			vertex_t0 = vertex[i].position - endSide + layerOffset - vertex[i].velocityOS * effectLength[i] + vertex[i].normalOS * normalMultiplier * entrySpeed;
 			vertex_t1 = vertex[j].position + endSide + layerOffset - vertex[j].velocityOS * effectLength[j] + vertex[j].normalOS * normalMultiplier * entrySpeed;
 			
-			// should we discard this batch?
+			// should we discard this segment?
 			float discardWrap = (_FxState < 0.6) ? 2.0 : 0.0;
 
 			// add the set of vertices to the tri strip

@@ -469,7 +469,7 @@ namespace Firefly
 			ParticleSystem ps = Instantiate(AssetLoader.Instance.loadedPrefabs[cfg.prefab], vessel.transform).GetComponent<ParticleSystem>();
 
 			// change transform name
-			ps.gameObject.name = vessel.name + "_FireflyPS_" + cfg.name;
+			ps.gameObject.name = "_FireflyPS_" + cfg.name;
 
 			// initialize lifetime
 			ParticleSystem.MainModule mainModule = ps.main;
