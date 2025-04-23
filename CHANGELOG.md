@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+* Add Space Shuttle System envelope (thanks **@giuliodondi**)
+
 ## 1.0.3 - 2025-04-10
 
 * Add particle config
