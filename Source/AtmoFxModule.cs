@@ -1,3 +1,4 @@
+using KSP.Localization;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -467,6 +468,7 @@ namespace Firefly
 
 			// instantiate prefab
 			ParticleSystem ps = Instantiate(AssetLoader.Instance.loadedPrefabs[cfg.prefab], vessel.transform).GetComponent<ParticleSystem>();
+			ps.transform.parent = null;
 
 			// change transform name
 			ps.gameObject.name = "_FireflyPS_" + cfg.name;
@@ -474,6 +476,9 @@ namespace Firefly
 			// initialize lifetime
 			ParticleSystem.MainModule mainModule = ps.main;
 			mainModule.startLifetime = new ParticleSystem.MinMaxCurve(cfg.lifetime.x, cfg.lifetime.y);
+
+			// initialize vel
+			UpdateParticleVel(ps, cfg.velocity);
 
 			// initialize transform pos and rot
 			ps.transform.localRotation = Quaternion.identity;
@@ -507,9 +512,6 @@ namespace Firefly
 			fxVessel.particleKeys.Add(cfg.name);
 		}
 
-		/// <summary>
-		/// Kills all particle systems
-		/// </summary>
 		void KillAllParticles()
 		{
 			if (fxVessel.areParticlesKilled) return;  // no need to constantly kill the particles
@@ -522,9 +524,6 @@ namespace Firefly
 			fxVessel.areParticlesKilled = true;
 		}
 
-		/// <summary>
-		/// Updates the rate for a given particle system
-		/// </summary>
 		void UpdateParticleRate(ParticleSystem system, float min, float max)
 		{
 			ParticleSystem.EmissionModule emissionModule = system.emission;
@@ -536,21 +535,22 @@ namespace Firefly
 			emissionModule.rateOverTime = rateCurve;
 		}
 
-		/// <summary>
-		/// Updates the velocity vector for a given particle system
-		/// </summary>
-		void UpdateParticleVel(ParticleSystem system, Vector3 dir, FloatPair velocity)
+		void UpdateParticleVel(ParticleSystem system, FloatPair velocity)
 		{
 			ParticleSystem.VelocityOverLifetimeModule velocityModule = system.velocityOverLifetime;
 
-			velocityModule.x = new ParticleSystem.MinMaxCurve(dir.x * velocity.x, dir.x * velocity.y);
-			velocityModule.y = new ParticleSystem.MinMaxCurve(dir.y * velocity.x, dir.y * velocity.y);
-			velocityModule.z = new ParticleSystem.MinMaxCurve(dir.z * velocity.x, dir.z * velocity.y);
+			velocityModule.x = new ParticleSystem.MinMaxCurve(0f, 0f);
+			velocityModule.y = new ParticleSystem.MinMaxCurve(velocity.x, velocity.y);
+			velocityModule.z = new ParticleSystem.MinMaxCurve(0f, 0f);
 		}
 
-		/// <summary>
-		/// Updates the particle systems, should be called everytime the velocity changes
-		/// </summary>
+		void UpdateParticleBounds(ParticleSystem system)
+		{
+			ParticleSystem.ShapeModule shapeModule = system.shape;
+			shapeModule.rotation = vessel.transform.eulerAngles - system.transform.eulerAngles;
+			shapeModule.scale = fxVessel.vesselBoundExtents * 2f;
+		}
+
 		void UpdateParticleSystems()
 		{
 			float entryStrength = GetEntryStrength();
@@ -565,13 +565,14 @@ namespace Firefly
 			fxVessel.areParticlesKilled = false;
 
 			// world velocity
-			Vector3 worldVel = doEffectEditor ? -GUI.EffectEditor.Instance.GetWorldDirection() : -AeroFX.velocity.normalized;
+			Vector3 worldVel = doEffectEditor ? -GUI.EffectEditor.Instance.GetWorldDirection() : -GetEntryVelocity();
 			Vector3 direction = vessel.transform.InverseTransformDirection(worldVel);
 			float lengthMultiplier = GetLengthMultiplier();
 			float halfLengthMultiplier = Mathf.Max(lengthMultiplier * 0.5f, 1f);
 
 			// update for each particle
 			desiredRate = Mathf.Clamp01((entryStrength - currentBody.particleThreshold) / 600f);
+			desiredRate = 1f;
 			for (int i = 0; i < fxVessel.allParticles.Count; i++)
 			{
 				FxParticleSystem particle = fxVessel.allParticles[fxVessel.particleKeys[i]];
@@ -583,10 +584,13 @@ namespace Firefly
 				UpdateParticleRate(ps, min, max);
 
 				// offset
-				ps.transform.localPosition = fxVessel.vesselBoundCenter + (direction * particle.offset * (particle.useHalfOffset ? halfLengthMultiplier : lengthMultiplier));
+				ps.transform.position = vessel.transform.position + fxVessel.vesselBoundCenter + (direction * particle.offset * (particle.useHalfOffset ? halfLengthMultiplier : lengthMultiplier));
 
 				// velocity
-				UpdateParticleVel(ps, worldVel, particle.velocity);
+				ps.transform.up = worldVel;
+
+				// emission bounds
+				UpdateParticleBounds(ps);
 			}
 		}
 
