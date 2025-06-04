@@ -225,7 +225,7 @@ namespace Firefly
 			PopulateCommandBuffer();
 
 			// create the particles
-			if (!(bool)ModSettings.I["disable_particles"]) CreateParticleSystems();  // run the function only if they're enabled in settings
+			if (!(bool)ModSettings.I["disable_particles"]) CreateParticleSystems(onModify);  // run the function only if they're enabled in settings
 
 			Logging.Log("Finished loading vessel");
 			isLoaded = true;
@@ -410,33 +410,37 @@ namespace Firefly
 			}
 		}
 
-		void CreateParticleSystems()
+		void CreateParticleSystems(bool onModify)
 		{
 			Logging.Log("Creating particle systems");
 
 			fxVessel.hasParticles = true;
 
-			for (int i = 0; i < vessel.transform.childCount; i++)
+			// only recreate the particle systems if this is not a ship modification
+			if (!onModify)
 			{
-				Transform t = vessel.transform.GetChild(i);
+				for (int i = 0; i < vessel.transform.childCount; i++)
+				{
+					Transform t = vessel.transform.GetChild(i);
 
-				// TODO: look into other methods of doing this
-				// this is stupid, I don't know why this is neccessary but it is
-				// to avoid conflict with ShVAK's VaporCones mod, check the name of the transform before destroying it
-				if (!t.name.Contains("FireflyPS")) continue;
+					// TODO: look into other methods of doing this
+					// this is stupid, I don't know why this is neccessary but it is
+					// to avoid conflict with ShVAK's VaporCones mod, check the name of the transform before destroying it
+					if (!t.name.Contains("FireflyPS")) continue;
 
-				if (t.TryGetComponent(out ParticleSystem _)) Destroy(t.gameObject);
-			}
+					if (t.TryGetComponent(out ParticleSystem _)) Destroy(t.gameObject);
+				}
 
-			fxVessel.particleMaterials.Clear();
-			fxVessel.allParticles.Clear();
-			fxVessel.particleKeys.Clear();
+				fxVessel.particleMaterials.Clear();
+				fxVessel.allParticles.Clear();
+				fxVessel.particleKeys.Clear();
 
-			// spawn particle systems
-			foreach (string key in ConfigManager.Instance.particleConfigs.Keys)
-			{
-				ParticleConfig cfg = ConfigManager.Instance.particleConfigs[key];
-				CreateParticleSystem(cfg);
+				// spawn particle systems
+				foreach (string key in ConfigManager.Instance.particleConfigs.Keys)
+				{
+					ParticleConfig cfg = ConfigManager.Instance.particleConfigs[key];
+					CreateParticleSystem(cfg);
+				}
 			}
 
 			// update the particle system properties for every one of them
@@ -547,7 +551,7 @@ namespace Firefly
 		void UpdateParticleBounds(ParticleSystem system)
 		{
 			ParticleSystem.ShapeModule shapeModule = system.shape;
-			shapeModule.rotation = vessel.transform.eulerAngles - system.transform.eulerAngles;
+			shapeModule.rotation = (system.transform.rotation.Inverse() * vessel.transform.rotation).eulerAngles;
 			shapeModule.scale = fxVessel.vesselBoundExtents * 2f;
 		}
 
@@ -584,7 +588,7 @@ namespace Firefly
 				UpdateParticleRate(ps, min, max);
 
 				// offset
-				ps.transform.position = vessel.transform.position + fxVessel.vesselBoundCenter + (direction * particle.offset * (particle.useHalfOffset ? halfLengthMultiplier : lengthMultiplier));
+				ps.transform.position = vessel.transform.position + fxVessel.vesselBoundCenter + (worldVel * particle.offset * (particle.useHalfOffset ? halfLengthMultiplier : lengthMultiplier));
 
 				// velocity
 				ps.transform.up = worldVel;
@@ -727,6 +731,17 @@ namespace Firefly
 				vesselPoints[i] = vessel.transform.TransformPoint(fxVessel.vesselBounds[i]);
 			}
 			DrawingUtils.DrawBox(vesselPoints, Color.green);
+
+			// particle bounds
+			Vector3[] particlePoints = new Vector3[8];
+			var ps = fxVessel.allParticles[fxVessel.particleKeys[0]].system;
+			var shapeModule = ps.shape;
+			Matrix4x4 particleMatrix = Matrix4x4.TRS(ps.transform.position, Quaternion.Euler(shapeModule.rotation), Vector3.one);
+			for (int i = 0; i < 8; i++)
+			{
+				particlePoints[i] = particleMatrix * fxVessel.vesselBounds[i];
+			}
+			DrawingUtils.DrawBox(particlePoints, Color.yellow);
 
 			// vessel axes
 			Vector3 fwd = vessel.GetFwdVector();
