@@ -472,7 +472,6 @@ namespace Firefly
 
 			// instantiate prefab
 			ParticleSystem ps = Instantiate(AssetLoader.Instance.loadedPrefabs[cfg.prefab], vessel.transform).GetComponent<ParticleSystem>();
-			ps.transform.parent = null;
 
 			// change transform name
 			ps.gameObject.name = "_FireflyPS_" + cfg.name;
@@ -480,9 +479,6 @@ namespace Firefly
 			// initialize lifetime
 			ParticleSystem.MainModule mainModule = ps.main;
 			mainModule.startLifetime = new ParticleSystem.MinMaxCurve(cfg.lifetime.x, cfg.lifetime.y);
-
-			// initialize vel
-			UpdateParticleVel(ps, cfg.velocity);
 
 			// initialize transform pos and rot
 			ps.transform.localRotation = Quaternion.identity;
@@ -539,20 +535,13 @@ namespace Firefly
 			emissionModule.rateOverTime = rateCurve;
 		}
 
-		void UpdateParticleVel(ParticleSystem system, FloatPair velocity)
+		void UpdateParticleVel(ParticleSystem system, Vector3 dir, FloatPair velocity)
 		{
 			ParticleSystem.VelocityOverLifetimeModule velocityModule = system.velocityOverLifetime;
 
-			velocityModule.x = new ParticleSystem.MinMaxCurve(0f, 0f);
-			velocityModule.y = new ParticleSystem.MinMaxCurve(velocity.x, velocity.y);
-			velocityModule.z = new ParticleSystem.MinMaxCurve(0f, 0f);
-		}
-
-		void UpdateParticleBounds(ParticleSystem system)
-		{
-			ParticleSystem.ShapeModule shapeModule = system.shape;
-			shapeModule.rotation = (system.transform.rotation.Inverse() * vessel.transform.rotation).eulerAngles;
-			shapeModule.scale = fxVessel.vesselBoundExtents * 2f;
+			velocityModule.x = new ParticleSystem.MinMaxCurve(dir.x * velocity.x, dir.x * velocity.y);
+			velocityModule.y = new ParticleSystem.MinMaxCurve(dir.y * velocity.x, dir.y * velocity.y);
+			velocityModule.z = new ParticleSystem.MinMaxCurve(dir.z * velocity.x, dir.z * velocity.y);
 		}
 
 		void UpdateParticleSystems()
@@ -576,7 +565,6 @@ namespace Firefly
 
 			// update for each particle
 			desiredRate = Mathf.Clamp01((entryStrength - currentBody.particleThreshold) / 600f);
-			desiredRate = 1f;
 			for (int i = 0; i < fxVessel.allParticles.Count; i++)
 			{
 				FxParticleSystem particle = fxVessel.allParticles[fxVessel.particleKeys[i]];
@@ -588,13 +576,10 @@ namespace Firefly
 				UpdateParticleRate(ps, min, max);
 
 				// offset
-				ps.transform.position = vessel.transform.position + fxVessel.vesselBoundCenter + (worldVel * particle.offset * (particle.useHalfOffset ? halfLengthMultiplier : lengthMultiplier));
+				ps.transform.localPosition = fxVessel.vesselBoundCenter + (worldVel * particle.offset * (particle.useHalfOffset ? halfLengthMultiplier : lengthMultiplier));
 
 				// velocity
-				ps.transform.up = worldVel;
-
-				// emission bounds
-				UpdateParticleBounds(ps);
+				UpdateParticleVel(ps, worldVel, particle.velocity);
 			}
 		}
 
