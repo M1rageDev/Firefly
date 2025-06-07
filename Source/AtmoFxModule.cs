@@ -1,3 +1,4 @@
+using Expansions.Missions.Editor;
 using KSP.Localization;
 using System;
 using System.Collections.Generic;
@@ -442,20 +443,6 @@ namespace Firefly
 					CreateParticleSystem(cfg);
 				}
 			}
-
-			// update the particle system properties for every one of them
-			for (int i = 0; i < fxVessel.allParticles.Count; i++)
-			{
-				ParticleSystem ps = fxVessel.allParticles[fxVessel.particleKeys[i]].system;
-
-				ParticleSystem.ShapeModule shapeModule = ps.shape;
-				shapeModule.scale = fxVessel.vesselBoundExtents * 2f;
-
-				ParticleSystem.VelocityOverLifetimeModule velocityModule = ps.velocityOverLifetime;
-				velocityModule.radialMultiplier = 1f;
-
-				UpdateParticleRate(ps, 0f, 0f);
-			}
 		}
 
 		void CreateParticleSystem(ParticleConfig cfg)
@@ -476,13 +463,20 @@ namespace Firefly
 			// change transform name
 			ps.gameObject.name = "_FireflyPS_" + cfg.name;
 
-			// initialize lifetime
+			// do some init stuff
+			ps.transform.localRotation = Quaternion.identity;
+			ps.transform.localPosition = fxVessel.vesselBoundCenter;
+
 			ParticleSystem.MainModule mainModule = ps.main;
 			mainModule.startLifetime = new ParticleSystem.MinMaxCurve(cfg.lifetime.x, cfg.lifetime.y);
 
-			// initialize transform pos and rot
-			ps.transform.localRotation = Quaternion.identity;
-			ps.transform.localPosition = fxVessel.vesselBoundCenter;
+			ParticleSystem.ShapeModule shapeModule = ps.shape;
+			shapeModule.scale = fxVessel.vesselBoundExtents * 2f;
+
+			ParticleSystem.VelocityOverLifetimeModule velocityModule = ps.velocityOverLifetime;
+			velocityModule.radialMultiplier = 1f;
+
+			UpdateParticleRate(ps, 0f, 0f);
 
 			// set material texture
 			ParticleSystemRenderer renderer = ps.GetComponent<ParticleSystemRenderer>();
@@ -535,13 +529,13 @@ namespace Firefly
 			emissionModule.rateOverTime = rateCurve;
 		}
 
-		void UpdateParticleVel(ParticleSystem system, Vector3 dir, FloatPair velocity)
+		void UpdateParticleVel(ParticleSystem system, Vector3 dir, Vector3 relativeVel, FloatPair velocity)
 		{
 			ParticleSystem.VelocityOverLifetimeModule velocityModule = system.velocityOverLifetime;
 
-			velocityModule.x = new ParticleSystem.MinMaxCurve(dir.x * velocity.x, dir.x * velocity.y);
-			velocityModule.y = new ParticleSystem.MinMaxCurve(dir.y * velocity.x, dir.y * velocity.y);
-			velocityModule.z = new ParticleSystem.MinMaxCurve(dir.z * velocity.x, dir.z * velocity.y);
+			velocityModule.x = new ParticleSystem.MinMaxCurve(dir.x * velocity.x + relativeVel.x, dir.x * velocity.y + relativeVel.x);
+			velocityModule.y = new ParticleSystem.MinMaxCurve(dir.y * velocity.x + relativeVel.y, dir.y * velocity.y + relativeVel.y);
+			velocityModule.z = new ParticleSystem.MinMaxCurve(dir.z * velocity.x + relativeVel.z, dir.z * velocity.y + relativeVel.z);
 		}
 
 		void UpdateParticleSystems()
@@ -558,6 +552,7 @@ namespace Firefly
 			fxVessel.areParticlesKilled = false;
 
 			// world velocity
+			Vector3 relativeVel = GetRelativeVelocity();  // relative to active vessel
 			Vector3 worldVel = doEffectEditor ? -GUI.EffectEditor.Instance.GetWorldDirection() : -GetEntryVelocity();
 			Vector3 direction = vessel.transform.InverseTransformDirection(worldVel);
 			float lengthMultiplier = GetLengthMultiplier();
@@ -576,10 +571,10 @@ namespace Firefly
 				UpdateParticleRate(ps, min, max);
 
 				// offset
-				ps.transform.localPosition = fxVessel.vesselBoundCenter + (worldVel * particle.offset * (particle.useHalfOffset ? halfLengthMultiplier : lengthMultiplier));
+				ps.transform.localPosition = fxVessel.vesselBoundCenter + (direction * particle.offset * (particle.useHalfOffset ? halfLengthMultiplier : lengthMultiplier));
 
 				// velocity
-				UpdateParticleVel(ps, worldVel, particle.velocity);
+				UpdateParticleVel(ps, worldVel, relativeVel, particle.velocity);
 			}
 		}
 
@@ -716,17 +711,6 @@ namespace Firefly
 				vesselPoints[i] = vessel.transform.TransformPoint(fxVessel.vesselBounds[i]);
 			}
 			DrawingUtils.DrawBox(vesselPoints, Color.green);
-
-			// particle bounds
-			Vector3[] particlePoints = new Vector3[8];
-			var ps = fxVessel.allParticles[fxVessel.particleKeys[0]].system;
-			var shapeModule = ps.shape;
-			Matrix4x4 particleMatrix = Matrix4x4.TRS(ps.transform.position, Quaternion.Euler(shapeModule.rotation), Vector3.one);
-			for (int i = 0; i < 8; i++)
-			{
-				particlePoints[i] = particleMatrix * fxVessel.vesselBounds[i];
-			}
-			DrawingUtils.DrawBox(particlePoints, Color.yellow);
 
 			// vessel axes
 			Vector3 fwd = vessel.GetFwdVector();
@@ -911,6 +895,24 @@ namespace Firefly
 		Vector3 GetEntryVelocity()
 		{
 			return vessel.srf_velocity.normalized;
+		}
+
+		/// <summary>
+		/// Returns the relative velocity of the vessel, relative to the active vessel (target vel)
+		/// </summary>
+		/// <returns></returns>
+		public Vector3 GetRelativeVelocity()
+		{
+			if (vessel.isActiveVessel)
+			{
+				// if the vessel is the active vessel, then return zero
+				return Vector3.zero;
+			}
+
+			Vector3 activeVslVelocity = FlightGlobals.ActiveVessel.srf_velocity;
+			Vector3 thisVelocity = vessel.srf_velocity;
+			
+			return thisVelocity - activeVslVelocity;
 		}
 
 		/// <summary>
