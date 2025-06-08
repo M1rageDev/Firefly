@@ -533,6 +533,8 @@ namespace Firefly
 		{
 			ParticleSystem.VelocityOverLifetimeModule velocityModule = system.velocityOverLifetime;
 
+			// NOTE: the relative velocity is for vessels which have a large relative velocity to the active vessel
+			//       which is used to make the particles move in the correct direction, even for not-active vessels
 			velocityModule.x = new ParticleSystem.MinMaxCurve(dir.x * velocity.x + relativeVel.x, dir.x * velocity.y + relativeVel.x);
 			velocityModule.y = new ParticleSystem.MinMaxCurve(dir.y * velocity.x + relativeVel.y, dir.y * velocity.y + relativeVel.y);
 			velocityModule.z = new ParticleSystem.MinMaxCurve(dir.z * velocity.x + relativeVel.z, dir.z * velocity.y + relativeVel.z);

@@ -3,6 +3,7 @@
 ## Unreleased
 
 * Add Space Shuttle System envelope (thanks **@giuliodondi**)
+* Fix the particles (again), now they should be done for good
 
 ## 1.0.3 - 2025-04-10
 
@@ -11,8 +12,6 @@
 * Add Ervo config for MPE (thanks **@SPACEMAN9813**)
 * Remove individual particle toggles from settings (replaced by particle editor)
 * Improve smoke trail particles
-
-There is nothing permanent except change
 
 
 ## 1.0.2 - 2025-03-01
