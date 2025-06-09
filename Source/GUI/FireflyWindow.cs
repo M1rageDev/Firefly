@@ -66,9 +66,10 @@ namespace Firefly.GUI
 				return;
 			}
 
-			if (fxModule.doEffectEditor)
+			if (fxModule.overridePhysics)
 			{
-				GUILayout.Label("Effect editor is open.");
+				GUILayout.Label("Physics override on.");
+				if (EffectEditor.Instance.show) GUILayout.Label("Effect editor open.");
 			}
 
 			// info
@@ -91,7 +92,7 @@ namespace Firefly.GUI
 			GUILayout.Label($"Current config is {fxModule.currentBody.bodyName}");
 			GUILayout.Label($"Active vessel is {vessel.vesselName}");
 			GUILayout.Label($"Vessel radius is {fxModule.fxVessel.vesselBoundRadius}");
-			if (!fxModule.doEffectEditor)
+			if (!fxModule.overridePhysics)
 			{
 				GUILayout.Label($"Entry strength is {fxModule.GetEntryStrength()}");
 				GUILayout.Label($"Dynamic pressure [kPa] {vessel.dynamicPressurekPa}");

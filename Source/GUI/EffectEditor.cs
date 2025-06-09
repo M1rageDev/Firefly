@@ -81,8 +81,6 @@ namespace Firefly.GUI
 		public static EffectEditor Instance { get; private set; }
 
 		public Vector3 effectDirection = -Vector3.up;
-		public float effectStrength;
-		public float effectState;
 
 		public BodyConfig config;
 
@@ -153,15 +151,17 @@ namespace Firefly.GUI
 			ResetFieldText();
 
 			// load effects
-			fxModule.doEffectEditor = true;
+			fxModule.overridePhysics = true;
+			fxModule.overrideData = OverridePhysicsData.Default();
 			if (!fxModule.isLoaded) fxModule.CreateVesselFx();
+			ApplyShipDirection();
 		}
 
 		public override void Hide()
 		{
 			base.Hide();
 
-			fxModule.doEffectEditor = false;
+			fxModule.overridePhysics = false;
 			fxModule.currentBody = ConfigManager.Instance.bodyConfigs[currentBody];
 		}
 
@@ -264,8 +264,8 @@ namespace Firefly.GUI
 		void DrawSimConfiguration()
 		{
 			GUILayout.Label("These sliders are for previewing the effects while not reentering. Do not use these during normal gameplay!");
-			effectStrength = GuiUtils.LabelSlider("Simulated effect strength", effectStrength, 0f, (float)ModSettings.I["strength_base"]);
-			effectState = GuiUtils.LabelSlider("Simulated effect state", effectState, 0f, 1f);
+			fxModule.overrideData.effectStrength = GuiUtils.LabelSlider("Simulated effect strength", fxModule.overrideData.effectStrength, 0f, (float)ModSettings.I["strength_base"]);
+			fxModule.overrideData.effectState = GuiUtils.LabelSlider("Simulated effect state", fxModule.overrideData.effectState, 0f, 1f);
 		}
 
 		void DrawBodyConfiguration()
@@ -371,20 +371,17 @@ namespace Firefly.GUI
 			if (FlightCamera.fetch.mainCamera == null) return;
 
 			effectDirection = vessel.transform.InverseTransformDirection(FlightCamera.fetch.mainCamera.transform.forward);
+			fxModule.overrideData.entryDirection = vessel.transform.TransformDirection(effectDirection);
 		}
 
 		// sets the direction to the ship's axis
 		void ApplyShipDirection()
 		{
-			effectDirection = -Vector3.up;
-		}
-
-		public Vector3 GetWorldDirection()
-		{
 			Vessel vessel = FlightGlobals.ActiveVessel;
-			if (vessel == null) return Vector3.zero;
+			if (vessel == null) return;
 
-			return vessel.transform.TransformDirection(effectDirection);
+			effectDirection = -Vector3.up;
+			fxModule.overrideData.entryDirection = vessel.transform.TransformDirection(effectDirection);
 		}
 
 		// gets called when the color picker applies a color

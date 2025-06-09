@@ -8,6 +8,39 @@ using UnityEngine.Rendering;
 namespace Firefly
 {
 	/// <summary>
+	/// Stores the data for overriding the physics of the vessel
+	/// </summary>
+	public class OverridePhysicsData
+	{
+		public Vector3 entryDirection;
+		public float effectStrength;
+		public float effectState;
+		public float angleOfAttack;
+
+		public BodyConfig bodyConfig;
+
+		public OverridePhysicsData(Vector3 entryDirection, float effectStrength, float effectState, float angleOfAttack, BodyConfig bodyConfig)
+		{
+			this.entryDirection = entryDirection;
+			this.effectStrength = effectStrength;
+			this.effectState = effectState;
+			this.angleOfAttack = angleOfAttack;
+			this.bodyConfig = bodyConfig;
+		}
+
+		public static OverridePhysicsData Default()
+		{
+			return new OverridePhysicsData(
+				Vector3.zero,
+				0f,
+				0f,
+				0f,
+				ConfigManager.Instance.defaultConfig
+			);
+		}
+	}
+
+	/// <summary>
 	/// Stores the data of an fx envelope renderer
 	/// </summary>
 	public struct FxEnvelopeModel
@@ -28,6 +61,9 @@ namespace Firefly
 		}
 	}
 
+	/// <summary>
+	/// Stores the data of an fx particle system instance
+	/// </summary>
 	public struct FxParticleSystem
 	{
 		public string name;
@@ -104,7 +140,9 @@ namespace Firefly
 
 		public BodyConfig currentBody;
 
-		public bool doEffectEditor = false;
+		// override stuff
+		public bool overridePhysics = false;
+		public OverridePhysicsData overrideData = OverridePhysicsData.Default();
 
 		// finds the stock handler of the aero FX
 		AerodynamicsFX _aeroFX;
@@ -259,10 +297,11 @@ namespace Firefly
 				BodyColors colors = new BodyColors(currentBody.colors);  // create the original colors
 				if (ConfigManager.Instance.partConfigs.ContainsKey(envelope.partName))
 				{
+					// if the part has an override config, use it
 					Logging.Log("Envelope has a part override config");
 					BodyColors overrideColor = ConfigManager.Instance.partConfigs[envelope.partName];
 
-					// override the colors with the override
+					// override the colors with the PART config
 					foreach (string key in overrideColor.fields.Keys)
 					{
 						if (overrideColor[key] != null) colors[key] = overrideColor[key];
@@ -555,7 +594,7 @@ namespace Firefly
 
 			// world velocity
 			Vector3 relativeVel = GetRelativeVelocity();  // relative to active vessel
-			Vector3 worldVel = doEffectEditor ? -GUI.EffectEditor.Instance.GetWorldDirection() : -GetEntryVelocity();
+			Vector3 worldVel = overridePhysics ? -overrideData.entryDirection : -GetEntryVelocity();
 			Vector3 direction = vessel.transform.InverseTransformDirection(worldVel);
 			float lengthMultiplier = GetLengthMultiplier();
 			float halfLengthMultiplier = Mathf.Max(lengthMultiplier * 0.5f, 1f);
@@ -567,13 +606,13 @@ namespace Firefly
 				FxParticleSystem particle = fxVessel.allParticles[fxVessel.particleKeys[i]];
 				ParticleSystem ps = particle.system;
 
+				// offset
+				ps.transform.localPosition = fxVessel.vesselBoundCenter + (direction * particle.offset * (particle.useHalfOffset ? halfLengthMultiplier : lengthMultiplier));
+
 				// rate
 				float min = particle.rate.x * desiredRate;
 				float max = particle.rate.y * desiredRate;
 				UpdateParticleRate(ps, min, max);
-
-				// offset
-				ps.transform.localPosition = fxVessel.vesselBoundCenter + (direction * particle.offset * (particle.useHalfOffset ? halfLengthMultiplier : lengthMultiplier));
 
 				// velocity
 				UpdateParticleVel(ps, worldVel, relativeVel, particle.velocity);
@@ -685,7 +724,7 @@ namespace Firefly
 			}
 
 			// Check if the ship goes outside of the atmosphere, unload the effects if so
-			if (vessel.altitude > vessel.mainBody.atmosphereDepth && isLoaded && !doEffectEditor)
+			if (vessel.altitude > vessel.mainBody.atmosphereDepth && isLoaded && !overridePhysics)
 			{
 				RemoveVesselFx(false);
 			}
@@ -756,13 +795,13 @@ namespace Firefly
 			{
 				Logging.Log($"Updating current body for {vessel.name}");
 
-				if (!doEffectEditor)
+				if (!overridePhysics)
 				{
 					ConfigManager.Instance.TryGetBodyConfig(body.name, true, out BodyConfig cfg);
 					currentBody = cfg;
 				} else
 				{
-					currentBody = GUI.EffectEditor.Instance.config;
+					currentBody = overrideData.bodyConfig;
 				}
 				
 				if (!atLoad)
@@ -794,13 +833,13 @@ namespace Firefly
 			}
 
 			// update the material with dynamic properties
-			fxVessel.material.SetVector("_Velocity", doEffectEditor ? GUI.EffectEditor.Instance.GetWorldDirection() : GetEntryVelocity());
+			fxVessel.material.SetVector("_Velocity", overridePhysics ? overrideData.entryDirection : GetEntryVelocity());
 			fxVessel.material.SetFloat("_EntryStrength", entryStrength);
 			fxVessel.material.SetMatrix("_AirstreamVP", VP);
 
 			fxVessel.material.SetInt("_Hdr", CameraManager.Instance.ActualHdrState ? 1 : 0);
-			fxVessel.material.SetFloat("_FxState", doEffectEditor ? GUI.EffectEditor.Instance.effectState : AeroFX.state);
-			fxVessel.material.SetFloat("_AngleOfAttack", doEffectEditor ? 0f : Utils.GetAngleOfAttack(vessel));
+			fxVessel.material.SetFloat("_FxState", overridePhysics ? overrideData.effectState : AeroFX.state);
+			fxVessel.material.SetFloat("_AngleOfAttack", overridePhysics ? overrideData.angleOfAttack : Utils.GetAngleOfAttack(vessel));
 
 			fxVessel.material.SetInt("_DisableBowshock", (bool)ModSettings.I["disable_bowshock"] ? 1 : 0);
 
@@ -943,9 +982,9 @@ namespace Firefly
 
 			lastStrength = strength;
 
-			if (doEffectEditor)
+			if (overridePhysics)
 			{
-				return GUI.EffectEditor.Instance.effectStrength * currentBody.strengthMultiplier;
+				return overrideData.effectStrength * currentBody.strengthMultiplier;
 			} else
 			{
 				return strength * currentBody.strengthMultiplier;
@@ -982,8 +1021,8 @@ namespace Firefly
 			float maxExtent = fxVessel.vesselBoundRadius;
 			float distance = maxExtent * 1.1f;
 
-			Vector3 localDir = doEffectEditor ? GUI.EffectEditor.Instance.effectDirection : vessel.transform.InverseTransformDirection(GetEntryVelocity());
-			Vector3 localPos = fxVessel.vesselBoundCenter + distance * localDir;
+			Vector3 dir = overridePhysics ? overrideData.entryDirection : GetEntryVelocity();
+			Vector3 localPos = fxVessel.vesselBoundCenter + distance * vessel.transform.InverseTransformDirection(dir);
 
 			return vessel.transform.TransformPoint(localPos);
 		}
