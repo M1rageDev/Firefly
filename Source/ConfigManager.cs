@@ -69,6 +69,9 @@ namespace Firefly
 		public string bodyName = "Unknown";
 		public PlanetPackConfig planetPack = new PlanetPackConfig();
 
+		// specifies the target Firefly version of this config
+		public int configVersion = 5;
+
 		// The entry strength gets multiplied by this before getting sent to the shader
 		public float strengthMultiplier = 1f;
 
@@ -98,6 +101,7 @@ namespace Firefly
 		public BodyConfig(BodyConfig template)
 		{
 			this.bodyName = template.bodyName;
+			this.configVersion = template.configVersion;
 			this.cfgPath = template.cfgPath;
 			this.strengthMultiplier = template.strengthMultiplier;
 			this.lengthMultiplier = template.lengthMultiplier;
@@ -113,6 +117,8 @@ namespace Firefly
 		public void SaveToNode(ref ConfigNode node)
 		{
 			node.AddValue("name", bodyName);
+			node.AddValue("config_version", configVersion);
+
 			node.AddValue("strength_multiplier", strengthMultiplier);
 
 			node.AddValue("length_multiplier", lengthMultiplier);
@@ -314,6 +320,7 @@ namespace Firefly
 					try
 					{
 						bool success = ProcessSingleBodyNode(urlConfigs[i], out BodyConfig body);
+						bool isWrongVersion = body.configVersion != Versioning.ConfigVersion;
 
 						// couldn't load the config
 						if (!success)
@@ -324,6 +331,18 @@ namespace Firefly
 								isSerious: false,
 								sourcePath: urlConfigs[i].url,
 								description: "This config could not be registered. " + ModLoadError.BadConfigAdvice
+							));
+							continue;
+						}
+						if (isWrongVersion)
+						{
+							Logging.Log("Body couldn't be loaded (WRONG VERSION CONFIG)");
+							ErrorManager.Instance.RegisterError(new ModLoadError(
+								cause: ModLoadError.ProbableCause.WrongVersionConfig,
+								isSerious: false,
+								sourcePath: urlConfigs[i].url,
+								description: "This config could not be registered. " + 
+											(body.configVersion < Versioning.ConfigVersion ? ModLoadError.OutdatedConfigAdvice : ModLoadError.OutdatedFireflyAdvice)
 							));
 							continue;
 						}
@@ -449,6 +468,8 @@ namespace Firefly
 				cfgPath = cfg.parent.fullPath,
 				bodyName = bodyName,
 
+				configVersion = ReadConfigInt(node, "config_version", ref isFormatted),
+
 				strengthMultiplier = ReadConfigValue(node, "strength_multiplier", ref isFormatted),
 				lengthMultiplier = ReadConfigValue(node, "length_multiplier", ref isFormatted),
 				opacityMultiplier = ReadConfigValue(node, "opacity_multiplier", ref isFormatted),
@@ -460,6 +481,12 @@ namespace Firefly
 
 			// read the colors
 			isFormatted = isFormatted && ProcessBodyColors(node, false, out body.colors);
+
+			if (body.configVersion == 0)  // not comparing to null, since uninitialized int is 0
+			{
+				// no configversion, then version must be < 5 (versioning introduced in 1.0.4)
+				body.configVersion = 4;
+			}
 
 			// is the config formatted correctly?
 			if (!isFormatted)
@@ -635,6 +662,17 @@ namespace Firefly
 		float ReadConfigValue(ConfigNode node, string key, ref bool isFormatted)
 		{
 			bool success = Utils.EvaluateFloat(node.GetValue(key), out float result);
+			isFormatted = isFormatted && success;
+
+			return result;
+		}
+
+		/// <summary>
+		/// Reads one integer value from a node
+		/// </summary>
+		int ReadConfigInt(ConfigNode node, string key, ref bool isFormatted)
+		{
+			bool success = Utils.EvaluateInt(node.GetValue(key), out int result);
 			isFormatted = isFormatted && success;
 
 			return result;

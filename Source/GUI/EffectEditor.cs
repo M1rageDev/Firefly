@@ -153,6 +153,9 @@ namespace Firefly.GUI
 			// load effects
 			fxModule.overridePhysics = true;
 			fxModule.overrideData = OverridePhysicsData.Default();
+			fxModule.overrideData.effectStrength = (float)ModSettings.I["strength_base"];
+			fxModule.overrideData.effectState = 1f;
+			fxModule.overrideData.overridenBy = "Effect editor";
 			if (!fxModule.isLoaded) fxModule.CreateVesselFx();
 			ApplyShipDirection();
 		}
@@ -162,7 +165,6 @@ namespace Firefly.GUI
 			base.Hide();
 
 			fxModule.overridePhysics = false;
-			fxModule.currentBody = ConfigManager.Instance.bodyConfigs[currentBody];
 		}
 
 		public override void Draw(int id)
@@ -185,7 +187,7 @@ namespace Firefly.GUI
 			UnityEngine.GUI.DragWindow();
 
 			// apply stuff
-			fxModule.currentBody = config;
+			fxModule.overrideData.bodyConfig = config;
 
 			// 3d
 			if (fxModule == null || fxModule.fxVessel == null) return;
@@ -253,6 +255,7 @@ namespace Firefly.GUI
 				currentBody = bodyConfigs[newChoice];
 
 				config = new BodyConfig(ConfigManager.Instance.bodyConfigs[currentBody]);
+				fxModule.overrideData.bodyConfig = config;
 				ResetFieldText();
 
 				fxModule.ReloadVessel();
@@ -344,6 +347,7 @@ namespace Firefly.GUI
 		{
 			ConfigManager.Instance.bodyConfigs.Remove(currentBody);
 			config = new BodyConfig(ConfigManager.Instance.bodyConfigs["Default"]);
+			fxModule.overrideData.bodyConfig = config;
 			currentBody = "Default";
 			ui_bodyChoice = 0;
 
@@ -419,7 +423,7 @@ namespace Firefly.GUI
 			bodyConfigs = newBodyArray;
 			ResetFieldText();
 
-			fxModule.currentBody = config;
+			fxModule.overrideData.bodyConfig = config;
 			fxModule.ReloadVessel();
 		}
 	}

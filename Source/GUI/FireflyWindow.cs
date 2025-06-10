@@ -68,7 +68,7 @@ namespace Firefly.GUI
 
 			if (fxModule.overridePhysics)
 			{
-				GUILayout.Label("Physics override on.");
+				GUILayout.Label("Physics is overriden by " + fxModule.overrideData.overridenBy);
 				if (EffectEditor.Instance.show) GUILayout.Label("Effect editor open.");
 			}
 

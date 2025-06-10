@@ -7,6 +7,8 @@ namespace Firefly
 	{
 		public static bool IsDev = false;
 
+		public static int ConfigVersion = 5;
+
 		public static string VersionAuthor(object caller)
 		{
 			AssemblyDescriptionAttribute attribute = caller.GetType().Assembly

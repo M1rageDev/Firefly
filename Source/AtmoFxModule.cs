@@ -12,6 +12,8 @@ namespace Firefly
 	/// </summary>
 	public class OverridePhysicsData
 	{
+		public string overridenBy;
+
 		public Vector3 entryDirection;
 		public float effectStrength;
 		public float effectState;
@@ -19,8 +21,9 @@ namespace Firefly
 
 		public BodyConfig bodyConfig;
 
-		public OverridePhysicsData(Vector3 entryDirection, float effectStrength, float effectState, float angleOfAttack, BodyConfig bodyConfig)
+		public OverridePhysicsData(string overridenBy, Vector3 entryDirection, float effectStrength, float effectState, float angleOfAttack, BodyConfig bodyConfig)
 		{
+			this.overridenBy = overridenBy;
 			this.entryDirection = entryDirection;
 			this.effectStrength = effectStrength;
 			this.effectState = effectState;
@@ -31,6 +34,7 @@ namespace Firefly
 		public static OverridePhysicsData Default()
 		{
 			return new OverridePhysicsData(
+				"Firefly internals",
 				Vector3.zero,
 				0f,
 				0f,
@@ -294,7 +298,7 @@ namespace Firefly
 				fxVessel.commandBuffer.SetGlobalVector("_EnvelopeScaleFactor", envelope.envelopeScaleFactor);
 
 				// part overrides
-				BodyColors colors = new BodyColors(currentBody.colors);  // create the original colors
+				BodyColors colors = new BodyColors(GetCurrentConfig().colors);  // create the original colors
 				if (ConfigManager.Instance.partConfigs.ContainsKey(envelope.partName))
 				{
 					// if the part has an override config, use it
@@ -582,9 +586,10 @@ namespace Firefly
 		void UpdateParticleSystems()
 		{
 			float entryStrength = GetEntryStrength();
+			BodyConfig config = GetCurrentConfig();
 
 			// check if we should actually do the particles
-			if (entryStrength < currentBody.particleThreshold)
+			if (entryStrength < config.particleThreshold)
 			{
 				KillAllParticles();
 				return;
@@ -600,7 +605,7 @@ namespace Firefly
 			float halfLengthMultiplier = Mathf.Max(lengthMultiplier * 0.5f, 1f);
 
 			// update for each particle
-			desiredRate = Mathf.Clamp01((entryStrength - currentBody.particleThreshold) / 600f);
+			desiredRate = Mathf.Clamp01((entryStrength - config.particleThreshold) / 600f);
 			for (int i = 0; i < fxVessel.allParticles.Count; i++)
 			{
 				FxParticleSystem particle = fxVessel.allParticles[fxVessel.particleKeys[i]];
@@ -795,14 +800,8 @@ namespace Firefly
 			{
 				Logging.Log($"Updating current body for {vessel.name}");
 
-				if (!overridePhysics)
-				{
-					ConfigManager.Instance.TryGetBodyConfig(body.name, true, out BodyConfig cfg);
-					currentBody = cfg;
-				} else
-				{
-					currentBody = overrideData.bodyConfig;
-				}
+				ConfigManager.Instance.TryGetBodyConfig(body.name, true, out BodyConfig cfg);
+				currentBody = cfg;
 				
 				if (!atLoad)
 				{
@@ -820,6 +819,7 @@ namespace Firefly
 		void UpdateMaterialProperties()
 		{
 			float entryStrength = GetEntryStrength();
+			BodyConfig config = GetCurrentConfig();
 
 			// calculate view-projection matrix for the airstream camera
 			Matrix4x4 V = fxVessel.airstreamCamera.worldToCameraMatrix;
@@ -844,11 +844,11 @@ namespace Firefly
 			fxVessel.material.SetInt("_DisableBowshock", (bool)ModSettings.I["disable_bowshock"] ? 1 : 0);
 
 			fxVessel.material.SetFloat("_LengthMultiplier", GetLengthMultiplier());
-			fxVessel.material.SetFloat("_OpacityMultiplier", currentBody.opacityMultiplier);
-			fxVessel.material.SetFloat("_WrapFresnelModifier", currentBody.wrapFresnelModifier);
+			fxVessel.material.SetFloat("_OpacityMultiplier", config.opacityMultiplier);
+			fxVessel.material.SetFloat("_WrapFresnelModifier", config.wrapFresnelModifier);
 
-			fxVessel.material.SetFloat("_StreakProbability", currentBody.streakProbability);
-			fxVessel.material.SetFloat("_StreakThreshold", currentBody.streakThreshold);
+			fxVessel.material.SetFloat("_StreakProbability", config.streakProbability);
+			fxVessel.material.SetFloat("_StreakThreshold", config.streakThreshold);
 		}
 
 		/// <summary>
@@ -931,6 +931,21 @@ namespace Firefly
 		}
 
 		/// <summary>
+		/// Returns the correct bodyconfig to use, depending on whether the override is on
+		/// </summary>
+		/// <returns></returns>
+		BodyConfig GetCurrentConfig()
+		{
+			if (overridePhysics)
+			{
+				return overrideData.bodyConfig;
+			} else
+			{
+				return currentBody;
+			}
+		}
+
+		/// <summary>
 		/// Returns the velocity direction
 		/// </summary>
 		Vector3 GetEntryVelocity()
@@ -961,8 +976,10 @@ namespace Firefly
 		/// </summary>
 		public float GetEntryStrength()
 		{
+			BodyConfig config = GetCurrentConfig();
+
 			// Pretty much just the FxScalar, but scaled with the strength base value, with an added modifier for the mach effects, and offset by the planet pack cfg
-			float transitionOffset = currentBody.planetPack.transitionOffset * AeroFX.state;
+			float transitionOffset = config.planetPack.transitionOffset * AeroFX.state;
 			float fxScalar = AeroFX.FxScalar + transitionOffset;
 			fxScalar *= Mathf.Lerp(0.13f, 1f, AeroFX.state);
 
@@ -984,10 +1001,10 @@ namespace Firefly
 
 			if (overridePhysics)
 			{
-				return overrideData.effectStrength * currentBody.strengthMultiplier;
+				return overrideData.effectStrength * config.strengthMultiplier;
 			} else
 			{
-				return strength * currentBody.strengthMultiplier;
+				return strength * config.strengthMultiplier;
 			}
 		}
 
@@ -1010,7 +1027,7 @@ namespace Firefly
 		/// </summary>
 		float GetLengthMultiplier()
 		{
-			return fxVessel.baseLengthMultiplier * currentBody.lengthMultiplier * (float)ModSettings.I["length_mult"];
+			return fxVessel.baseLengthMultiplier * GetCurrentConfig().lengthMultiplier * (float)ModSettings.I["length_mult"];
 		}
 
 		/// <summary>

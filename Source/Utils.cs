@@ -7,12 +7,15 @@ namespace Firefly
 	public class ModLoadError
 	{
 		public static string BadConfigAdvice = "Check if it has all the required values, and if it's formatted correctly.";
+		public static string OutdatedConfigAdvice = "The config is outdated, this is likely caused by a planet pack author not having updated their configs to the latest standard.";
+		public static string OutdatedFireflyAdvice = "The config is made for a newer version of Firefly, please update Firefly to the latest version.";
 
 		public static int SeriousErrorCount = 0;
 
 		public enum ProbableCause
 		{
 			IncorrectInstall,
+			WrongVersionConfig,
 			BadConfig,
 			Other
 		}
@@ -98,6 +101,12 @@ namespace Firefly
 		public static bool EvaluateFloat(string text, out float val)
 		{
 			return float.TryParse(text, out val);
+		}
+
+		// parses an int
+		public static bool EvaluateInt(string text, out int val)
+		{
+			return int.TryParse(text, out val);
 		}
 
 		// parses a boolean
