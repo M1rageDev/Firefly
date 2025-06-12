@@ -15,15 +15,9 @@ namespace Firefly.GUI
 		// ui values
 		Vector2 ui_configListPosition = Vector2.zero;
 
-		bool ui_cfgIsActive = false;
 		string ui_prefabName = "";
 		string ui_mainTexPath = "";
 		string ui_emissionTexPath = "";
-		GuiUtils.UiObjectInput<float> ui_offset = new GuiUtils.UiObjectInput<float>(0f);
-		bool ui_useHalfOffset = false;
-		GuiUtils.UiObjectInput<FloatPair> ui_rateRange = new GuiUtils.UiObjectInput<FloatPair>(new FloatPair(), 2);
-		GuiUtils.UiObjectInput<FloatPair> ui_lifetimeRange = new GuiUtils.UiObjectInput<FloatPair>(new FloatPair(), 2);
-		GuiUtils.UiObjectInput<FloatPair> ui_velocityRange = new GuiUtils.UiObjectInput<FloatPair>(new FloatPair(), 2);
 
 		GuiUtils.ConfirmingButton ui_deleteButton = new GuiUtils.ConfirmingButton("Delete selected config");
 		GuiUtils.ConfirmingButton ui_saveButton = new GuiUtils.ConfirmingButton("Save all to file");
@@ -37,6 +31,15 @@ namespace Firefly.GUI
 			Instance = this;
 
 			ui_createPopup = new Popup("Create from preset", new Vector2(300f, 100f), CreatePopupCallback, CreatePopupDraw);
+		}
+
+		public override void Show()
+		{
+			base.Show();
+
+			Vessel vessel = FlightGlobals.ActiveVessel;
+			if (vessel == null) return;
+			fxModule = vessel.FindVesselModuleImplementing<AtmoFxModule>();
 		}
 
 		public override void Draw(int id)
@@ -125,18 +128,15 @@ namespace Firefly.GUI
 				GUILayout.Label($"Current config: {currentConfigName}", GUILayout.Width(300f));
 
 				// draw all configuration options
-				GuiUtils.DrawBoolInput("Is active", ref ui_cfgIsActive, GUILayout.Width(300f));
 				GuiUtils.DrawStringInput("Unity bundle prefab name", ref ui_prefabName, 300f, GUILayout.Width(300f));
 				GUILayout.Space(20f);
 				GuiUtils.DrawStringInput("Main texture", ref ui_mainTexPath, 300f, GUILayout.Width(300f));
 				GuiUtils.DrawStringInput("Emission texture", ref ui_emissionTexPath, 300f, GUILayout.Width(300f));
 				GUILayout.Space(20f);
-				GuiUtils.DrawFloatInput("Emitter offset", ref ui_offset, GUILayout.Width(300f));
-				GuiUtils.DrawBoolInput("Use half offset", ref ui_useHalfOffset, GUILayout.Width(300f));
-				GUILayout.Space(20f);
-				GuiUtils.DrawFloatPairInput("Rate range", ref ui_rateRange, GUILayout.Width(300f));
-				GuiUtils.DrawFloatPairInput("Lifetime range", ref ui_lifetimeRange, GUILayout.Width(300f));
-				GuiUtils.DrawFloatPairInput("Velocity range", ref ui_velocityRange, GUILayout.Width(300f));
+				foreach (string key in currentConfig.fields.Keys)
+				{
+					GuiUtils.DrawConfigField(key, currentConfig.fields, GUILayout.Width(300f));
+				}
 
 				// saves everything to config and to ConfigManager
 				if (GUILayout.Button("Apply"))
@@ -185,29 +185,22 @@ namespace Firefly.GUI
 		// updates the ui values from the current config
 		void UpdateUiValues()
 		{
-			ui_cfgIsActive = currentConfig.isActive;
 			ui_prefabName = currentConfig.prefab;
 			ui_mainTexPath = currentConfig.mainTexture;
 			ui_emissionTexPath = currentConfig.emissionTexture;
-			ui_offset.Overwrite(currentConfig.offset);
-			ui_useHalfOffset = currentConfig.useHalfOffset;
-			ui_rateRange.Overwrite(currentConfig.rate);
-			ui_lifetimeRange.Overwrite(currentConfig.lifetime);
-			ui_velocityRange.Overwrite(currentConfig.velocity);
+
+			foreach (string key in currentConfig.fields.Keys)
+			{
+				currentConfig.fields[key].UpdateUiText();
+			}
 		}
 
 		// updates the current config with the ui values
 		void ApplyConfigValues()
 		{
-			currentConfig.isActive = ui_cfgIsActive;
 			currentConfig.prefab = ui_prefabName;
 			currentConfig.mainTexture = ui_mainTexPath;
 			currentConfig.emissionTexture = ui_emissionTexPath;
-			currentConfig.offset = ui_offset.GetValue();
-			currentConfig.useHalfOffset = ui_useHalfOffset;
-			currentConfig.rate = ui_rateRange.GetValue();
-			currentConfig.lifetime = ui_lifetimeRange.GetValue();
-			currentConfig.velocity = ui_velocityRange.GetValue();
 
 			ConfigManager.Instance.RefreshTextureList();
 			AssetLoader.Instance.ReloadAssets();
@@ -270,15 +263,6 @@ namespace Firefly.GUI
 
 			ScreenMessages.PostScreenMessage("Saved all configs to file", 5f, ScreenMessageStyle.UPPER_CENTER);
 			Logging.Log($"Saved particle config {ConfigManager.ParticleConfigPath}");
-		}
-
-		public override void Show()
-		{
-			base.Show();
-
-			Vessel vessel = FlightGlobals.ActiveVessel;
-			if (vessel == null) return;
-			fxModule = vessel.FindVesselModuleImplementing<AtmoFxModule>();
 		}
 	}
 }

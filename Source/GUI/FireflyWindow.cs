@@ -110,10 +110,10 @@ namespace Firefly.GUI
 			// draw config fields
 			foreach (string key in ModSettings.I.fields.Keys)
 			{
-				ModSettings.Field field = ModSettings.I.fields[key];
+				ConfigField field = ModSettings.I.fields[key];
 
-				if (field.valueType == ModSettings.ValueType.Boolean) GuiUtils.DrawConfigFieldBool(key, ModSettings.I.fields);
-				else if (field.valueType == ModSettings.ValueType.Float) GuiUtils.DrawConfigFieldFloat(key, ModSettings.I.fields);
+				if (field.valueType == ValueType.Boolean) GuiUtils.DrawSettingsFieldBool(key, ModSettings.I.fields);
+				else if (field.valueType == ValueType.Float) GuiUtils.DrawSettingsFieldFloat(key, ModSettings.I.fields);
 			}
 
 			if (GUILayout.Button("Save overrides to file")) SettingsManager.Instance.SaveModSettings();

@@ -1,5 +1,6 @@
 ﻿using Steamworks;
 using System.Linq;
+using System.Runtime.Serialization;
 using UnityEngine;
 
 namespace Firefly
@@ -33,6 +34,125 @@ namespace Firefly
 			this.description = description;
 
 			if (isSerious) SeriousErrorCount++;
+		}
+	}
+
+	public enum ValueType
+	{
+		Boolean,
+		Float,
+		Float3,
+		FloatPair
+	}
+
+	public class ConfigField
+	{
+		public object value;
+		public ValueType valueType;
+
+		public bool needsReload;
+
+		public string uiText;
+
+		// used for values with more than one value
+		public string uiText1;
+		public string uiText2;
+
+		public ConfigField(object value, ValueType valueType, bool needsReload=false)
+		{
+			this.value = value;
+			this.valueType = valueType;
+			this.needsReload = needsReload;
+
+			UpdateUiText();
+		}
+
+		public ConfigField(ConfigField template)
+		{
+			this.value = template.value;
+			this.valueType = template.valueType;
+			this.needsReload = template.needsReload;
+
+			this.uiText = template.uiText;
+			this.uiText1 = template.uiText1;
+			this.uiText2 = template.uiText2;
+		}
+
+		public void UpdateUiText()
+		{
+			if (valueType == ValueType.Float3)
+			{
+				Vector3 vec = (Vector3)value;
+				uiText = vec.x.ToString();
+				uiText1 = vec.y.ToString();
+				uiText2 = vec.z.ToString();
+			}
+			else if (valueType == ValueType.FloatPair)
+			{
+				FloatPair pair = (FloatPair)value;
+				uiText = pair.x.ToString();
+				uiText1 = pair.y.ToString();
+			}
+			else
+			{
+				uiText = value.ToString();
+			}
+		}
+
+		public object GetValueForSave()
+		{
+			object ret = value;
+
+			// special cases
+			if (valueType == ValueType.Float3)
+			{
+				Vector3 vec = (Vector3)value;
+
+				ret = string.Join(" ", vec.x, vec.y, vec.z);
+			} else if (valueType == ValueType.FloatPair)
+			{
+				FloatPair pair = (FloatPair)value;
+
+				ret = string.Join(" ", pair.x, pair.y);
+			}
+
+			return ret;
+		}
+
+		public void ParseString(string x, ref bool isFormatted, bool needsValue=false)
+		{
+			if (x == null)
+			{
+				if (needsValue) isFormatted = false;
+				return;
+			}
+
+			bool success = false;
+			switch (valueType)
+			{
+				case ValueType.Boolean:
+					bool result_bool;
+					success = Utils.EvaluateBool(x, out result_bool);
+					this.value = result_bool;
+					break;
+				case ValueType.Float:
+					float result_float;
+					success = Utils.EvaluateFloat(x, out result_float);
+					this.value = result_float;
+					break;
+				case ValueType.FloatPair:
+					FloatPair result_pair;
+					success = Utils.EvaluateFloatPair(x, out result_pair);
+					this.value = result_pair;
+					break;
+				case ValueType.Float3:
+					Vector3 result_float3;
+					success = Utils.EvaluateFloat3(x, out result_float3);
+					this.value = result_float3;
+					break;
+				default: break;
+			}
+			isFormatted = isFormatted && success;
 		}
 	}
 
@@ -97,25 +217,21 @@ namespace Firefly
 
 	public static class Utils
 	{
-		// parses a float
 		public static bool EvaluateFloat(string text, out float val)
 		{
 			return float.TryParse(text, out val);
 		}
 
-		// parses an int
 		public static bool EvaluateInt(string text, out int val)
 		{
 			return int.TryParse(text, out val);
 		}
 
-		// parses a boolean
 		public static bool EvaluateBool(string text, out bool val)
 		{
 			return bool.TryParse(text.ToLower(), out val);
 		}
 
-		// parses a float pair
 		public static bool EvaluateFloatPair(string text, out FloatPair val)
 		{
 			bool isFormatted = true;
@@ -131,7 +247,6 @@ namespace Firefly
 			return isFormatted;
 		}
 
-		// parses a vector3
 		public static bool EvaluateFloat3(string text, out Vector3 val)
 		{
 			bool isFormatted = true;
@@ -162,7 +277,6 @@ namespace Firefly
 			return new Color(r * factor, g * factor, b * factor);
 		}
 
-		// parses an HDR color
 		public static bool EvaluateColorHDR(string text, out Color val, out Color sdr)
 		{
 			bool isFormatted = true;
@@ -319,7 +433,7 @@ namespace Firefly
 		}
 
 		/// <summary>
-		/// Returns a Color from HSV values
+		/// Converts HSV values to a Color object
 		/// </summary>
 		public static Color ColorHSV(float h, float s, float v)
 		{
@@ -327,7 +441,7 @@ namespace Firefly
 		}
 
 		/// <summary>
-		/// Returns HSV from a color
+		/// Converts a Color object to HSV values
 		/// </summary>
 		public static void ColorHSV(Color c, out float h, out float s, out float v)
 		{

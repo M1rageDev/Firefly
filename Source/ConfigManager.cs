@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Contracts.Parameters;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -8,8 +9,6 @@ namespace Firefly
 	public class BodyColors
 	{
 		public Dictionary<string, HDRColor> fields = new Dictionary<string, HDRColor>();
-
-		public HDRColor shockwave;
 
 		// custom indexer
 		public HDRColor this[string i]
@@ -39,18 +38,10 @@ namespace Firefly
 		/// </summary>
 		public BodyColors(BodyColors org)
 		{
-			fields.Add("glow", org["glow"]);
-			fields.Add("glow_hot", org["glow_hot"]);
-
-			fields.Add("trail_primary", org["trail_primary"]);
-			fields.Add("trail_secondary", org["trail_secondary"]);
-			fields.Add("trail_tertiary", org["trail_tertiary"]);
-			fields.Add("trail_streak", org["trail_streak"]);
-
-			fields.Add("wrap_layer", org["wrap_layer"]);
-			fields.Add("wrap_streak", org["wrap_streak"]);
-
-			fields.Add("shockwave", org["shockwave"]);
+			foreach (string key in org.fields.Keys)
+			{
+				fields.Add(key, org[key]);
+			}
 		}
 
 		public void SaveToNode(ref ConfigNode node)
@@ -65,51 +56,42 @@ namespace Firefly
 
 	public class BodyConfig
 	{
+		public Dictionary<string, ConfigField> fields = new Dictionary<string, ConfigField>();
+
 		public string cfgPath = "";
 		public string bodyName = "Unknown";
+		public int configVersion = 5;
 		public PlanetPackConfig planetPack = new PlanetPackConfig();
 
-		// specifies the target Firefly version of this config
-		public int configVersion = 5;
-
-		// The entry strength gets multiplied by this before getting sent to the shader
-		public float strengthMultiplier = 1f;
-
-		// The trail length gets multiplied by this
-		public float lengthMultiplier = 1f;
-
-		// The trail opacity gets multiplied by this
-		public float opacityMultiplier = 1f;
-
-		// The wrap layer's fresnel effect is modified by this
-		public float wrapFresnelModifier = 1f;
-
-		// The threshold in m/s for particles to appear
-		public float particleThreshold = 1800f;
-
-		// This gets added to the streak probability
-		public float streakProbability = 0f;
-
-		// This gets added to the streak threshold, which is 0.5 by default (range is 0-1, where 1 is 4000 m/s, default is 0.5)
-		public float streakThreshold = 0f;
-
-		// Colors
 		public BodyColors colors = new BodyColors();
 
-		public BodyConfig() { }
+		public object this[string i]
+		{
+			get => fields[i].value;
+			set => fields[i].value = value;
+		}
+
+		public BodyConfig() 
+		{
+			fields.Add("strength_multiplier", new ConfigField(1f, ValueType.Float));
+			fields.Add("length_multiplier", new ConfigField(1f, ValueType.Float));
+			fields.Add("opacity_multiplier", new ConfigField(1f, ValueType.Float));
+			fields.Add("wrap_fresnel_modifier", new ConfigField(1f, ValueType.Float));
+			fields.Add("particle_threshold", new ConfigField(1800f, ValueType.Float));
+			fields.Add("streak_probability", new ConfigField(0f, ValueType.Float));
+			fields.Add("streak_threshold", new ConfigField(0f, ValueType.Float));  // range is 0-1, where 1 is 4000 m/s, default is 0.5
+		}
 
 		public BodyConfig(BodyConfig template)
 		{
+			this.cfgPath = template.cfgPath;
 			this.bodyName = template.bodyName;
 			this.configVersion = template.configVersion;
-			this.cfgPath = template.cfgPath;
-			this.strengthMultiplier = template.strengthMultiplier;
-			this.lengthMultiplier = template.lengthMultiplier;
-			this.opacityMultiplier = template.opacityMultiplier;
-			this.wrapFresnelModifier = template.wrapFresnelModifier;
-			this.particleThreshold = template.particleThreshold;
-			this.streakProbability = template.streakProbability;
-			this.streakThreshold = template.streakThreshold;
+
+			foreach (string key in template.fields.Keys)
+			{
+				fields.Add(key, new ConfigField(template.fields[key]));
+			}
 
 			this.colors = new BodyColors(template.colors);
 		}
@@ -119,16 +101,11 @@ namespace Firefly
 			node.AddValue("name", bodyName);
 			node.AddValue("config_version", configVersion);
 
-			node.AddValue("strength_multiplier", strengthMultiplier);
-
-			node.AddValue("length_multiplier", lengthMultiplier);
-			node.AddValue("opacity_multiplier", opacityMultiplier);
-			node.AddValue("wrap_fresnel_modifier", wrapFresnelModifier);
-
-			node.AddValue("particle_threshold", particleThreshold);
-
-			node.AddValue("streak_probability", streakProbability);
-			node.AddValue("streak_threshold", streakThreshold);
+			for (int i = 0; i < fields.Count; i++)
+			{
+				KeyValuePair<string, ConfigField> elem = fields.ElementAt(i);
+				node.AddValue(elem.Key, elem.Value.GetValueForSave());
+			}
 
 			ConfigNode colorsNode = new ConfigNode("Color");
 			colors.SaveToNode(ref colorsNode);
@@ -151,52 +128,54 @@ namespace Firefly
 
 	public class ParticleConfig
 	{
+		public Dictionary<string, ConfigField> fields = new Dictionary<string, ConfigField>();
+
 		public string name = "";
-		public bool isActive = false;
 
 		public string prefab = "";
-
 		public string mainTexture = "";
 		public string emissionTexture = "";
 
-		public float offset = 0f;
-		public bool useHalfOffset = false;
+		public object this[string i]
+		{
+			get => fields[i].value;
+			set => fields[i].value = value;
+		}
 
-		public FloatPair rate;
-		public FloatPair lifetime;
-		public FloatPair velocity;
-
-		public ParticleConfig() { }
+		public ParticleConfig() 
+		{
+			fields.Add("is_active", new ConfigField(true, ValueType.Boolean));
+			fields.Add("offset", new ConfigField(0f, ValueType.Float));
+			fields.Add("use_half_offset", new ConfigField(false, ValueType.Boolean));
+			fields.Add("rate", new ConfigField(new FloatPair(0f, 0f), ValueType.FloatPair));
+			fields.Add("lifetime", new ConfigField(new FloatPair(0f, 0f), ValueType.FloatPair));
+			fields.Add("velocity", new ConfigField(new FloatPair(0f, 0f), ValueType.FloatPair));
+		}
 
 		public ParticleConfig(ParticleConfig x)
 		{
 			name = x.name;
-			isActive = x.isActive;
 
 			prefab = x.prefab;
-
 			mainTexture = x.mainTexture;
 			emissionTexture = x.emissionTexture;
-
-			offset = x.offset;
-			useHalfOffset = x.useHalfOffset;
-
-			rate = new FloatPair(x.rate.x, x.rate.y);
-			lifetime = new FloatPair(x.lifetime.x, x.lifetime.y);
-			velocity = new FloatPair(x.velocity.x, x.velocity.y);
+			
+			foreach (string key in x.fields.Keys)
+			{
+				fields.Add(key, new ConfigField(x.fields[key]));
+			}
 		}
 
 		public void SaveToNode(ConfigNode node)
 		{
-			node.AddValue("isActive", isActive);
 			node.AddValue("prefab", prefab);
-			node.AddValue("mainTexture", mainTexture);
-			node.AddValue("emissionTexture", emissionTexture);
-			node.AddValue("offset", offset.ToString());
-			node.AddValue("useHalfOffset", useHalfOffset.ToString());
-			node.AddValue("rate", rate.ToString());
-			node.AddValue("lifetime", lifetime.ToString());
-			node.AddValue("velocity", velocity.ToString());
+			node.AddValue("main_texture", mainTexture);
+			node.AddValue("emission_texture", emissionTexture);
+
+			foreach (string key in fields.Keys)
+			{
+				node.AddValue(key, fields[key].GetValueForSave());
+			}
 		}
 	}
 
@@ -255,17 +234,13 @@ namespace Firefly
 			LoadParticleConfigs();
 		}
 
-		void LoadPlanetConfigs()
+		void LoadPlanetPackConfigs()
 		{
-			// clear the dict and list
-			bodyConfigs.Clear();
 			planetPackConfigs.Clear();
 
-			// get the planet packs
 			// here we're using the UrlConfig stuff, to be able to get the path of the config
 			UrlDir.UrlConfig[] urlConfigs = GameDatabase.Instance.GetConfigs("ATMOFX_PLANET_PACK");
 
-			// check if there's actually anything to load
 			if (urlConfigs.Length > 0)
 			{
 				for (int i = 0; i < urlConfigs.Length; i++)
@@ -292,7 +267,7 @@ namespace Firefly
 
 						Logging.Log($"Successfully registered planet pack cfg '{nodeName}'");
 						planetPackConfigs.Add(cfg);
-					} 
+					}
 					catch (Exception e)  // catching plain exception, to then log it
 					{
 						Logging.Log($"Exception while loading planet pack {nodeName}.");
@@ -307,19 +282,20 @@ namespace Firefly
 					}
 				}
 			}
+		}
 
-			// get the nodes
-			urlConfigs = GameDatabase.Instance.GetConfigs("ATMOFX_BODY");
+		void LoadPlanetConfigs()
+		{
+			bodyConfigs.Clear();
 
-			// check if there's actually anything to load
+			UrlDir.UrlConfig[] urlConfigs = GameDatabase.Instance.GetConfigs("ATMOFX_BODY");
 			if (urlConfigs.Length > 0)
 			{
-				// iterate over every node and store the data
 				for (int i = 0; i < urlConfigs.Length; i++)
 				{
 					try
 					{
-						bool success = ProcessSingleBodyNode(urlConfigs[i], out BodyConfig body);
+						bool success = ProcessBodyConfigNode(urlConfigs[i], out BodyConfig body);
 						bool isWrongVersion = body.configVersion != Versioning.ConfigVersion;
 
 						// couldn't load the config
@@ -334,6 +310,8 @@ namespace Firefly
 							));
 							continue;
 						}
+
+						// wrong version
 						if (isWrongVersion)
 						{
 							Logging.Log("Body couldn't be loaded (WRONG VERSION CONFIG)");
@@ -384,19 +362,14 @@ namespace Firefly
 			}
 
 			defaultConfig = bodyConfigs["Default"];
-
 			loadedBodyConfigs = bodyConfigs.Keys.ToArray();
 		}
 
 		void LoadPartConfigs()
 		{
-			// clear the dict
 			partConfigs.Clear();
 
-			// get the nodes
 			ConfigNode[] nodes = GameDatabase.Instance.GetConfigNodes("ATMOFX_PART");
-
-			// check if there's actually anything to load
 			if (nodes.Length > 0)
 			{
 				for (int i = 0; i < nodes.Length; i++)
@@ -428,10 +401,7 @@ namespace Firefly
 			particleConfigs.Clear();
 			texturesToLoad.Clear();
 
-			// get the nodes
 			ConfigNode[] nodes = GameDatabase.Instance.GetConfigNodes("ATMOFX_PARTICLES");
-
-			// check if there's actually anything to load
 			if (nodes.Length > 0)
 			{
 				for (int i = 0; i < nodes.Length; i++)
@@ -444,7 +414,52 @@ namespace Firefly
 			}
 		}
 
-		bool ProcessSingleBodyNode(UrlDir.UrlConfig cfg, out BodyConfig body)
+		bool ProcessPlanetPackNode(ConfigNode node, out PlanetPackConfig cfg)
+		{
+			Logging.Log($"Loading planet pack config");
+
+			// create the config
+			bool isFormatted = true;
+			cfg = new PlanetPackConfig
+			{
+				strengthMultiplier = ReadConfigFloat(node, "strength_multiplier", ref isFormatted),
+				transitionOffset = ReadConfigFloat(node, "transition_offset", ref isFormatted),
+			};
+
+			// read the affected body array
+			string array = node.GetValue("affected_bodies");
+			if (!string.IsNullOrEmpty(array))
+			{
+				// split into individual bodies
+				string[] strings = array.Split(',');
+				for (int i = 0; i < strings.Length; i++)
+				{
+					strings[i] = strings[i].Trim();
+				}
+
+				if (strings.Length < 1)
+				{
+					Logging.Log("WARNING: Planet pack config affects no bodies");
+					return false;
+				}
+
+				cfg.affectedBodies = strings;
+			}
+			else
+			{
+				isFormatted = false;
+			}
+
+			if (!isFormatted)
+			{
+				Logging.Log($"Planet pack config '{node.name}' is not formatted correctly");
+				return false;
+			}
+
+			return true;
+		}
+
+		bool ProcessBodyConfigNode(UrlDir.UrlConfig cfg, out BodyConfig body)
 		{
 			ConfigNode node = cfg.config;
 
@@ -467,28 +482,26 @@ namespace Firefly
 			{
 				cfgPath = cfg.parent.fullPath,
 				bodyName = bodyName,
-
-				configVersion = ReadConfigInt(node, "config_version", ref isFormatted),
-
-				strengthMultiplier = ReadConfigValue(node, "strength_multiplier", ref isFormatted),
-				lengthMultiplier = ReadConfigValue(node, "length_multiplier", ref isFormatted),
-				opacityMultiplier = ReadConfigValue(node, "opacity_multiplier", ref isFormatted),
-				wrapFresnelModifier = ReadConfigValue(node, "wrap_fresnel_modifier", ref isFormatted),
-				particleThreshold = ReadConfigValue(node, "particle_threshold", ref isFormatted),
-				streakProbability = ReadConfigValue(node, "streak_probability", ref isFormatted),
-				streakThreshold = ReadConfigValue(node, "streak_threshold", ref isFormatted)
+				configVersion = ReadConfigInt(node, "config_version", ref isFormatted)
 			};
+
+			// check if the config version is defined
+			if (body.configVersion == 0)  // not comparing to null, since uninitialized int is 0
+			{
+				// no config version, then version must be < 5 (cfg version which the versioning system was introduced in)
+				body.configVersion = 4;
+			}
+
+			// read the fields
+			foreach (string key in body.fields.Keys)
+			{
+				body.fields[key].ParseString(node.GetValue(key), ref isFormatted, false);
+			}
 
 			// read the colors
 			isFormatted = isFormatted && ProcessBodyColors(node, false, out body.colors);
 
-			if (body.configVersion == 0)  // not comparing to null, since uninitialized int is 0
-			{
-				// no configversion, then version must be < 5 (versioning introduced in 1.0.4)
-				body.configVersion = 4;
-			}
-
-			// is the config formatted correctly?
+			// check if formatted
 			if (!isFormatted)
 			{
 				Logging.Log($"Body config is not formatted correctly: {bodyName}");
@@ -502,53 +515,8 @@ namespace Firefly
 				if (planetPackConfigs[i].affectedBodies.Contains(bodyName))
 				{
 					body.planetPack = planetPackConfigs[i];
-					body.strengthMultiplier *= planetPackConfigs[i].strengthMultiplier;
+					body["strength_multiplier"] = (float)body["strength_multiplier"] * planetPackConfigs[i].strengthMultiplier;
 				}
-			}
-
-			return true;
-		}
-
-		bool ProcessPlanetPackNode(ConfigNode node, out PlanetPackConfig cfg)
-		{
-			Logging.Log($"Loading planet pack config");
-
-			// create the config
-			bool isFormatted = true;
-			cfg = new PlanetPackConfig
-			{
-				strengthMultiplier = ReadConfigValue(node, "strength_multiplier", ref isFormatted),
-				transitionOffset = ReadConfigValue(node, "transition_offset", ref isFormatted),
-			};
-
-			// read the affected body array
-			string array = node.GetValue("affected_bodies");
-
-			if (!string.IsNullOrEmpty(array))
-			{
-				string[] strings = array.Split(',');
-				for (int i = 0; i < strings.Length; i++)
-				{
-					strings[i] = strings[i].Trim();
-				}
-
-				if (strings.Length < 1)
-				{
-					Logging.Log("WARNING: Planet pack config affects no bodies");
-					return false;
-				}
-
-				cfg.affectedBodies = strings;
-			} else
-			{
-				isFormatted = false;
-			}
-
-			// is the config formatted correctly?
-			if (!isFormatted)
-			{
-				Logging.Log($"Planet pack config '{node.name}' is not formatted correctly");
-				return false;
 			}
 
 			return true;
@@ -571,9 +539,7 @@ namespace Firefly
 				ConfigNode singleNode = node.nodes[i];
 				string name = singleNode.name;
 
-				bool success = ProcessSingleParticleNode(singleNode, out ParticleConfig singleCfg);
-
-				// log error if the config is not formatted correctly
+				bool success = ProcessSingleParticleDef(singleNode, out ParticleConfig singleCfg);
 				if (!success)
 				{
 					Logging.Log($"Couldn't process single particle config {name} in {cfgName}");
@@ -593,7 +559,7 @@ namespace Firefly
 			}
 		}
 
-		bool ProcessSingleParticleNode(ConfigNode node, out ParticleConfig cfg)
+		bool ProcessSingleParticleDef(ConfigNode node, out ParticleConfig cfg)
 		{
 			bool isFormatted = true;
 			cfg = new ParticleConfig()
@@ -602,20 +568,18 @@ namespace Firefly
 
 				prefab = node.GetValue("prefab"),
 
-				mainTexture = node.GetValue("mainTexture"),
-				emissionTexture = node.GetValue("emissionTexture")
+				mainTexture = node.GetValue("main_texture"),
+				emissionTexture = node.GetValue("emission_texture")
 			};
 
+			// if no emission texture, set it to empty string
 			if (cfg.emissionTexture == "unused" || cfg.emissionTexture == "") cfg.emissionTexture = "";
 
-			isFormatted = isFormatted && Utils.EvaluateBool(node.GetValue("isActive"), out cfg.isActive);
-
-			isFormatted = isFormatted && Utils.EvaluateFloat(node.GetValue("offset"), out cfg.offset);
-			isFormatted = isFormatted && Utils.EvaluateBool(node.GetValue("useHalfOffset"), out cfg.useHalfOffset);
-
-			isFormatted = isFormatted && Utils.EvaluateFloatPair(node.GetValue("rate"), out cfg.rate);
-			isFormatted = isFormatted && Utils.EvaluateFloatPair(node.GetValue("lifetime"), out cfg.lifetime);
-			isFormatted = isFormatted && Utils.EvaluateFloatPair(node.GetValue("velocity"), out cfg.velocity);
+			// read the fields
+			foreach (string key in cfg.fields.Keys)
+			{
+				cfg.fields[key].ParseString(node.GetValue(key), ref isFormatted, false);
+			}
 
 			return isFormatted;
 		}
@@ -656,10 +620,7 @@ namespace Firefly
 			return isFormatted;
 		}
 
-		/// <summary>
-		/// Reads one float value from a node
-		/// </summary>
-		float ReadConfigValue(ConfigNode node, string key, ref bool isFormatted)
+		float ReadConfigFloat(ConfigNode node, string key, ref bool isFormatted)
 		{
 			bool success = Utils.EvaluateFloat(node.GetValue(key), out float result);
 			isFormatted = isFormatted && success;
@@ -667,9 +628,6 @@ namespace Firefly
 			return result;
 		}
 
-		/// <summary>
-		/// Reads one integer value from a node
-		/// </summary>
 		int ReadConfigInt(ConfigNode node, string key, ref bool isFormatted)
 		{
 			bool success = Utils.EvaluateInt(node.GetValue(key), out int result);
@@ -678,9 +636,6 @@ namespace Firefly
 			return result;
 		}
 
-		/// <summary>
-		/// Reads one boolean value from a node
-		/// </summary>
 		bool ReadConfigBoolean(ConfigNode node, string key, ref bool isFormatted)
 		{
 			bool success = Utils.EvaluateBool(node.GetValue(key), out bool result);
@@ -689,27 +644,18 @@ namespace Firefly
 			return result;
 		}
 
-		/// <summary>
-		/// Reads one HDR color value from a node
-		/// </summary>
-		HDRColor ReadConfigColorHDR(ConfigNode node, string key, bool partConfig, ref bool isFormatted)
+		HDRColor ReadConfigColorHDR(ConfigNode node, string key, bool isPartConfig, ref bool isFormatted)
 		{
-			// check if exists
 			if (!node.HasValue(key))
 			{
-				isFormatted = isFormatted && partConfig;
-
+				if (!isPartConfig) isFormatted = false;
 				return null;
 			}
 
-			// get the value
 			string value = node.GetValue(key);
-
-			// check if null
 			if (value.ToLower() == "null" || value.ToLower() == "default")
 			{
-				isFormatted = isFormatted && partConfig;
-
+				if (!isPartConfig) isFormatted = false;
 				return null;
 			}
 
@@ -719,9 +665,6 @@ namespace Firefly
 			return new HDRColor(sdr);
 		}
 
-		/// <summary>
-		/// Tries getting the body config for a specified body name, and fallbacks if desired
-		/// </summary>
 		public bool TryGetBodyConfig(string bodyName, bool fallback, out BodyConfig cfg)
 		{
 			bool hasConfig = bodyConfigs.ContainsKey(bodyName);
@@ -739,9 +682,6 @@ namespace Firefly
 			return hasConfig;
 		}
 
-		/// <summary>
-		/// Gets the body config for a specified vessel
-		/// </summary>
 		public BodyConfig GetVesselBody(Vessel vessel)
 		{
 			TryGetBodyConfig(vessel.mainBody.bodyName, true, out BodyConfig cfg);

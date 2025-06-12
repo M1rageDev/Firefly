@@ -112,16 +112,14 @@ namespace Firefly.GUI
 			}
 		}
 
-		// draws a setting bool override field
-		public static void DrawConfigFieldBool(string label, Dictionary<string, ModSettings.Field> tgl)
+		public static void DrawSettingsFieldBool(string label, Dictionary<string, ConfigField> tgl)
 		{
 			string needsReload = tgl[label].needsReload ? "*" : "";
 
 			tgl[label].value = GUILayout.Toggle((bool)tgl[label].value, label + needsReload);
 		}
 
-		// draws a setting float override field
-		public static void DrawConfigFieldFloat(string label, Dictionary<string, ModSettings.Field> tgl)
+		public static void DrawSettingsFieldFloat(string label, Dictionary<string, ConfigField> tgl)
 		{
 			string needsReload = tgl[label].needsReload ? "*" : "";
 
@@ -135,7 +133,62 @@ namespace Firefly.GUI
 			GUILayout.EndHorizontal();
 		}
 
-		// draws a labeled slider
+		public static void DrawConfigField(string label, Dictionary<string, ConfigField> holder, params GUILayoutOption[] layoutOptions)
+		{
+			switch (holder[label].valueType)
+			{
+				case ValueType.Boolean:
+					DrawConfigFieldBool(label, holder, layoutOptions);
+					break;
+				case ValueType.Float:
+					DrawConfigFieldFloat(label, holder, layoutOptions);
+					break;
+				case ValueType.FloatPair:
+					DrawConfigFieldFloatPair(label, holder, layoutOptions);
+					break;
+				default:
+					Debug.LogError($"GuiUtils.DrawConfigField: Unknown type {holder[label].valueType} for field {label}");
+					break;
+			}
+		}
+
+		public static void DrawConfigFieldBool(string label, Dictionary<string, ConfigField> holder, params GUILayoutOption[] layoutOptions)
+		{
+			holder[label].value = GUILayout.Toggle((bool)holder[label].value, label, layoutOptions);
+		}
+
+		public static void DrawConfigFieldFloat(string label, Dictionary<string, ConfigField> holder, params GUILayoutOption[] layoutOptions)
+		{
+			GUILayout.BeginHorizontal(layoutOptions);
+			GUILayout.Label(label);
+
+			holder[label].uiText = GUILayout.TextField(holder[label].uiText);
+			bool hasValue = float.TryParse(holder[label].uiText, out float value);
+			if (hasValue) holder[label].value = value;
+
+			GUILayout.EndHorizontal();
+		}
+
+		public static void DrawConfigFieldFloatPair(string label, Dictionary<string, ConfigField> holder, params GUILayoutOption[] layoutOptions)
+		{
+			GUILayout.BeginHorizontal(layoutOptions);
+			GUILayout.Label(label);
+
+			FloatPair newValue = (FloatPair)holder[label].value;
+
+			holder[label].uiText = GUILayout.TextField(holder[label].uiText);
+			bool hasValue = float.TryParse(holder[label].uiText, out float v);
+			if (hasValue) newValue.x = v;
+
+			holder[label].uiText1 = GUILayout.TextField(holder[label].uiText1);
+			hasValue = float.TryParse(holder[label].uiText1, out v);
+			if (hasValue) newValue.y = v;
+
+			holder[label].value = newValue;
+
+			GUILayout.EndHorizontal();
+		}
+
 		public static float LabelSlider(string label, float value, float startValue, float endValue)
 		{
 			GUILayout.BeginHorizontal();
@@ -148,7 +201,6 @@ namespace Firefly.GUI
 			return v;
 		}
 
-		// draws a float input field
 		public static void DrawFloatInput(string label, ref UiObjectInput<float> uiInput, params GUILayoutOption[] layoutOptions)
 		{
 			GUILayout.BeginHorizontal(layoutOptions);
@@ -172,7 +224,6 @@ namespace Firefly.GUI
 			GUILayout.EndHorizontal();
 		}
 
-		// draws a string input field
 		public static void DrawStringInput(string label, ref string text, float maxFieldWidth = -1f, params GUILayoutOption[] layoutOptions)
 		{
 			GUILayout.BeginHorizontal(layoutOptions);
@@ -189,7 +240,6 @@ namespace Firefly.GUI
 			GUILayout.EndHorizontal();
 		}
 
-		// draws a boolean input field
 		public static void DrawBoolInput(string label, ref bool val, params GUILayoutOption[] layoutOptions)
 		{
 			GUILayout.BeginHorizontal(layoutOptions);
@@ -200,7 +250,6 @@ namespace Firefly.GUI
 			GUILayout.EndHorizontal();
 		}
 
-		// draws a float pair input field (2 float values)
 		public static void DrawFloatPairInput(string label, ref UiObjectInput<FloatPair> uiInput, params GUILayoutOption[] layoutOptions)
 		{
 			GUILayout.BeginHorizontal(layoutOptions);

@@ -96,12 +96,6 @@ namespace Firefly.GUI
 		Vector2 ui_bodyListPosition;
 		int ui_bodyChoice;
 
-		string ui_strengthMultiplier;
-		string ui_lengthMultiplier;
-		string ui_opacityMultiplier;
-		string ui_wrapFresnelModifier;
-		string ui_particleThreshold;
-
 		// dialog windows
 		public ColorPickerWindow colorPicker;
 		string currentlyPicking;
@@ -188,6 +182,7 @@ namespace Firefly.GUI
 
 			// apply stuff
 			fxModule.overrideData.bodyConfig = config;
+			fxModule.overrideData.entryDirection = GetWorldDirection();
 
 			// 3d
 			if (fxModule == null || fxModule.fxVessel == null) return;
@@ -273,30 +268,23 @@ namespace Firefly.GUI
 
 		void DrawBodyConfiguration()
 		{
-			GuiUtils.DrawFloatInput("Strength multiplier", ref ui_strengthMultiplier, ref config.strengthMultiplier, GUILayout.Width(300f));
-			GuiUtils.DrawFloatInput("Length multiplier", ref ui_lengthMultiplier, ref config.lengthMultiplier);
-			GuiUtils.DrawFloatInput("Opacity multiplier", ref ui_opacityMultiplier, ref config.opacityMultiplier);
-			GuiUtils.DrawFloatInput("Wrap fresnel modifier", ref ui_wrapFresnelModifier, ref config.wrapFresnelModifier);
-			GuiUtils.DrawFloatInput("Particle threshold", ref ui_particleThreshold, ref config.particleThreshold);
+			foreach (string key in config.fields.Keys)
+			{
+				if (key == "streakProbability" || key == "streakThreshold") continue; // skip streak fields, they are drawn separately as sliders
 
-			config.streakProbability = GuiUtils.LabelSlider("Streak probability", config.streakProbability, 0f, 0.09f);
-			config.streakThreshold = GuiUtils.LabelSlider("Streak threshold", config.streakThreshold, 0f, -0.5f);
+				GuiUtils.DrawConfigFieldFloat(key, config.fields, GUILayout.Width(300f));
+			}
+
+			config["streak_probability"] = GuiUtils.LabelSlider("streak_probability", (float)config["streak_probability"], 0f, 0.09f);
+			config["streak_threshold"] = GuiUtils.LabelSlider("streak_threshold", (float)config["streak_threshold"], 0f, -0.5f);
 		}
 
 		void DrawColorConfiguration()
 		{
-			DrawColorButton("Glow", "glow");
-			DrawColorButton("Hot Glow", "glow_hot");
-
-			DrawColorButton("Trail Primary", "trail_primary");
-			DrawColorButton("Trail Secondary", "trail_secondary");
-			DrawColorButton("Trail Tertiary", "trail_tertiary");
-			DrawColorButton("Trail Streak", "trail_streak");
-
-			DrawColorButton("Wrap Layer", "wrap_layer");
-			DrawColorButton("Wrap Streak", "wrap_streak");
-
-			DrawColorButton("Bowshock", "shockwave");
+			foreach (string key in config.colors.fields.Keys)
+			{
+				DrawColorButton(key, key);
+			}
 		}
 
 		// draws a button for a config color
@@ -360,11 +348,10 @@ namespace Firefly.GUI
 		// resets the ui input texts
 		void ResetFieldText()
 		{
-			ui_strengthMultiplier = config.strengthMultiplier.ToString();
-			ui_lengthMultiplier = config.lengthMultiplier.ToString();
-			ui_opacityMultiplier = config.opacityMultiplier.ToString();
-			ui_wrapFresnelModifier = config.wrapFresnelModifier.ToString();
-			ui_particleThreshold = config.particleThreshold.ToString();
+			foreach (string key in config.fields.Keys)
+			{
+				config.fields[key].uiText = config[key].ToString();
+			}
 		}
 
 		// sets the direction to the current camera facing
@@ -375,17 +362,20 @@ namespace Firefly.GUI
 			if (FlightCamera.fetch.mainCamera == null) return;
 
 			effectDirection = vessel.transform.InverseTransformDirection(FlightCamera.fetch.mainCamera.transform.forward);
-			fxModule.overrideData.entryDirection = vessel.transform.TransformDirection(effectDirection);
 		}
 
 		// sets the direction to the ship's axis
 		void ApplyShipDirection()
 		{
-			Vessel vessel = FlightGlobals.ActiveVessel;
-			if (vessel == null) return;
-
 			effectDirection = -Vector3.up;
-			fxModule.overrideData.entryDirection = vessel.transform.TransformDirection(effectDirection);
+		}
+
+		Vector3 GetWorldDirection()
+		{
+			Vessel vessel = FlightGlobals.ActiveVessel;
+			if (vessel == null) return Vector3.zero;
+
+			return vessel.transform.TransformDirection(effectDirection);
 		}
 
 		// gets called when the color picker applies a color

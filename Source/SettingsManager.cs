@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using CommNet.Network;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -8,37 +9,11 @@ namespace Firefly
 	{
 		public static ModSettings I { get; private set; }
 
-		public enum ValueType
-		{
-			Boolean,
-			Float,
-			Float3
-		}
-
-		public class Field
-		{
-			public object value;
-			public ValueType valueType;
-
-			public bool needsReload;
-
-			public string uiText;
-
-			public Field(object value, ValueType valueType, bool needsReload)
-			{
-				this.value = value;
-				this.valueType = valueType;
-				this.needsReload = needsReload;
-
-				this.uiText = value.ToString();
-			}
-		}
-
-		public Dictionary<string, Field> fields;
+		public Dictionary<string, ConfigField> fields;
 
 		public ModSettings()
 		{
-			this.fields = new Dictionary<string, Field>();
+			this.fields = new Dictionary<string, ConfigField>();
 
 			I = this;
 		}
@@ -47,13 +22,13 @@ namespace Firefly
 		{
 			ModSettings ms = new ModSettings
 			{
-				fields = new Dictionary<string, Field>()
+				fields = new Dictionary<string, ConfigField>()
 				{
-					{ "hdr_override", new Field(true, ValueType.Boolean, false) },
-					{ "disable_bowshock", new Field(false, ValueType.Boolean, false) },
-					{ "disable_particles", new Field(false, ValueType.Boolean, true) },
-					{ "strength_base", new Field(2800f, ValueType.Float, false) },
-					{ "length_mult", new Field(1f, ValueType.Float, false) }
+					{ "hdr_override", new ConfigField(true, ValueType.Boolean, false) },
+					{ "disable_bowshock", new ConfigField(false, ValueType.Boolean, false) },
+					{ "disable_particles", new ConfigField(false, ValueType.Boolean, true) },
+					{ "strength_base", new ConfigField(2800f, ValueType.Float, false) },
+					{ "length_mult", new ConfigField(1f, ValueType.Float, false) }
 				}
 			};
 
@@ -67,16 +42,8 @@ namespace Firefly
 		{
 			for (int i = 0; i < fields.Count; i++)
 			{
-				KeyValuePair<string, Field> elem = fields.ElementAt(i);
-				object val = elem.Value.value;
-
-				// special case for float3
-				if (elem.Value.valueType == ValueType.Float3)
-				{
-					Vector3 vec = (Vector3)val;
-
-					val = string.Join(" ", vec.x, vec.y, vec.z);
-				}
+				KeyValuePair<string, ConfigField> elem = fields.ElementAt(i);
+				object val = elem.Value.GetValueForSave();
 
 				// save
 				node.AddValue(elem.Key, val);
@@ -91,7 +58,7 @@ namespace Firefly
 
 			for (int i = 0; i < fields.Count; i++)
 			{
-				KeyValuePair<string, Field> element = fields.ElementAt(i);
+				KeyValuePair<string, ConfigField> element = fields.ElementAt(i);
 				result += $"<{element.Value.valueType}>{element.Key}";
 				result += $": {element.Value.value}";
 				result += "\n";
@@ -116,7 +83,7 @@ namespace Firefly
 		/// <summary>
 		/// Gets a field from the dict specified by a key
 		/// </summary>
-		public Field GetField(string key)
+		public ConfigField GetField(string key)
 		{
 			if (fields.ContainsKey(key))
 			{
@@ -193,9 +160,9 @@ namespace Firefly
 			bool isFormatted = true;
 			for (int i = 0; i < modSettings.fields.Count; i++)
 			{
-				KeyValuePair<string, ModSettings.Field> e = modSettings.fields.ElementAt(i);
+				KeyValuePair<string, ConfigField> e = modSettings.fields.ElementAt(i);
 
-				modSettings[e.Key] = ReadSettingsField(settingsNode, e.Key, ref isFormatted);
+				modSettings.fields[e.Key].ParseString(settingsNode.GetValue(e.Key), ref isFormatted);
 			}
 
 			if (!isFormatted)
@@ -205,47 +172,6 @@ namespace Firefly
 			}
 
 			Logging.Log("Loaded Mod Settings: \n" + modSettings.ToString());
-		}
-
-		/// <summary>
-		/// Reads one boolean value from a node
-		/// </summary>
-		object ReadSettingsField(ConfigNode node, string field, ref bool isFormatted)
-		{
-			string value = node.GetValue(field);
-			ModSettings.ValueType? type = modSettings.GetFieldType(field);
-
-			if (value == null)
-			{
-				isFormatted = false;
-				return null;
-			}
-
-			bool success = false;
-			object result = default;
-			switch (type)
-			{
-				case ModSettings.ValueType.Boolean:
-					bool result_bool;
-					success = Utils.EvaluateBool(value, out result_bool);
-					result = result_bool;
-					break;
-				case ModSettings.ValueType.Float:
-					float result_float;
-					success = Utils.EvaluateFloat(value, out result_float);
-					result = result_float;
-					break;
-				case ModSettings.ValueType.Float3:
-					Vector3 result_float3;
-					success = Utils.EvaluateFloat3(value, out result_float3);
-					result = result_float3;
-					break;
-				default: break;
-			}
-
-			isFormatted = isFormatted && success;
-
-			return result;
 		}
 	}
 }

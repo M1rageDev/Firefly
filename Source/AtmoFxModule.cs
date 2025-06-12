@@ -494,7 +494,7 @@ namespace Firefly
 			if (!string.IsNullOrEmpty(cfg.emissionTexture))
 				if (!AssetLoader.Instance.loadedTextures.ContainsKey(cfg.emissionTexture)) return;
 
-			if (!cfg.isActive)
+			if (!(bool)cfg["is_active"])
 			{
 				Logging.Log($"Skipping particle system {cfg.name}, since it is marked as inactive");
 				return;
@@ -511,7 +511,8 @@ namespace Firefly
 			ps.transform.localPosition = fxVessel.vesselBoundCenter;
 
 			ParticleSystem.MainModule mainModule = ps.main;
-			mainModule.startLifetime = new ParticleSystem.MinMaxCurve(cfg.lifetime.x, cfg.lifetime.y);
+			FloatPair lifetime = (FloatPair)cfg["lifetime"];
+			mainModule.startLifetime = new ParticleSystem.MinMaxCurve(lifetime.x, lifetime.y);
 
 			ParticleSystem.ShapeModule shapeModule = ps.shape;
 			shapeModule.scale = fxVessel.vesselBoundExtents * 2f;
@@ -540,11 +541,11 @@ namespace Firefly
 
 				system = ps,
 
-				offset = cfg.offset,
-				useHalfOffset = cfg.useHalfOffset,
+				offset = (float)cfg["offset"],
+				useHalfOffset = (bool)cfg["use_half_offset"],
 
-				rate = cfg.rate,
-				velocity = cfg.velocity
+				rate = (FloatPair)cfg["rate"],
+				velocity = (FloatPair)cfg["velocity"]
 			});
 			fxVessel.particleKeys.Add(cfg.name);
 		}
@@ -589,7 +590,7 @@ namespace Firefly
 			BodyConfig config = GetCurrentConfig();
 
 			// check if we should actually do the particles
-			if (entryStrength < config.particleThreshold)
+			if (entryStrength < (float)config["particle_threshold"])
 			{
 				KillAllParticles();
 				return;
@@ -605,7 +606,7 @@ namespace Firefly
 			float halfLengthMultiplier = Mathf.Max(lengthMultiplier * 0.5f, 1f);
 
 			// update for each particle
-			desiredRate = Mathf.Clamp01((entryStrength - config.particleThreshold) / 600f);
+			desiredRate = Mathf.Clamp01((entryStrength - (float)config["particle_threshold"]) / 600f);
 			for (int i = 0; i < fxVessel.allParticles.Count; i++)
 			{
 				FxParticleSystem particle = fxVessel.allParticles[fxVessel.particleKeys[i]];
@@ -844,11 +845,11 @@ namespace Firefly
 			fxVessel.material.SetInt("_DisableBowshock", (bool)ModSettings.I["disable_bowshock"] ? 1 : 0);
 
 			fxVessel.material.SetFloat("_LengthMultiplier", GetLengthMultiplier());
-			fxVessel.material.SetFloat("_OpacityMultiplier", config.opacityMultiplier);
-			fxVessel.material.SetFloat("_WrapFresnelModifier", config.wrapFresnelModifier);
+			fxVessel.material.SetFloat("_OpacityMultiplier", (float)config["opacity_multiplier"]);
+			fxVessel.material.SetFloat("_WrapFresnelModifier", (float)config["wrap_fresnel_modifier"]);
 
-			fxVessel.material.SetFloat("_StreakProbability", config.streakProbability);
-			fxVessel.material.SetFloat("_StreakThreshold", config.streakThreshold);
+			fxVessel.material.SetFloat("_StreakProbability", (float)config["streak_probability"]);
+			fxVessel.material.SetFloat("_StreakThreshold", (float)config["streak_threshold"]);
 		}
 
 		/// <summary>
@@ -1001,10 +1002,10 @@ namespace Firefly
 
 			if (overridePhysics)
 			{
-				return overrideData.effectStrength * config.strengthMultiplier;
+				return overrideData.effectStrength * (float)config["strength_multiplier"];
 			} else
 			{
-				return strength * config.strengthMultiplier;
+				return strength * (float)config["strength_multiplier"];
 			}
 		}
 
@@ -1027,7 +1028,7 @@ namespace Firefly
 		/// </summary>
 		float GetLengthMultiplier()
 		{
-			return fxVessel.baseLengthMultiplier * GetCurrentConfig().lengthMultiplier * (float)ModSettings.I["length_mult"];
+			return fxVessel.baseLengthMultiplier * (float)GetCurrentConfig()["length_multiplier"] * (float)ModSettings.I["length_mult"];
 		}
 
 		/// <summary>
