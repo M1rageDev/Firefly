@@ -22,9 +22,9 @@ float4 _GlowColor;
 float4 _HotGlowColor;
 float4 _TertiaryColor;
 
-float _BlueMultiplier;
+float _GlowMultiplier;
 
-float _HeatMultiplier;
+float _BlueMultiplier;
 			
 float _FxState;
 
@@ -84,7 +84,7 @@ half4 frag(FS_INPUT IN) : SV_Target
 	float rawDot = saturate(dot(IN.normal, _Velocity));
 	float velDot = saturate(rawDot + 0.2);
 
-	float alpha = saturate(shadow * whiteRatio * _HeatMultiplier * velDot * _FxState);
+	float alpha = saturate(shadow * whiteRatio * _GlowMultiplier * velDot * _FxState);
 				
 	// Entry heat color
 	float3 entryHeat = GetEntryColor(_GlowColor, _HotGlowColor, (entrySpeed + _BlueMultiplier)) * shadow * velDot * lerp(0, 4, faintRatio);

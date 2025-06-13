@@ -3,6 +3,7 @@
 ## Unreleased
 
 * Add Space Shuttle System envelope (thanks **@giuliodondi**)
+* Make the effect override system more universal, which should allow mods to create custom effects using Firefly
 * Fix the particles (again), now they should be done for good
 
 ## 1.0.3 - 2025-04-10

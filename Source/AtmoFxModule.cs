@@ -350,6 +350,22 @@ namespace Firefly
 		}
 
 		/// <summary>
+		/// Resets the commandbuffer (destroys, inits and populates it)
+		/// </summary>
+		public void ReloadCommandBuffer()
+		{
+			if (fxVessel.commandBuffer == null)
+			{
+				Logging.Log("Command buffer is null, cannot reload it");
+				return;
+			}
+
+			DestroyCommandBuffer();
+			InitializeCommandBuffer();
+			PopulateCommandBuffer();
+		}
+
+		/// <summary>
 		/// Resets the model renderer cache for each part
 		/// </summary>
 		void ResetPartModelCache()
@@ -846,6 +862,8 @@ namespace Firefly
 
 			fxVessel.material.SetFloat("_LengthMultiplier", GetLengthMultiplier());
 			fxVessel.material.SetFloat("_OpacityMultiplier", (float)config["opacity_multiplier"]);
+			fxVessel.material.SetFloat("_GlowMultiplier", (float)config["glow_multiplier"]);
+			fxVessel.material.SetFloat("_WrapOpacityMultiplier", (float)config["wrap_opacity_multiplier"]);
 			fxVessel.material.SetFloat("_WrapFresnelModifier", (float)config["wrap_fresnel_modifier"]);
 
 			fxVessel.material.SetFloat("_StreakProbability", (float)config["streak_probability"]);

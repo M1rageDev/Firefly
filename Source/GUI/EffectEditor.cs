@@ -384,9 +384,7 @@ namespace Firefly.GUI
 			config.colors[currentlyPicking] = new HDRColor(colorPicker.color);
 
 			// reset the commandbuffer, to update colors
-			fxModule.DestroyCommandBuffer();
-			fxModule.InitializeCommandBuffer();
-			fxModule.PopulateCommandBuffer();
+			fxModule.ReloadCommandBuffer();
 		}
 
 		// gets called when the config creation popup confirms creation and closes

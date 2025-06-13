@@ -76,6 +76,8 @@ namespace Firefly
 			fields.Add("strength_multiplier", new ConfigField(1f, ValueType.Float));
 			fields.Add("length_multiplier", new ConfigField(1f, ValueType.Float));
 			fields.Add("opacity_multiplier", new ConfigField(1f, ValueType.Float));
+			fields.Add("glow_multiplier", new ConfigField(1f, ValueType.Float));
+			fields.Add("wrap_opacity_multiplier", new ConfigField(1f, ValueType.Float));
 			fields.Add("wrap_fresnel_modifier", new ConfigField(1f, ValueType.Float));
 			fields.Add("particle_threshold", new ConfigField(1800f, ValueType.Float));
 			fields.Add("streak_probability", new ConfigField(0f, ValueType.Float));

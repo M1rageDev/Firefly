@@ -11,7 +11,6 @@ Shader "Firefly/Firefly"
 		[Header(Values)]
 		_TrailAlphaMultiplier ("Trail Alpha Multiplier", Float) = 1
 		_BlueMultiplier ("Blue Multiplier", Float) = 0.1
-		_HeatMultiplier ("Heat Multiplier", Float) = 1
 		_OpacityMultiplier ("Opacity Multiplier", Float) = 1
 		_WrapFresnelModifier ("Wrap layer fresnel modifier", Float) = 0
 		_StreakProbability ("Streak Probability", Float) = 0.1

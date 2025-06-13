@@ -10,6 +10,7 @@ float _TrailAlphaMultiplier;
 float _BlueMultiplier;
 float _SideMultiplier;
 float _OpacityMultiplier;
+float _WrapOpacityMultiplier;
 float _WrapFresnelModifier;
 float _StreakProbability;
 float _StreakThreshold;
@@ -397,7 +398,7 @@ half4 gs_frag(GS_DATA IN) : SV_Target
 	float scalar1 = 1 - trailPosScalar0;
 				
 	// set the fragment alpha to the new opacity with noise
-	c.a = lerp(alpha0, alpha1, IN.layer) * lerp(scalar0, scalar1, IN.layer) * _OpacityMultiplier;
+	c.a = lerp(alpha0, alpha1, IN.layer) * lerp(scalar0, scalar1, IN.layer) * _OpacityMultiplier * lerp(1.0, _WrapOpacityMultiplier, IN.layer);
 				
 	// doing alpha blending before Unity can clamp the colors to LDR (if not in HDR mode)
 	float c_a = saturate(c.a);
