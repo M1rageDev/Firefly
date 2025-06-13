@@ -601,9 +601,6 @@ namespace Firefly
 			}
 		}
 
-		/// <summary>
-		/// Processes the colors node of a body
-		/// </summary>
 		bool ProcessBodyColors(ConfigNode rootNode, bool partConfig, out BodyColors body)
 		{
 			body = new BodyColors();
@@ -650,13 +647,17 @@ namespace Firefly
 		{
 			if (!node.HasValue(key))
 			{
+				// if this is not a partconfig (it's a body config) then make sure to set isFormatted to false
+				// partconfigs can have missing values, but body configs should not
 				if (!isPartConfig) isFormatted = false;
+
 				return null;
 			}
 
 			string value = node.GetValue(key);
 			if (value.ToLower() == "null" || value.ToLower() == "default")
 			{
+				// same logic as above
 				if (!isPartConfig) isFormatted = false;
 				return null;
 			}
@@ -667,6 +668,13 @@ namespace Firefly
 			return new HDRColor(sdr);
 		}
 
+		/// <summary>
+		/// Tries to get a body config for a given body name. Returns true if the config was found, false otherwise.
+		/// </summary>
+		/// <param name="bodyName">The config name to get</param>
+		/// <param name="fallback">Whether to fallback to the default config if specified config was not found</param>
+		/// <param name="cfg">The output config</param>
+		/// <returns>Whether the specified config was found</returns>
 		public bool TryGetBodyConfig(string bodyName, bool fallback, out BodyConfig cfg)
 		{
 			bool hasConfig = bodyConfigs.ContainsKey(bodyName);
@@ -684,6 +692,9 @@ namespace Firefly
 			return hasConfig;
 		}
 
+		/// <summary>
+		/// Gets the body config for a given vessel. Returns the default config if not found.
+		/// </summary>
 		public BodyConfig GetVesselBody(Vessel vessel)
 		{
 			TryGetBodyConfig(vessel.mainBody.bodyName, true, out BodyConfig cfg);
