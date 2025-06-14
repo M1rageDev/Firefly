@@ -371,6 +371,10 @@ namespace Firefly
 			{
 				return VectorDivide(Vector3.one, model.localScale);
 			}
+			else if (part.name.Contains("largeSolarPanel"))
+			{
+				return Vector3.one;  // Gigantor XL needs 1, since the animation scales the panel
+			}
 			else
 			{
 				return VectorDivide(Vector3.one, model.lossyScale);
