@@ -318,7 +318,7 @@ namespace Firefly
 						{
 							Logging.Log("Body couldn't be loaded (WRONG VERSION CONFIG)");
 							ErrorManager.Instance.RegisterError(new ModLoadError(
-								cause: ModLoadError.ProbableCause.WrongVersionConfig,
+								cause: ModLoadError.ProbableCause.ConfigVersionMismatch,
 								isSerious: false,
 								sourcePath: urlConfigs[i].url,
 								description: "This config could not be registered. " + 
