@@ -335,7 +335,7 @@ namespace Firefly
 		// note - the output vector is actually a result of (1 / result), to make the shader code use multiplication instead of division
 		public static Vector3 GetModelEnvelopeScale(Part part, Transform model)
 		{
-			if (part.name.Contains("GrapplingDevice") || part.name.Contains("smallClaw"))
+			if (part.name.Contains("GrapplingDevice") || part.name.Contains("smallClaw") || part.name.Contains("longAntenna"))
 			{
 				return VectorDivide(Vector3.one, model.localScale);
 			}
