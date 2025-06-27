@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using FireflyAPI;
 
 namespace Firefly.GUI
 {
@@ -137,13 +138,13 @@ namespace Firefly.GUI
 		{
 			switch (holder[label].valueType)
 			{
-				case ValueType.Boolean:
+				case FireflyAPI.ValueType.Boolean:
 					DrawConfigFieldBool(label, holder, layoutOptions);
 					break;
-				case ValueType.Float:
+				case FireflyAPI.ValueType.Float:
 					DrawConfigFieldFloat(label, holder, layoutOptions);
 					break;
-				case ValueType.FloatPair:
+				case FireflyAPI.ValueType.FloatPair:
 					DrawConfigFieldFloatPair(label, holder, layoutOptions);
 					break;
 				default:

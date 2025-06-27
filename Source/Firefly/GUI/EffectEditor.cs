@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using UnityEngine;
+using FireflyAPI;
 
 namespace Firefly.GUI
 {
@@ -139,17 +140,17 @@ namespace Firefly.GUI
 				// otherwise, go with the default
 				ui_bodyChoice = 0;
 				currentBody = "Default";
-				config = new BodyConfig(ConfigManager.Instance.defaultConfig);
+				config = new BodyConfig(ConfigManager.Instance.DefaultConfig);
 			}
 
 			ResetFieldText();
 
 			// load effects
-			fxModule.overridePhysics = true;
-			fxModule.overrideData = OverridePhysicsData.Default();
-			fxModule.overrideData.effectStrength = (float)ModSettings.I["strength_base"];
-			fxModule.overrideData.effectState = 1f;
-			fxModule.overrideData.overridenBy = "Effect editor";
+			fxModule.OverridePhysics = true;
+			fxModule.ResetOverride();
+			fxModule.OverrideEffectStrength = (float)ModSettings.I["strength_base"];
+			fxModule.OverrideEffectState = 1f;
+			fxModule.OverridenBy = "Effect editor";
 			if (!fxModule.isLoaded) fxModule.CreateVesselFx();
 			ApplyShipDirection();
 		}
@@ -158,7 +159,7 @@ namespace Firefly.GUI
 		{
 			base.Hide();
 
-			fxModule.overridePhysics = false;
+			fxModule.OverridePhysics = false;
 		}
 
 		public override void Draw(int id)
@@ -181,8 +182,8 @@ namespace Firefly.GUI
 			UnityEngine.GUI.DragWindow();
 
 			// apply stuff
-			fxModule.overrideData.bodyConfig = config;
-			fxModule.overrideData.entryDirection = GetWorldDirection();
+			fxModule.OverrideBodyConfig = config;
+			fxModule.OverrideEntryDirection = GetWorldDirection();
 
 			// 3d
 			if (fxModule == null || fxModule.fxVessel == null) return;
@@ -243,14 +244,14 @@ namespace Firefly.GUI
 			{
 				// update ConfigManager
 				if (currentBody != "Default") ConfigManager.Instance.bodyConfigs[currentBody] = new BodyConfig(config);
-				else ConfigManager.Instance.defaultConfig = new BodyConfig(config);
+				else ConfigManager.Instance.DefaultConfig = new BodyConfig(config);
 
 				// reset the config stuff
 				ui_bodyChoice = newChoice;
 				currentBody = bodyConfigs[newChoice];
 
 				config = new BodyConfig(ConfigManager.Instance.bodyConfigs[currentBody]);
-				fxModule.overrideData.bodyConfig = config;
+				fxModule.OverrideBodyConfig = config;
 				ResetFieldText();
 
 				fxModule.ReloadVessel();
@@ -262,8 +263,8 @@ namespace Firefly.GUI
 		void DrawSimConfiguration()
 		{
 			GUILayout.Label("These sliders are for previewing the effects while not reentering. Do not use these during normal gameplay!");
-			fxModule.overrideData.effectStrength = GuiUtils.LabelSlider("Simulated effect strength", fxModule.overrideData.effectStrength, 0f, (float)ModSettings.I["strength_base"]);
-			fxModule.overrideData.effectState = GuiUtils.LabelSlider("Simulated effect state", fxModule.overrideData.effectState, 0f, 1f);
+			fxModule.OverrideEffectStrength = GuiUtils.LabelSlider("Simulated effect strength", fxModule.OverrideEffectStrength, 0f, (float)ModSettings.I["strength_base"]);
+			fxModule.OverrideEffectState = GuiUtils.LabelSlider("Simulated effect state", fxModule.OverrideEffectState, 0f, 1f);
 		}
 
 		void DrawBodyConfiguration()
@@ -304,7 +305,7 @@ namespace Firefly.GUI
 		{
 			// save config to ConfigManager
 			if (currentBody != "Default") ConfigManager.Instance.bodyConfigs[currentBody] = new BodyConfig(config);
-			else ConfigManager.Instance.defaultConfig = new BodyConfig(config);
+			else ConfigManager.Instance.DefaultConfig = new BodyConfig(config);
 
 			Logging.Log($"Saving body config {currentBody}");
 
@@ -335,7 +336,7 @@ namespace Firefly.GUI
 		{
 			ConfigManager.Instance.bodyConfigs.Remove(currentBody);
 			config = new BodyConfig(ConfigManager.Instance.bodyConfigs["Default"]);
-			fxModule.overrideData.bodyConfig = config;
+			fxModule.OverrideBodyConfig = config;
 			currentBody = "Default";
 			ui_bodyChoice = 0;
 
@@ -392,7 +393,7 @@ namespace Firefly.GUI
 		{
 			// update ConfigManager
 			if (currentBody != "Default") ConfigManager.Instance.bodyConfigs[currentBody] = new BodyConfig(config);
-			else ConfigManager.Instance.defaultConfig = new BodyConfig(config);
+			else ConfigManager.Instance.DefaultConfig = new BodyConfig(config);
 
 			// get the new config from the selected template
 			config = new BodyConfig(ConfigManager.Instance.bodyConfigs[createConfigPopup.selectedTemplate]);
@@ -411,7 +412,7 @@ namespace Firefly.GUI
 			bodyConfigs = newBodyArray;
 			ResetFieldText();
 
-			fxModule.overrideData.bodyConfig = config;
+			fxModule.OverrideBodyConfig = config;
 			fxModule.ReloadVessel();
 		}
 	}

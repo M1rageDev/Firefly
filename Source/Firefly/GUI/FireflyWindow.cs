@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using FireflyAPI;
 
 namespace Firefly.GUI
 {
@@ -66,9 +67,9 @@ namespace Firefly.GUI
 				return;
 			}
 
-			if (fxModule.overridePhysics)
+			if (fxModule.OverridePhysics)
 			{
-				GUILayout.Label("Physics is overriden by " + fxModule.overrideData.overridenBy);
+				GUILayout.Label("Physics is overriden by " + fxModule.OverridenBy);
 				if (EffectEditor.Instance.show) GUILayout.Label("Effect editor open.");
 			}
 
@@ -92,7 +93,7 @@ namespace Firefly.GUI
 			GUILayout.Label($"Current config is {fxModule.currentBody.bodyName}");
 			GUILayout.Label($"Active vessel is {vessel.vesselName}");
 			GUILayout.Label($"Vessel radius is {fxModule.fxVessel.vesselBoundRadius}");
-			if (!fxModule.overridePhysics)
+			if (!fxModule.OverridePhysics)
 			{
 				GUILayout.Label($"Entry strength is {fxModule.GetEntryStrength()}");
 				GUILayout.Label($"Dynamic pressure [kPa] {vessel.dynamicPressurekPa}");

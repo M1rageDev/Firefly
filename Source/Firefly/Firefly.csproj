@@ -29,6 +29,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="$(RepoRootPath)/GameData/Firefly/Plugins/FireflyAPI.dll">
+      <Private>False</Private>
+      <KSPAssemblyName>FireflyAPI</KSPAssemblyName>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="Properties\Firefly.version" />
     <None Include="Properties\Firefly.version.props" />
   </ItemGroup>
@@ -42,6 +48,7 @@
   <PropertyGroup>
     <BinariesOutputRelativePath>GameData/Firefly/Plugins</BinariesOutputRelativePath>
     <GenerateKSPAssemblyAttribute>true</GenerateKSPAssemblyAttribute>
+    <GenerateKSPAssemblyDependencyAttributes>true</GenerateKSPAssemblyDependencyAttributes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="KSPBuildTools" Version="0.0.4" />
