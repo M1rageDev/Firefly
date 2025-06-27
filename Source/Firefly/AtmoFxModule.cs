@@ -42,6 +42,13 @@ namespace Firefly
 				ConfigManager.Instance.defaultConfig
 			);
 		}
+
+		public void SetOverridenBy(string overridenBy) => this.overridenBy = overridenBy;
+		public void SetEntryDirection(Vector3 entryDirection) => this.entryDirection = entryDirection;
+		public void SetEffectStrength(float effectStrength) => this.effectStrength = effectStrength;
+		public void SetEffectState(float effectState) => this.effectState = effectState;
+		public void SetAngleOfAttack(float angleOfAttack) => this.angleOfAttack = angleOfAttack;
+		public void SetBodyConfig(BodyConfig bodyConfig) => this.bodyConfig = bodyConfig;
 	}
 
 	/// <summary>

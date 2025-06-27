@@ -310,7 +310,9 @@ namespace Firefly
 								sourcePath: urlConfigs[i].url,
 								description: "This config could not be registered. " + ModLoadError.BadConfigAdvice
 							));
-							continue;
+
+							// make sure to check, to be able to display another error
+							if (!isWrongVersion) continue;
 						}
 
 						// wrong version
