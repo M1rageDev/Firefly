@@ -8,53 +8,32 @@ namespace FireflyAPI
 {
 	public static class FireflyAPIManager
 	{
-		static bool? _isFireflyInstalled = null;
+		public static bool IsFireflyInstalled { get; set; }
+		public static Assembly FireflyAssembly { get; set; }
+		public static IConfigManager ConfigManager { get; set; }
 
-		public static bool IsFireflyInstalled()
+		static FireflyAPIManager()
 		{
-			if (_isFireflyInstalled == null)
-			{
-				_isFireflyInstalled = AssemblyLoader.loadedAssemblies.Contains("Firefly");
-			}
+			IsFireflyInstalled = AssemblyLoader.loadedAssemblies.Contains("Firefly");
+			if (!IsFireflyInstalled) return;
 
-			return _isFireflyInstalled.Value;
+			FireflyAssembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.name.Equals("Firefly", StringComparison.OrdinalIgnoreCase)).assembly;
+
+			Type mgrType = FireflyAssembly.GetType("Firefly.ConfigManager");
+			object mgr = mgrType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static).GetValue(null);
+			ConfigManager = mgr as IConfigManager;
 		}
 
 		public static bool TryFindModule(Vessel vessel, out IFireflyModule module)
 		{
-			module = vessel.FindVesselModuleImplementing<IFireflyModule>();
+			if (vessel == null)
+			{
+				module = null;
+				return false;
+			}
 
+			module = vessel.FindVesselModuleImplementing<IFireflyModule>();
 			return module == null;
 		}
-
-		public static Assembly FireflyAssembly
-		{
-			get
-			{
-				if (_fireflyAssembly == null)
-				{
-					_fireflyAssembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.name.Equals("Firefly", StringComparison.OrdinalIgnoreCase)).assembly;
-				}
-
-				return _fireflyAssembly;
-			}
-		}
-		static Assembly _fireflyAssembly;
-
-		public static IConfigManager ConfigManager
-		{
-			get
-			{
-				if (_configManager == null)
-				{
-					Type mgrType = FireflyAssembly.GetType("Firefly.ConfigManager");
-					object mgr = mgrType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static).GetValue(null);
-					_configManager = mgr as IConfigManager;
-				}
-
-				return _configManager;
-			}
-		}
-		static IConfigManager _configManager;
 	}
 }
