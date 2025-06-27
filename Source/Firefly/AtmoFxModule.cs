@@ -285,7 +285,7 @@ namespace Firefly
 					// override the colors with the PART config
 					foreach (string key in overrideColor.fields.Keys)
 					{
-						if (overrideColor[key] != null) colors[key] = overrideColor[key];
+						if (overrideColor[key].HasValue) colors[key] = overrideColor[key];
 					}
 				}
 
@@ -299,18 +299,18 @@ namespace Firefly
 				fxVessel.commandBuffer.SetGlobalVector("_RandomnessFactor", Vector2.one * randomnessFactor);
 
 				// add commands to set the color properties
-				fxVessel.commandBuffer.SetGlobalColor("_GlowColor", colors["glow"]);
-				fxVessel.commandBuffer.SetGlobalColor("_HotGlowColor", colors["glow_hot"]);
+				fxVessel.commandBuffer.SetGlobalColor("_GlowColor", colors["glow"].Value);
+				fxVessel.commandBuffer.SetGlobalColor("_HotGlowColor", colors["glow_hot"].Value);
 
-				fxVessel.commandBuffer.SetGlobalColor("_PrimaryColor", colors["trail_primary"]);
-				fxVessel.commandBuffer.SetGlobalColor("_SecondaryColor", colors["trail_secondary"]);
-				fxVessel.commandBuffer.SetGlobalColor("_TertiaryColor", colors["trail_tertiary"]);
-				fxVessel.commandBuffer.SetGlobalColor("_StreakColor", colors["trail_streak"]);
+				fxVessel.commandBuffer.SetGlobalColor("_PrimaryColor", colors["trail_primary"].Value);
+				fxVessel.commandBuffer.SetGlobalColor("_SecondaryColor", colors["trail_secondary"].Value);
+				fxVessel.commandBuffer.SetGlobalColor("_TertiaryColor", colors["trail_tertiary"].Value);
+				fxVessel.commandBuffer.SetGlobalColor("_StreakColor", colors["trail_streak"].Value);
 
-				fxVessel.commandBuffer.SetGlobalColor("_LayerColor", colors["wrap_layer"]);
-				fxVessel.commandBuffer.SetGlobalColor("_LayerStreakColor", colors["wrap_streak"]);
+				fxVessel.commandBuffer.SetGlobalColor("_LayerColor", colors["wrap_layer"].Value);
+				fxVessel.commandBuffer.SetGlobalColor("_LayerStreakColor", colors["wrap_streak"].Value);
 
-				fxVessel.commandBuffer.SetGlobalColor("_ShockwaveColor", colors["shockwave"]);
+				fxVessel.commandBuffer.SetGlobalColor("_ShockwaveColor", colors["shockwave"].Value);
 
 				// draw the mesh
 				fxVessel.commandBuffer.DrawRenderer(envelope.renderer, fxVessel.material);

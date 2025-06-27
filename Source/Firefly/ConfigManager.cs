@@ -523,7 +523,7 @@ namespace Firefly
 			return result;
 		}
 
-		HDRColor ReadConfigColorHDR(ConfigNode node, string key, bool isPartConfig, ref bool isFormatted)
+		HDRColor? ReadConfigColorHDR(ConfigNode node, string key, bool isPartConfig, ref bool isFormatted)
 		{
 			if (!node.HasValue(key))
 			{

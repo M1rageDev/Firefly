@@ -292,7 +292,7 @@ namespace Firefly.GUI
 		// draws a button for a config color
 		void DrawColorButton(string label, string colorKey)
 		{
-			HDRColor c = config.colors[colorKey];
+			HDRColor c = config.colors[colorKey].Value;
 
 			if (GuiUtils.DrawColorButton(label, Texture2D.whiteTexture, c.baseColor))
 			{

@@ -140,13 +140,11 @@ namespace FireflyAPI
 		}
 	}
 
-	public class HDRColor
+	public readonly struct HDRColor
 	{
-		public Color baseColor;
-		public Color hdr;
-		public float intensity;
-
-		public bool hasValue;
+		public readonly Color baseColor;
+		public readonly Color hdr;
+		public readonly float intensity;
 
 		public HDRColor(Color sdri)
 		{
