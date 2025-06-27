@@ -2,11 +2,11 @@
 
 namespace FireflyAPI
 {
-    public interface IFireflyModule
-    {
-        bool OverridePhysics { get; set; }
+	public interface IFireflyModule
+	{
+		bool OverridePhysics { get; set; }
 
-        string OverridenBy { get; set; }
+		string OverridenBy { get; set; }
 		Vector3 OverrideEntryDirection { get; set; }
 		float OverrideEffectStrength { get; set; }
 		float OverrideEffectState { get; set; }

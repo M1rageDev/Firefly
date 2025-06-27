@@ -8,8 +8,8 @@ namespace FireflyAPI
 {
 	[KSPAddon(KSPAddon.Startup.Instantly, true)]
 	public class FireflyAPIManager : MonoBehaviour
-    {
-        public static FireflyAPIManager Instance { get; private set; }
+	{
+		public static FireflyAPIManager Instance { get; private set; }
 		
 		Assembly fireflyAssembly;
 		IConfigManager configManager;
