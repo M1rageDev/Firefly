@@ -152,6 +152,7 @@ namespace Firefly.GUI
 			fxModule.OverrideEffectState = 1f;
 			fxModule.OverridenBy = "Effect editor";
 			if (!fxModule.isLoaded) fxModule.CreateVesselFx();
+			fxModule.ReloadCommandBuffer();
 			ApplyShipDirection();
 		}
 

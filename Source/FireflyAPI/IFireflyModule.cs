@@ -14,6 +14,7 @@ namespace FireflyAPI
 		BodyConfig OverrideBodyConfig { get; set; }
 
 		void ResetOverride();
+		void ReloadCommandBuffer();
 		void CreateVesselFx();
 	}
 }

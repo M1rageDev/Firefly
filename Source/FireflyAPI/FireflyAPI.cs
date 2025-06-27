@@ -52,7 +52,7 @@ namespace FireflyAPI
 			{
 				Type mgrType = GetFireflyAssembly().GetType("Firefly.ConfigManager");
 				object mgr = mgrType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static).GetValue(null);
-				Instance.configManager = (IConfigManager)mgr;
+				Instance.configManager = mgr as IConfigManager;
 			}
 
 			return Instance.configManager;
