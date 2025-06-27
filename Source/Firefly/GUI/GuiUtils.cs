@@ -138,13 +138,13 @@ namespace Firefly.GUI
 		{
 			switch (holder[label].valueType)
 			{
-				case FireflyAPI.ValueType.Boolean:
+				case ValueType.Boolean:
 					DrawConfigFieldBool(label, holder, layoutOptions);
 					break;
-				case FireflyAPI.ValueType.Float:
+				case ValueType.Float:
 					DrawConfigFieldFloat(label, holder, layoutOptions);
 					break;
-				case FireflyAPI.ValueType.FloatPair:
+				case ValueType.FloatPair:
 					DrawConfigFieldFloatPair(label, holder, layoutOptions);
 					break;
 				default:

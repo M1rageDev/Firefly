@@ -113,7 +113,18 @@ namespace Firefly
 		public float OverrideEffectStrength { get; set; } = 0f;
 		public float OverrideEffectState { get; set; } = 0f;
 		public float OverrideAngleOfAttack { get; set; } = 0f;
-		public BodyConfig OverrideBodyConfig { get; set; } = ConfigManager.Instance.DefaultConfig;
+		public string OverrideBodyConfigName 
+		{ 
+			get 
+			{
+				return _overrideBodyConfig.bodyName;
+			} 
+			set
+			{
+				ConfigManager.Instance.TryGetBodyConfig(value, true, out _overrideBodyConfig);
+			}
+		}
+		BodyConfig _overrideBodyConfig = ConfigManager.Instance.DefaultConfig;
 
 		// finds the stock handler of the aero FX
 		AerodynamicsFX _aeroFX;
@@ -140,6 +151,12 @@ namespace Firefly
 			return Activation.LoadedVessels | Activation.FlightScene;
 		}
 
+		public void SetOverrideBodyConfig(BodyConfig cfg)
+		{
+			OverrideBodyConfigName = cfg.bodyName;
+			_overrideBodyConfig = cfg;
+		}
+
 		public void ResetOverride()
 		{
 			OverridenBy = "Firefly internals";
@@ -147,7 +164,7 @@ namespace Firefly
 			OverrideEffectStrength = 0f;
 			OverrideEffectState = 0f;
 			OverrideAngleOfAttack = 0f;
-			OverrideBodyConfig = ConfigManager.Instance.DefaultConfig;
+			OverrideBodyConfigName = "Default";
 		}
 
 		/// <summary>
@@ -934,7 +951,7 @@ namespace Firefly
 		{
 			if (OverridePhysics)
 			{
-				return OverrideBodyConfig;
+				return _overrideBodyConfig;
 			} else
 			{
 				return currentBody;

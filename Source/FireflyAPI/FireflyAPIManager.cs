@@ -10,7 +10,6 @@ namespace FireflyAPI
 	{
 		public static bool IsFireflyInstalled { get; set; }
 		public static Assembly FireflyAssembly { get; set; }
-		public static IConfigManager ConfigManager { get; set; }
 
 		static FireflyAPIManager()
 		{
@@ -18,10 +17,6 @@ namespace FireflyAPI
 			if (!IsFireflyInstalled) return;
 
 			FireflyAssembly = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.name.Equals("Firefly", StringComparison.OrdinalIgnoreCase)).assembly;
-
-			Type mgrType = FireflyAssembly.GetType("Firefly.ConfigManager");
-			object mgr = mgrType.GetProperty("Instance", BindingFlags.Public | BindingFlags.Static).GetValue(null);
-			ConfigManager = mgr as IConfigManager;
 		}
 
 		public static bool TryFindModule(Vessel vessel, out IFireflyModule module)

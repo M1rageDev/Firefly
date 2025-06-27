@@ -183,7 +183,7 @@ namespace Firefly.GUI
 			UnityEngine.GUI.DragWindow();
 
 			// apply stuff
-			fxModule.OverrideBodyConfig = config;
+			fxModule.SetOverrideBodyConfig(config);
 			fxModule.OverrideEntryDirection = GetWorldDirection();
 
 			// 3d
@@ -252,7 +252,7 @@ namespace Firefly.GUI
 				currentBody = bodyConfigs[newChoice];
 
 				config = new BodyConfig(ConfigManager.Instance.bodyConfigs[currentBody]);
-				fxModule.OverrideBodyConfig = config;
+				fxModule.SetOverrideBodyConfig(config);
 				ResetFieldText();
 
 				fxModule.ReloadVessel();
@@ -337,7 +337,7 @@ namespace Firefly.GUI
 		{
 			ConfigManager.Instance.bodyConfigs.Remove(currentBody);
 			config = new BodyConfig(ConfigManager.Instance.bodyConfigs["Default"]);
-			fxModule.OverrideBodyConfig = config;
+			fxModule.SetOverrideBodyConfig(config);
 			currentBody = "Default";
 			ui_bodyChoice = 0;
 
@@ -413,7 +413,7 @@ namespace Firefly.GUI
 			bodyConfigs = newBodyArray;
 			ResetFieldText();
 
-			fxModule.OverrideBodyConfig = config;
+			fxModule.SetOverrideBodyConfig(config);
 			fxModule.ReloadVessel();
 		}
 	}

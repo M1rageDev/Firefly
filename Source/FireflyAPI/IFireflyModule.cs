@@ -11,7 +11,7 @@ namespace FireflyAPI
 		float OverrideEffectStrength { get; set; }
 		float OverrideEffectState { get; set; }
 		float OverrideAngleOfAttack { get; set; }
-		BodyConfig OverrideBodyConfig { get; set; }
+		string OverrideBodyConfigName { get; set; }
 
 		void ResetOverride();
 		void ReloadCommandBuffer();
