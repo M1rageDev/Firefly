@@ -363,5 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 
 Resources/
-GameData/Firefly/Plugins/Firefly.dll
-GameData/Firefly/Plugins/FireflyAPI.dll
+GameData/Firefly/Plugins/*
