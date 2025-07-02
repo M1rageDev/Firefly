@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.4 - 2025-07-02
 
 * Create FireflyAPI, which allows modders to use the effect override system
 * Introduce config versioning
@@ -9,6 +9,7 @@
 * Fix the particles (again), now they should be done for good
 * Fix Gigantor XL solar panels having bugged effects
 * Fix Communotron 16 having bugged effects
+
 
 ## 1.0.3 - 2025-04-10
 
