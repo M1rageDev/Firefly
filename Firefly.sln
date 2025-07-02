@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.8.34408.163
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Firefly", "Source\Firefly\Firefly.csproj", "{0DD486F0-EF12-458B-B0E2-F74C7A90E36A}"
-	ProjectSection(ProjectDependencies) = postProject
-		{B6D3F455-2A3C-44BA-87E8-390D377BB7F3} = {B6D3F455-2A3C-44BA-87E8-390D377BB7F3}
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{12B60FDF-E2E4-4B1B-A68E-EE02E66E0337}"
 	ProjectSection(SolutionItems) = preProject
@@ -14,8 +11,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FireflyAPI", "Source\FireflyAPI\FireflyAPI.csproj", "{B6D3F455-2A3C-44BA-87E8-390D377BB7F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,10 +22,6 @@ Global
 		{0DD486F0-EF12-458B-B0E2-F74C7A90E36A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0DD486F0-EF12-458B-B0E2-F74C7A90E36A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0DD486F0-EF12-458B-B0E2-F74C7A90E36A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B6D3F455-2A3C-44BA-87E8-390D377BB7F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B6D3F455-2A3C-44BA-87E8-390D377BB7F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B6D3F455-2A3C-44BA-87E8-390D377BB7F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B6D3F455-2A3C-44BA-87E8-390D377BB7F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
