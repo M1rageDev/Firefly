@@ -3,6 +3,7 @@
 ## Unreleased
 
 * Create FireflyAPI, which allows modders to use the effect override system
+* Introduce config versioning
 * Add Space Shuttle System envelope (thanks **@giuliodondi**)
 * Make the effect override system more universal, which should allow mods to create custom effects using Firefly
 * Fix the particles (again), now they should be done for good
