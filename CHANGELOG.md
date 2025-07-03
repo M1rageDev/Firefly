@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+* Fix window duplication bug (thanks **@infradmin**)
+
 ## 1.0.5 - 2025-07-03
 
 * Fix black trail bug
