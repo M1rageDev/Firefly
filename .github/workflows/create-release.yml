@@ -13,3 +13,4 @@ jobs:
     with:
       version-string: ${{ inputs.version-string }}
       changelog-output-file: GameData/Firefly/FireflyChangelog.cfg
+      use-ckan: true
