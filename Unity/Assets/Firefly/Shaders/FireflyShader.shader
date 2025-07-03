@@ -51,7 +51,7 @@ Shader "Firefly/Firefly"
 
 			ZWrite Off
 			ZTest LEqual
-			Blend SrcAlpha OneMinusSrcAlpha
+			Blend SrcAlpha One
 			Cull Off
 			
 			HLSLPROGRAM
@@ -67,7 +67,6 @@ Shader "Firefly/Firefly"
 			ENDHLSL
 		}
 		
-		/*
 		Pass
 		{
 			Name "Bowshock Pass"
@@ -89,6 +88,5 @@ Shader "Firefly/Firefly"
 			
 			ENDHLSL
 		}
-		*/
 	}
 }

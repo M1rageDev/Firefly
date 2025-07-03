@@ -1,12 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0DD486F0-EF12-458B-B0E2-F74C7A90E36A}</ProjectGuid>
+    <ProjectGuid>b6d3f455-2a3c-44ba-87e8-390d377bb7f3</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Firefly</RootNamespace>
-    <AssemblyName>Firefly</AssemblyName>
+    <RootNamespace>FireflyInstallChecker</RootNamespace>
+    <AssemblyName>FireflyInstallChecker</AssemblyName>
     <TargetFramework>net4.8</TargetFramework>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -28,29 +28,11 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="$(KSPRoot)/GameData/FireflyAPI/Plugins/FireflyAPI.dll">
-      <Private>False</Private>
-      <KSPAssemblyName>FireflyAPI</KSPAssemblyName>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Properties\Firefly.version" />
-    <None Include="Properties\Firefly.version.props" />
-  </ItemGroup>
-  <Import Project="Properties\Firefly.version.props" />
-  <ItemGroup>
-    <KSPVersionFile Include="Properties\Firefly.version">
-      <Destination>$(RepoRootPath)/GameData/Firefly/Firefly.version</Destination>
-      <KSP_Version_Min>1.12</KSP_Version_Min>
-    </KSPVersionFile>
-  </ItemGroup>
   <PropertyGroup>
     <BinariesOutputRelativePath>GameData/Firefly/Plugins</BinariesOutputRelativePath>
     <GenerateKSPAssemblyAttribute>true</GenerateKSPAssemblyAttribute>
-    <GenerateKSPAssemblyDependencyAttributes>true</GenerateKSPAssemblyDependencyAttributes>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="KSPBuildTools" Version="0.0.4" />
   </ItemGroup>
-</Project>
+ </Project>

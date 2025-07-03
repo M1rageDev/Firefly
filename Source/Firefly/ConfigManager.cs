@@ -8,10 +8,10 @@ namespace Firefly
 {
 	public class BodyColors
 	{
-		public Dictionary<string, HDRColor?> fields = new Dictionary<string, HDRColor?>();
+		public Dictionary<string, HDRColor> fields = new Dictionary<string, HDRColor>();
 
 		// custom indexer
-		public HDRColor? this[string i]
+		public HDRColor this[string i]
 		{
 			get => fields[i];
 			set => fields[i] = value;
@@ -48,8 +48,8 @@ namespace Firefly
 		{
 			for (int i = 0; i < fields.Count; i++)
 			{
-				KeyValuePair<string, HDRColor?> elem = fields.ElementAt(i);
-				node.AddValue(elem.Key, elem.Value.Value.SDRIString());
+				KeyValuePair<string, HDRColor> elem = fields.ElementAt(i);
+				node.AddValue(elem.Key, elem.Value.SDRIString());
 			}
 		}
 	}
@@ -645,7 +645,7 @@ namespace Firefly
 			return result;
 		}
 
-		HDRColor? ReadConfigColorHDR(ConfigNode node, string key, bool isPartConfig, ref bool isFormatted)
+		HDRColor ReadConfigColorHDR(ConfigNode node, string key, bool isPartConfig, ref bool isFormatted)
 		{
 			if (!node.HasValue(key))
 			{
