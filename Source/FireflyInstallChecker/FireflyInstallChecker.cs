@@ -7,15 +7,15 @@ namespace FireflyInstallChecker
     {
         public void Awake()
         {
-			if (!AssemblyLoader.loadedAssemblies.Contains("Firefly") || !AssemblyLoader.loadedAssemblies.Contains("FireflyAPI"))
+			if (!AssemblyLoader.loadedAssemblies.Contains("FireflyAPI"))
             {
 				// no api???
-				Debug.LogError("[FireflyInstallChecker] Firefly/FireflyAPI not found! Please ensure that Firefly AND Firefly API are installed correctly.");
+				Debug.LogError("[FireflyInstallChecker] FireflyAPI not found! Please ensure that FireflyAPI is installed correctly.");
 
 				PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), "Firefly Install Error", 
 					"<color=red>Incorrect Firefly install</color>",
-					"Firefly/FireflyAPI not found! Please ensure that Firefly AND Firefly API are installed correctly.",
-					"Fuck right off",
+					"FireflyAPI not found! Please ensure that FireflyAPI is installed correctly.",
+					"OK",
 					true, HighLogic.UISkin, true, string.Empty
 				);
 			}
