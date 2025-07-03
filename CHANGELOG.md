@@ -1,11 +1,12 @@
 # Changelog
 
-## Unreleased
+## 1.0.5 - 2025-07-03
 
 * Fix black trail bug
 * Bring back missing bowshock
 * Separate FireflyAPI into separate mod
 * Introduce install checker for FireflyAPI
+
 
 ## 1.0.4 - 2025-07-02
 
