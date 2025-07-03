@@ -61,6 +61,13 @@ namespace Firefly.GUI
 			if (appButton != null) ApplicationLauncher.Instance.RemoveModApplication(appButton);
 			GameEvents.onHideUI.Remove(OnHideUi);
 			GameEvents.onShowUI.Remove(OnShowUi);
+
+			for (int i = 0; i < Window.AllWindows.Count; i++)
+			{
+				Window window = Window.AllWindows[i];
+
+				window.OnDestroy();
+			}
 		}
 
 		void OnHideUi()

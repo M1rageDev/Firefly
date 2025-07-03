@@ -22,31 +22,31 @@ namespace Firefly.GUI
 			AllWindows.Add(this);
 		}
 
-        ~Window()
-        {
-			AllWindows.Remove(this);
-		}
-
         public virtual void Show()
         {
             show = true;
         }
 
-        public void RunGui()
+		public virtual void Draw(int id)
+		{
+			UnityEngine.GUI.DragWindow();
+		}
+
+		public virtual void Hide()
+		{
+			show = false;
+		}
+
+		public void RunGui()
         {
             if (!show) return;
 
 			windowRect = GUILayout.Window(this.id, windowRect, Draw, title);
 		}
 
-        public virtual void Draw(int id)
+        public void OnDestroy()
         {
-			UnityEngine.GUI.DragWindow();
-		}
-
-        public virtual void Hide()
-        {
-			show = false;
+			AllWindows.Remove(this);
 		}
     }
 }
