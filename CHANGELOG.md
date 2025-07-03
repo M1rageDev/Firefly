@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.5 - 2025-07-03
+
+There is nothing permanent except change
+
+
 ## 1.0.4 - 2025-07-02
 
 * Create FireflyAPI, which allows modders to use the effect override system
