@@ -124,7 +124,7 @@ namespace Firefly
 				ConfigManager.Instance.TryGetBodyConfig(value, true, out _overrideBodyConfig);
 			}
 		}
-		BodyConfig _overrideBodyConfig = ConfigManager.Instance.DefaultConfig;
+		BodyConfig _overrideBodyConfig;
 
 		// finds the stock handler of the aero FX
 		AerodynamicsFX _aeroFX;
