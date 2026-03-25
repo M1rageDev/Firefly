@@ -163,11 +163,12 @@ namespace Firefly
 				KeyValuePair<string, ConfigField> e = modSettings.fields.ElementAt(i);
 
 				modSettings.fields[e.Key].ParseString(settingsNode.GetValue(e.Key), ref isFormatted);
+				modSettings.fields[e.Key].UpdateUiText();
 			}
 
 			if (!isFormatted)
 			{
-				Logging.Log("Settings cfg formatted incorrectly");
+				Logging.Log("Settings cfg formatted incorrectly. Using default settings.");
 				modSettings = ModSettings.CreateDefault();
 			}
 
