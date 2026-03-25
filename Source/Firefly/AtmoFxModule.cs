@@ -956,7 +956,8 @@ namespace Firefly
 		{
 			if (OverridePhysics)
 			{
-				return _overrideBodyConfig;
+				if (_overrideBodyConfig != null) return _overrideBodyConfig;
+				else return ConfigManager.Instance.DefaultConfig;
 			} else
 			{
 				return currentBody;
