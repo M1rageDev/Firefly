@@ -283,6 +283,9 @@ namespace Firefly
 		{
 			fxVessel.commandBuffer.Clear();
 
+			Logging.Log("Cleared commandbuffer");
+			Logging.Log($"Envelope model count: {fxVessel.fxEnvelope.Count}. Can start populating the commandbuffer.");
+
 			for (int i = 0; i < fxVessel.fxEnvelope.Count; i++)
 			{
 				FxEnvelopeModel envelope = fxVessel.fxEnvelope[i];
@@ -332,6 +335,8 @@ namespace Firefly
 				// draw the mesh
 				fxVessel.commandBuffer.DrawRenderer(envelope.renderer, fxVessel.material);
 			}
+
+			Logging.Log("Commandbuffer populated.");
 		}
 
 		/// <summary>
