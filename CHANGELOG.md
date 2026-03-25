@@ -3,6 +3,8 @@
 ## Unreleased
 
 * Fix window duplication bug (thanks **@infradmin**)
+* Fix settings loading (thanks **@Rodg88**)
+* Fix startup NRE
 
 ## 1.0.5 - 2025-07-03
 
