@@ -29,10 +29,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <BinariesOutputRelativePath>GameData/Firefly/Plugins</BinariesOutputRelativePath>
+	<KSPBT_ModRoot>$(SolutionDir)/GameData/Firefly/</KSPBT_ModRoot>
+  </PropertyGroup>
+  <PropertyGroup>
+    <KSPBT_ModPluginFolder>Plugins</KSPBT_ModPluginFolder>
     <GenerateKSPAssemblyAttribute>true</GenerateKSPAssemblyAttribute>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="KSPBuildTools" Version="0.0.4" />
+    <PackageReference Include="KSPBuildTools" Version="1.1.1" />
   </ItemGroup>
  </Project>

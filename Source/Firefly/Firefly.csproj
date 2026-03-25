@@ -29,29 +29,32 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="$(KSPRoot)\GameData\FireflyAPI\Plugins\FireflyAPI.dll">
+    <ModReference Include="FireflyAPI">
+	  <DLLPath>GameData/FireflyAPI/Plugins/FireflyAPI.dll</DLLPath>
       <Private>False</Private>
-      <KSPAssemblyName>FireflyAPI</KSPAssemblyName>
 	  <CKANIdentifier>FireflyAPI</CKANIdentifier>
-    </Reference>
+    </ModReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\Firefly.version" />
     <None Include="Properties\Firefly.version.props" />
   </ItemGroup>
   <Import Project="Properties\Firefly.version.props" />
+  <PropertyGroup>
+    <KSPBT_ModRoot>$(SolutionDir)/GameData/Firefly/</KSPBT_ModRoot>
+  </PropertyGroup>
   <ItemGroup>
     <KSPVersionFile Include="Properties\Firefly.version">
-      <Destination>$(RepoRootPath)/GameData/Firefly/Firefly.version</Destination>
+      <Destination>$(KSPBT_ModRoot)Firefly.version</Destination>
       <KSP_Version_Min>1.12</KSP_Version_Min>
     </KSPVersionFile>
   </ItemGroup>
   <PropertyGroup>
-    <BinariesOutputRelativePath>GameData/Firefly/Plugins</BinariesOutputRelativePath>
-    <GenerateKSPAssemblyAttribute>true</GenerateKSPAssemblyAttribute>
-    <GenerateKSPAssemblyDependencyAttributes>true</GenerateKSPAssemblyDependencyAttributes>
+	<KSPBT_ModPluginFolder>Plugins</KSPBT_ModPluginFolder>
+    <KSPBT_GenerateAssemblyAttribute>true</KSPBT_GenerateAssemblyAttribute>
+	<KSPBT_GenerateDependencyAttributes>true</KSPBT_GenerateDependencyAttributes>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="KSPBuildTools" Version="0.0.4" />
+    <PackageReference Include="KSPBuildTools" Version="1.1.1" />
   </ItemGroup>
 </Project>
