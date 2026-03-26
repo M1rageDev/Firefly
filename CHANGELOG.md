@@ -1,9 +1,9 @@
 # Changelog
 
-## 1.0.6 - 2026-03-26
+## Unreleased
 
 * Fix window duplication bug (thanks **@infradmin**)
-* Fix settings loading (thanks **@Rodg88**)
+* Fix settings loading (thanks **@Rodg88**, **cordilon**)
 * Fix startup NRE
 
 
