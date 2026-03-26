@@ -3,7 +3,7 @@
 ## Unreleased
 
 * Fix window duplication bug (thanks **@infradmin**)
-* Fix settings loading (thanks **@Rodg88**, **cordilon**)
+* Fix settings loading (thanks **@Rodg88**, **@cordilon**)
 * Fix startup NRE
 
 
