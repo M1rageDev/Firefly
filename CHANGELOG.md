@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.0.6 - 2026-03-26
 
 * Fix window duplication bug (thanks **@infradmin**)
 * Fix settings loading (thanks **@Rodg88**, **@cordilon**)
