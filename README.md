@@ -13,8 +13,9 @@ Firefly completely replaces the stock aerodynamic visual effects with its own cu
 For details on writing configs, creating envelopes, and other information, check the [wiki](https://github.com/M1rageDev/Firefly/wiki).  
 
 ## Dependencies  
-The only **required** dependency is:  
-- [ModuleManager](https://github.com/sarbian/ModuleManager)  
+The only **required** dependencies are:  
+- [ModuleManager](https://github.com/sarbian/ModuleManager)
+- [FireflyAPI](https://github.com/M1rageDev/FireflyAPI)
 
 ## Installation  
 We recommend installing the mod via CKAN. If installing manually, place the `GameData` folder inside your Kerbal Space Program directory (merge if prompted). 
