@@ -30,7 +30,7 @@ namespace Firefly
 
 			var module = vessel.FindVesselModuleImplementing<AtmoFxModule>();
 
-			if (module != null) module.OnVesselPartCountChanged();
+			if (module != null && vessel.parts.Count > 0) module.OnVesselPartCountChanged();
 			else Logging.Log("FX instance not registered");
 		}
 
