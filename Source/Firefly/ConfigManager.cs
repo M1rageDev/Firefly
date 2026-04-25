@@ -231,6 +231,7 @@ namespace Firefly
 		public void StartLoading()
 		{
 			settingsManager.LoadModSettings();
+			LoadPlanetPackConfigs();
 			LoadPlanetConfigs();
 			LoadPartConfigs();
 			LoadParticleConfigs();
