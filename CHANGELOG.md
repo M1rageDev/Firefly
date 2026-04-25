@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+* Fix planet pack configs not getting loaded (thanks **@Armo00**)
+* Fix FX camera leak (thanks **@BrettRyland**)
+
 ## 1.0.6 - 2026-03-26
 
 * Fix window duplication bug (thanks **@infradmin**)
