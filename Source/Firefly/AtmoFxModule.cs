@@ -106,7 +106,7 @@ namespace Firefly
 
 		public BodyConfig currentBody;
 
-		// override stuff
+		// override stuff, for use with the API/editors
 		public bool OverridePhysics { get; set; }
 		public string OverridenBy { get; set; } = "Firefly internals";
 		public Vector3 OverrideEntryDirection { get; set; } = Vector3.zero;
@@ -643,15 +643,18 @@ namespace Firefly
 		/// <summary>
 		/// Unloads the vessel, removing instances and other things like that
 		/// </summary>
-		public void RemoveVesselFx(bool onlyEnvelopes = false)
+		public void RemoveVesselFx(bool onlyEnvelopes = false, bool force = false)
 		{
-			if (!isLoaded) return;
+			// cant remove the fx is they are unloaded
+			// however there are edge cases where this needs to be triggered while the fx are unloaded, so allow to force it
+			if (!isLoaded && !force) return;
 
 			isLoaded = false;
 
 			// destroy the commandbuffer
 			DestroyCommandBuffer();
 
+			// clear envelope list, no longer needed
 			fxVessel.fxEnvelope.Clear();
 
 			if (!onlyEnvelopes)
@@ -659,15 +662,22 @@ namespace Firefly
 				// destroy the misc stuff
 				if (fxVessel.material != null) Destroy(fxVessel.material);
 				if (fxVessel.airstreamCamera != null) Destroy(fxVessel.airstreamCamera.gameObject);
-				if (fxVessel.airstreamTexture != null) Destroy(fxVessel.airstreamTexture);
+				if (fxVessel.airstreamTexture != null)
+				{
+                    fxVessel.airstreamTexture.Release();
+                    Destroy(fxVessel.airstreamTexture);
+				}
 
 				// destroy the particles
 				for (int i = 0; i < fxVessel.allParticles.Count; i++)
 				{
-					if (fxVessel.allParticles[fxVessel.particleKeys[i]].system != null) Destroy(fxVessel.allParticles[fxVessel.particleKeys[i]].system.gameObject);
+					if (fxVessel.allParticles[fxVessel.particleKeys[i]].system != null)
+					{
+                        Destroy(fxVessel.allParticles[fxVessel.particleKeys[i]].system.gameObject);
+                    }
 				}
 
-				lastStrength = 0f;
+				lastStrength = 0f;  // reset transition
 
 				fxVessel = null;
 			}
@@ -710,7 +720,8 @@ namespace Firefly
 
 		public void OnDestroy()
 		{
-			RemoveVesselFx(false);
+			// force removal
+			RemoveVesselFx(false, true);
 		}
 
 		public void Update()
