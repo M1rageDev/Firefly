@@ -110,7 +110,7 @@ GS_INPUT gs_vert(VS_INPUT IN)
 	return OUT;
 }
 
-[maxvertexcount(12)]
+[maxvertexcount(36)]
 void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStream)
 {
 	// don't draw anything if the speed is low enough

@@ -73,7 +73,7 @@ GS_INPUT gs_vert(VS_INPUT IN)
 	return OUT;
 }
 
-[maxvertexcount(9)]
+[maxvertexcount(21)]
 void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStream)
 {
 	if (_EntryStrength < 1000 || _DisableBowshock > 0) return;
@@ -158,7 +158,7 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 	effectSideLength = abs(effectSideLength);
 
 	// Iterate through every vertex
-	for (uint i = 0; i < 2; i++)
+	for (uint i = 0; i < 3; i++)
 	{
 		if (occlusion[i] > 0.9 && velDot[i] > -0.4 && velDot[i] < 0 && pow(vertFresnel[i], 2) > 0.2)
 		{
