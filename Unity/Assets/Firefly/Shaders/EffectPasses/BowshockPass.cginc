@@ -220,6 +220,10 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 						
 			// Restart the strip
 			triStream.RestartStrip();
+
+			// bowl (3) + one trail segment (6) = [maxvertexcount(9)]; more emits are undefined behaviour
+			// (dropped on Windows, garbage triangles under D3DMetal GS emulation, issue #16)
+			break;
 		}
 	}
 }
