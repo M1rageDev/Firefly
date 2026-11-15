@@ -346,6 +346,13 @@ void gs_geom(triangle GS_INPUT vertex[3], inout TriangleStream<GS_DATA> triStrea
 						
 			// restart the strip again
 			triStream.RestartStrip();
+
+			// Both strips of this rim vertex used up all of [maxvertexcount(12)].
+			// Emitting more is undefined behaviour: D3D11 drivers silently drop the extra vertices (D3D11.3 spec 13.3),
+			// but GS emulation on D3DMetal / Metal Shader Converter has no bounds check and writes them into the
+			// output slots of neighbouring GS invocations -> screen-wide garbage triangles on macOS (issue #16).
+			// Stopping here gives exactly the Windows result on every platform.
+			break;
 		}
 	}
 
