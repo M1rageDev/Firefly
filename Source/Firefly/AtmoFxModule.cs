@@ -235,6 +235,9 @@ namespace Firefly
 				return;
 			}
 
+			// reset part cache before bounds are set-up
+			ResetPartModelCache();
+
 			// calculate the vessel bounds
 			bool correctBounds = CalculateVesselBounds(fxVessel, vessel, true);
 			if (!correctBounds)
@@ -250,9 +253,6 @@ namespace Firefly
 
 			// create the command buffer
 			InitializeCommandBuffer();
-
-			// reset part cache
-			ResetPartModelCache();
 
 			// create the fx envelopes
 			UpdateFxEnvelopes();
@@ -447,6 +447,9 @@ namespace Firefly
 
 				// check for layers
 				if (Utils.CheckLayerModel(model.transform)) continue;
+
+				// check for objects attached to cameras
+				if (Utils.IsCameraAttachment(model.transform)) continue;
 
 				// is skinned
 				bool isSkinnedRenderer = model.TryGetComponent(out SkinnedMeshRenderer _);
@@ -923,6 +926,7 @@ namespace Firefly
 				for (int r = 0; r < renderers.Count; r++)
 				{
 					if (!renderers[r].gameObject.activeInHierarchy) continue;
+					if (Utils.IsCameraAttachment(renderers[r].transform)) continue;
 
 					// try getting the mesh filter
 					bool hasFilter = renderers[r].TryGetComponent(out MeshFilter meshFilter);
