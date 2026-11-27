@@ -314,6 +314,21 @@ namespace Firefly
 			);
 		}
 
+		/// <summary>
+		/// Check if a model is attached to a camera or to the flight camera rig (this targets hullcam-style cameras or helper objects)
+		/// Those are not part of the vessel, and thus shouldn't count towards vessel bounds or fx envelopes!
+		/// </summary>
+		public static bool IsCameraAttachment(Transform model)
+		{
+			for (Transform t = model; t != null; t = t.parent)
+			{
+				if (t.TryGetComponent(out Camera _) || t.TryGetComponent(out FlightCamera _)) return true;
+				if (t.TryGetComponent(out Part _)) return false;
+			}
+
+			return false;
+		}
+
 		public static Vector3 VectorDivide(Vector3 a, Vector3 b)
 		{
 			return new Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
